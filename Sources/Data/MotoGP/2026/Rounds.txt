@@ -1,0 +1,23 @@
+Round,Circuit Name,Date,Sprint Laps,Race Laps,Sprint Winner Number,Race Winner Number
+1,Chang International Circuit,01/03/2026,13,26,89,1
+2,Autodromo Internacional Ayrton Senna (Goiania),22/03/2026,12,25,1,89
+3,Circuit of the Americas,29/03/2026,10,20,93,93
+4,Circuito de Jerez - Angel Nieto,26/04/2026,12,25,89,1
+5,Bugatti Circuit (Le Mans),10/05/2026,13,27,1,89
+6,Circuit de Barcelona-Catalunya,17/05/2026,12,24,93,1
+7,Autodromo Internazionale del Mugello,31/05/2026,11,23,1,93
+8,Balaton Park Circuit,07/06/2026,11,22,89,1
+9,Brno Circuit,21/06/2026,11,22,1,89
+10,TT Circuit Assen,28/06/2026,13,26,93,1
+11,Sachsenring,12/07/2026,15,30,,
+12,Silverstone Circuit,09/08/2026,10,20,,
+13,MotorLand Aragon,30/08/2026,11,22,,
+14,Misano World Circuit Marco Simoncelli,13/09/2026,13,27,,
+15,Red Bull Ring,20/09/2026,14,28,,
+16,Mobility Resort Motegi,04/10/2026,12,24,,
+17,Pertamina Mandalika International Street Circuit,11/10/2026,13,27,,
+18,Phillip Island Grand Prix Circuit,25/10/2026,13,27,,
+19,Petronas Sepang International Circuit,01/11/2026,10,20,,
+20,Lusail International Circuit,08/11/2026,11,22,,
+21,Algarve International Circuit,22/11/2026,12,25,,
+22,Circuit Ricardo Tormo (Valencia),29/11/2026,14,27,,
