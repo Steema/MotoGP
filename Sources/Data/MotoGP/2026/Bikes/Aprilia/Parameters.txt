@@ -1,0 +1,14 @@
+Name, Value, Units
+Weight, 160, Kg
+Fuel, 20, Kg
+FuelLiquid, 15, Liters
+Horses, 250, CV
+MaxRPM, 14000, RPM
+Back.Wheel, 17, Inches
+Back.Tire.Grip, 1.7, Coefficient
+Back.Tire.Diameter, 69, cm
+Back.Tire.Friction, 0.02, Coefficient
+Front.Wheel, 17, Inches
+Front.Tire.Grip, 1.7, Coefficient
+Front.Tire.Diameter, 60, cm
+Front.Tire.Friction, 0.02, Coefficient

@@ -39,7 +39,7 @@ begin
   // --- 1. CONFIGURACIÓ INICIAL ---
   CenterX := Width div 2;
   CenterY := Height div 2;
-  HorizonY := CenterY - 20; // Alçada de la línia de l'horitzó
+  HorizonY := CenterY - 10; // Alçada de la línia de l'horitzó
 
   BikeWidth := 40;
   BikeHeight := 90;

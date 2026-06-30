@@ -9,13 +9,15 @@ uses
   Vcl.ComCtrls, Vcl.CheckLst,
 
   VCLTee.TeEngine, VCLTee.TeCanvas, VCLTee.TeeProcs, VCLTee.Chart,
-  VCLTee.Control, VCLTee.Grid,
+  VCLTee.Control, VCLTee.Grid, VCLTee.TeePenDlg,
   VCLTee.TeeSVGCanvas,
 
   Tee.GridData.Strings, Tee.Grid.CSV, TeeGIS, TeeRacing, Tee.Painter,
   Tee.Grid.Columns,
 
-  VCLTee.Series, Vcl.Menus;
+  TeeTorqueCurve,
+
+  VCLTee.Series, Vcl.Menus, VCLTee.TeeNumericGauge, VCLTee.TeeGauges;
 
 type
   TMainForm = class(TForm)
@@ -75,6 +77,14 @@ type
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     FrontView: TChart;
+    TabSheet3: TTabSheet;
+    LBBikes: TListBox;
+    PageControl5: TPageControl;
+    TabSheet4: TTabSheet;
+    TabTorqueCurve: TTabSheet;
+    BikeGrid: TTeeGrid;
+    SpeedGauge: TNumericGauge;
+    LeanGauge: TGaugeSeries;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -94,7 +104,10 @@ type
     procedure OpenGL1Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure PoleGridSelect(Sender: TObject);
-    procedure FrontViewAfterDraw(Sender: TObject);
+    procedure LBBikesClick(Sender: TObject);
+    procedure FrontViewBeforeDrawSeries(Sender: TObject);
+    procedure Exit1Click(Sender: TObject);
+    procedure FrontViewResize(Sender: TObject);
   private
     { Private declarations }
 
@@ -103,6 +116,7 @@ type
     CircuitPath : TTeeBasePath;
     GIS : TGISRaster;
 
+    BikeData,
     SeasonData,
     PilotsData,
     SensorsData,
@@ -112,6 +126,8 @@ type
     StartCount : Integer;
 
     Race : TRace;
+
+    Torque : TFormTorqueCurve;
 
     SeriesSpeed,
     SeriesAcceleration : TFastLineSeries;
@@ -440,6 +456,9 @@ begin
   InitRaceData;
 end;
 
+const
+  Season='2026';
+
 procedure TMainForm.FormShow(Sender: TObject);
 
   procedure SetupGrid(const AGrid:TTeeGrid; const AColumn:Integer);
@@ -455,14 +474,12 @@ procedure TMainForm.FormShow(Sender: TObject);
     end;
   end;
 
-const
-  Season='2026';
-
 begin
   PoleGrid.ParentFont:=True;
   Pilots.ParentFont:=True;
   Circuits.ParentFont:=True;
   ChampionGrid.ParentFont:=True;
+  BikeGrid.ParentFont:=True;
 
   PilotsData:=TCSVDataImport.FromFile(MotoGP+'\'+Season+'\Pilots.txt',True,',','');
   Pilots.Data:=PilotsData;
@@ -514,6 +531,17 @@ begin
 
   // Select top rider
   PoleGrid.Selected.Row:=0;
+
+  Torque:=TFormTorqueCurve.Create(Self);
+  Torque.Align:=alClient;
+  TTeeVCL.AddFormTo(Torque,TabTorqueCurve);
+
+  LBBikes.ItemIndex:=0;
+  LBBikesClick(Self);
+
+  PageControl1.ActivePage:=TabLap;
+
+  LeanGauge.CircleBrush.Style:=bsClear;
 end;
 
 function CalcLeanAngle(const APoints: TPointFloatArray; Current: Integer; const Speed:Single): Single;
@@ -544,8 +572,9 @@ begin
   if Result < -MaxLean then Result := -MaxLean;
 end;
 
-procedure TMainForm.FrontViewAfterDraw(Sender: TObject);
+procedure TMainForm.FrontViewBeforeDrawSeries(Sender: TObject);
 var Rider, tmp, L : Integer;
+    Speed,
     LeanAngle : Single;
 begin
   if CircuitPoints=nil then
@@ -561,11 +590,26 @@ begin
     begin
       tmp:=PilotPositionIndex(Race.Data[L].Data[Rider].Position);
 
-      LeanAngle:=CalcLeanAngle(CircuitPoints,tmp,Race.Data[L].Data[Rider].Speed);
-      TFrontView.Draw(FrontView,LeanAngle);
-    end;
-  end;
+      Speed:=Race.Data[L].Data[Rider].Speed;
 
+      LeanAngle:=CalcLeanAngle(CircuitPoints,tmp,Speed);
+      LeanGauge.Value:=Round(LeanAngle);
+      SpeedGauge.Value:=Round(Speed);
+
+      TFrontView.Draw(FrontView,LeanGauge.Value);
+    end;
+  end
+  else
+  begin
+    LeanGauge.Value:=0;
+    SpeedGauge.Value:=0;
+  end;
+end;
+
+procedure TMainForm.FrontViewResize(Sender: TObject);
+begin
+  SpeedGauge.CustomBounds:=Rect(10,10,400,100);
+  LeanGauge.CustomBounds:=Rect(10,90,FrontView.Width-10,FrontView.Height-10);
 end;
 
 procedure TMainForm.SetTeeCanvas(const AClass:TTeeCanvasClass);
@@ -729,6 +773,19 @@ begin
       Race.Data[0].Data[t].Init(Race.Riders[t].Pole*3);
 end;
 
+procedure TMainForm.LBBikesClick(Sender: TObject);
+var tmp : String;
+begin
+  tmp:=LBBikes.Items[LBBikes.ItemIndex];
+
+  BikeData:=TCSVDataImport.FromFile(MotoGP+'\'+Season+'\Bikes\'+tmp+'\Parameters.txt',True,',','');
+  BikeGrid.Data:=BikeData;
+
+  Torque.FillSample(DefaultBike.Torque);
+
+  Torque.Chart1.Legend.Title.Caption:=LBBikes.Items[LBBikes.ItemIndex];
+end;
+
 procedure TMainForm.StartRace;
 var t : Integer;
 begin
@@ -791,6 +848,11 @@ begin
 
   // Show Speed and Acceleration for selected driver
   RefillCharts;
+end;
+
+procedure TMainForm.Exit1Click(Sender: TObject);
+begin
+  Close;
 end;
 
 procedure TMainForm.Timer1Timer(Sender: TObject);

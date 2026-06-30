@@ -44,13 +44,27 @@ type
     Tire : TTire;
   end;
 
+  TGearRatios=Array of Single; // Ratio for every Gear, 0=Neutral
+
+  TTorqueAtRPM=record
+  public
+    RPM : Integer;
+    Nm : Single;
+  end;
+
+  TTorqueCurve=Array of TTorqueAtRPM;
+
   TBike=record
     Weight : Single; // kg
     Fuel : Single; // kg
     FuelLiquid : Single; // cubic centimeters
+
     Horses : Single; // CV
     Watts : Single; // Watts
     MaxRPM : Integer; // 14000
+
+    Torque : TTorqueCurve;
+    GearRatios : TGearRatios;
 
     Front : TBikeFrontBack;
     Back : TBikeFrontBack;
@@ -91,6 +105,10 @@ type
   // Instant data
   TRiderData=record
   public
+    RPM : Integer;
+
+    Clutch : Single; // from 0 to 1
+
     Speed,    // meters/sec   0..400
     Acceleration,  // m/sqr(sec)  -2 .. 1.2 "g"
     Position : Single;  // meters from race start
@@ -205,21 +223,74 @@ begin
       LapsTime[t]:=0;
 end;
 
+function TorqueAtRPM(const Curve:TTorqueCurve; const RPM: Integer): Single;
+var
+  t: Integer;
+  Len: Integer;
+  P1, P2: TTorqueAtRPM;
+  Fraction: Single;
+begin
+  Len := Length(Curve);
+
+  // 1. Edge Case: Empty array
+  if Len = 0 then
+    Exit(0.0);
+
+  // 2. Edge Case: Only one data point available
+  if Len = 1 then
+    Exit(Curve[0].Nm);
+
+  // 3. Boundary Case: Target is below or equal to the lowest RPM
+  if RPM <= Curve[0].RPM then
+    Exit(Curve[0].Nm);
+
+  // 4. Boundary Case: Target is above or equal to the highest RPM
+  if RPM >= Curve[Len - 1].RPM then
+    Exit(Curve[Len - 1].Nm);
+
+  // 5. Find the bounding points
+  for t := 0 to Len - 2 do
+  begin
+    if (RPM >= Curve[t].RPM) and (RPM <= Curve[t + 1].RPM) then
+    begin
+      P1 := Curve[t];
+      P2 := Curve[t + 1];
+
+      // Prevent division by zero if two identical RPM points exist
+      if P2.RPM = P1.RPM then
+        Exit(P1.Nm);
+
+      // Calculate how far along the target is between P1 and P2 (0.0 to 1.0)
+      Fraction := (RPM - P1.RPM) / (P2.RPM - P1.RPM);
+
+      // Calculate the interpolated Nm
+      Exit(P1.Nm + Fraction * (P2.Nm - P1.Nm));
+    end;
+  end;
+
+  // Fallback default
+  Result := 0.0;
+end;
+
 { TRiderData }
 
 procedure TRiderData.Init(const StartPosition:Single);
 begin
+  RPM:=14000;   // Throttle max
+
+  Clutch:=1;  //
+
   Speed:=0;
+
   Acceleration:=0.7+Random(30)*0.01;
   Position:=StartPosition; // Finish line - pole grid position in meters
 end;
+
 
 procedure TRiderData.Step(const Prev: TRiderData);
 const G = 9.81; // Earth Gravity meters/sec2
       AirDensity=1.225; //  kg/m3
       CdAeroDynamic= 0.45; // * Front Area
-
-      MotorTorque = 110; // Nm
       RGear = 5;
       RFinal = 3;
 
@@ -230,8 +301,13 @@ var Thrust,
     TotalGrip,
     TotalMass,
     AirResistance,
+    MotorTorque, // Nm
     RollingFriction : Single;
 begin
+  RPM:=Prev.RPM;
+
+  MotorTorque:=TorqueAtRPM(DefaultBike.Torque,RPM);
+
   ThrustTorque:=(MotorTorque*RGear*RFinal*TransmissionEficiency)/(0.5*DefaultBike.Back.Tire.Diameter*0.01);
 
   TotalMass:=DefaultBike.Weight+DefaultBike.Fuel+DefaultPilot.TotalMass;
@@ -266,6 +342,32 @@ begin
   Position:=Prev.Position+Speed;
 end;
 
+function DefaultTorqueCurve:TTorqueCurve;
+begin
+  SetLength(result,6);
+
+  result[0].RPM:= 5000; result[0].Nm:= 70;
+  result[1].RPM:= 8000; result[1].Nm:= 95;
+  result[2].RPM:=11000; result[2].Nm:=115;
+  result[3].RPM:=14000; result[3].Nm:=110;
+  result[4].RPM:=17000; result[4].Nm:=100;
+  result[5].RPM:=18000; result[5].Nm:= 90;
+end;
+
+function DefaultGearRatios:TGearRatios;
+begin
+  SetLength(result,8);  // 7 Gears + Neutral
+
+  result[0]:=0;
+  result[1]:=2.6;
+  result[2]:=2.1;
+  result[3]:=1.75;
+  result[4]:=1.5;
+  result[5]:=1.32;
+  result[6]:=1.18;
+  result[7]:=1.1;
+end;
+
 procedure InitDefaultBike;
 begin
   DefaultBike.Weight:=160; // kg
@@ -284,6 +386,10 @@ begin
   DefaultBike.Front.Tire.Grip:=1.7;
   DefaultBike.Front.Tire.Diameter:=60; // cm
   DefaultBike.Front.Tire.Friction:=0.02; // coefficient
+
+  DefaultBike.Torque:=DefaultTorqueCurve;
+
+  DefaultBike.GearRatios:=DefaultGearRatios;
 
   // Clutch
 end;
