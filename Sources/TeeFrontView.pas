@@ -111,6 +111,7 @@ begin
   // Dibuixem un cercle o trapezi centrat en el punt del cos mogut per l'angle
   Canvas.Ellipse(BodyX - BikeWidth, BodyY - 20, BodyX + BikeWidth, BodyY + 20);
 
+  {
   // D' Dibuixar la visera/pantalla del pilot (casc i cúpula)
   Canvas.Brush.Color := clBlack;
   Canvas.Ellipse(BodyX - 15, BodyY - 35, BodyX + 15, BodyY - 10);
@@ -118,9 +119,11 @@ begin
   // E) Dibuixar el manillar (línia perpendicular al cos)
   Canvas.Pen.Color := clBlack;
   Canvas.Pen.Width := 4;
+
   // Per fer-ho simple, dibuixem una línia horitzontal desplaçada amb el cos
   Canvas.MoveTo(BodyX - 35, BodyY);
   Canvas.LineTo(BodyX + 35, BodyY);
+  }
 end;
 
 end.

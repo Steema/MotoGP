@@ -144,8 +144,11 @@ type
 
     Laps : Integer;  // how many laps this pilot
 
+    BestLap : Integer; // Lap number (starting at 1) with best time
+
     Color : TColor;
 
+    Ellapsed : TArray<Int64>; // Milliseconds of each finished lap
     LapsTime : TArray<Integer>;  // When the rider crosses each lap finish, indexed to TRace.Data
 
     procedure Start(const TotalLaps:Integer);
@@ -159,7 +162,7 @@ type
 
     TotalLaps : Integer; // Race laps
 
-    RiderEndsLap : TProc<Integer>;
+    RiderEndsLap : TProc<Integer,Integer>; // Rider,Lap
 
     Current : Integer; // Current lap (of faster pilot)
 
@@ -221,6 +224,11 @@ begin
 
   for t:=0 to High(LapsTime) do
       LapsTime[t]:=0;
+
+  SetLength(Ellapsed,TotalLaps);
+
+  for t:=0 to High(Ellapsed) do
+      Ellapsed[t]:=0;
 end;
 
 function TorqueAtRPM(const Curve:TTorqueCurve; const RPM: Integer): Single;

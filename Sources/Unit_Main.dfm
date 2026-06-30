@@ -398,10 +398,10 @@ object MainForm: TMainForm
               TopAxis.Title.Font.Name = 'Verdana'
               View3D = False
               View3DWalls = False
+              OnBeforeDrawSeries = FrontViewBeforeDrawSeries
               Align = alClient
               TabOrder = 0
               OnResize = FrontViewResize
-              ExplicitLeft = 2
               DefaultCanvas = 'TGDIPlusCanvas'
               ColorPaletteIndex = 13
               object SpeedGauge: TNumericGauge
@@ -417,28 +417,29 @@ object MainForm: TMainForm
                 Frame.MiddleBrush.BackColor = clYellow
                 Frame.OuterBrush.BackColor = clGreen
                 Frame.OuterBrush.Gradient.EndColor = clGreen
+                Value = 55.300000000000000000
                 InternalMarkers = {
                   03000000545046300E544E756D657269634D61726B65720008506F736974696F
                   6E0708707043656E7465720B53686170652E436F6C6F7204DBDBC80010536861
                   70652E466F6E742E436F6C6F7204282828001153686170652E466F6E742E4865
                   6967687402D00F53686170652E466F6E742E4E616D65060A44532D4469676974
                   616C1353686170652E4672616D652E56697369626C65081453686170652E5368
-                  61646F772E56697369626C65080A53686170652E546578740604302C30301353
-                  686170652E54657874416C69676E6D656E74070E746152696768744A75737469
-                  66791153686170652E5472616E73706172656E74090000545046300E544E756D
-                  657269634D61726B65720008506F736974696F6E070A70705269676874546F70
-                  0F53686170652E416C69676E6D656E740708746143656E7465720B5368617065
-                  2E436F6C6F7204DBDBC8001053686170652E466F6E742E436F6C6F7204282828
-                  001153686170652E466F6E742E48656967687402E80F53686170652E466F6E74
-                  2E4E616D65060A44532D4469676974616C1353686170652E4672616D652E5669
-                  7369626C65081453686170652E536861646F772E56697369626C65080A536861
-                  70652E5465787406046B6D2F681153686170652E5472616E73706172656E7409
-                  0000545046300E544E756D657269634D61726B6572000B53686170652E436F6C
-                  6F7204282828001053686170652E466F6E742E436F6C6F7204DBDBC800115368
-                  6170652E466F6E742E48656967687402F10F53686170652E466F6E742E4E616D
-                  65060A44532D4469676974616C1353686170652E4672616D652E56697369626C
-                  65081453686170652E536861646F772E56697369626C65080A53686170652E54
-                  657874060553706565640000}
+                  61646F772E56697369626C65080A53686170652E54657874060535352C333013
+                  53686170652E54657874416C69676E6D656E74070E746152696768744A757374
+                  6966791153686170652E5472616E73706172656E74090000545046300E544E75
+                  6D657269634D61726B65720008506F736974696F6E070A70705269676874546F
+                  700F53686170652E416C69676E6D656E740708746143656E7465720B53686170
+                  652E436F6C6F7204DBDBC8001053686170652E466F6E742E436F6C6F72042828
+                  28001153686170652E466F6E742E48656967687402E80F53686170652E466F6E
+                  742E4E616D65060A44532D4469676974616C1353686170652E4672616D652E56
+                  697369626C65081453686170652E536861646F772E56697369626C65080A5368
+                  6170652E5465787406046B6D2F681153686170652E5472616E73706172656E74
+                  090000545046300E544E756D657269634D61726B6572000B53686170652E436F
+                  6C6F7204282828001053686170652E466F6E742E436F6C6F7204DBDBC8001153
+                  686170652E466F6E742E48656967687402F10F53686170652E466F6E742E4E61
+                  6D65060A44532D4469676974616C1353686170652E4672616D652E5669736962
+                  6C65081453686170652E536861646F772E56697369626C65080A53686170652E
+                  54657874060553706565640000}
               end
               object LeanGauge: TGaugeSeries
                 Legend.Visible = False
@@ -483,6 +484,7 @@ object MainForm: TMainForm
                 RotationAngle = 160
                 ShapeStyle = gsPolygon
                 TotalAngle = 140.000000000000000000
+                Value = 16.286506941542030000
               end
             end
           end
@@ -553,7 +555,7 @@ object MainForm: TMainForm
       Top = 0
       Width = 449
       Height = 650
-      ActivePage = TabSheet3
+      ActivePage = TabLap
       Align = alClient
       TabOrder = 1
       object TabLap: TTabSheet
@@ -621,7 +623,7 @@ object MainForm: TMainForm
           View3D = False
           Align = alClient
           TabOrder = 0
-          ExplicitLeft = -1
+          ExplicitLeft = 1
           DefaultCanvas = 'TGDIPlusCanvas'
           ColorPaletteIndex = 13
           object CurveSeries: TPointSeries
@@ -634,6 +636,15 @@ object MainForm: TMainForm
             YValues.Name = 'Y'
             YValues.Order = loNone
             CustomVertAxis = 0
+          end
+          object CursorLap: TColorLineTool
+            Pen.Color = 1918068724
+            Pen.Width = 2
+            AxisID = 0
+            object TAnnotationTool
+              Shape.Alignment = taCenter
+              Shape.Shadow.Visible = False
+            end
           end
         end
       end
@@ -741,8 +752,6 @@ object MainForm: TMainForm
             'Yamaha')
           TabOrder = 0
           OnClick = LBBikesClick
-          ExplicitLeft = -1
-          ExplicitTop = 1
         end
         object PageControl5: TPageControl
           Left = 121
@@ -765,10 +774,6 @@ object MainForm: TMainForm
               ParentBackground = False
               ParentColor = False
               TabOrder = 0
-              ExplicitLeft = -40
-              ExplicitTop = 168
-              ExplicitWidth = 400
-              ExplicitHeight = 250
               _Headers = (
                 1
                 'TColumnHeaderBand'
@@ -813,6 +818,7 @@ object MainForm: TMainForm
             ParentBackground = False
             ParentColor = False
             TabOrder = 0
+            ExplicitLeft = 1
             _Headers = (
               1
               'TColumnHeaderBand'
