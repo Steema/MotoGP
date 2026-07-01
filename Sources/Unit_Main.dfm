@@ -398,6 +398,7 @@ object MainForm: TMainForm
               TopAxis.Title.Font.Name = 'Verdana'
               View3D = False
               View3DWalls = False
+              OnAfterDraw = FrontViewAfterDraw
               OnBeforeDrawSeries = FrontViewBeforeDrawSeries
               Align = alClient
               TabOrder = 0
@@ -417,14 +418,14 @@ object MainForm: TMainForm
                 Frame.MiddleBrush.BackColor = clYellow
                 Frame.OuterBrush.BackColor = clGreen
                 Frame.OuterBrush.Gradient.EndColor = clGreen
-                Value = 55.300000000000000000
+                Value = 58.450000000000000000
                 InternalMarkers = {
                   03000000545046300E544E756D657269634D61726B65720008506F736974696F
                   6E0708707043656E7465720B53686170652E436F6C6F7204DBDBC80010536861
                   70652E466F6E742E436F6C6F7204282828001153686170652E466F6E742E4865
                   6967687402D00F53686170652E466F6E742E4E616D65060A44532D4469676974
                   616C1353686170652E4672616D652E56697369626C65081453686170652E5368
-                  61646F772E56697369626C65080A53686170652E54657874060535352C333013
+                  61646F772E56697369626C65080A53686170652E54657874060535382C343513
                   53686170652E54657874416C69676E6D656E74070E746152696768744A757374
                   6966791153686170652E5472616E73706172656E74090000545046300E544E75
                   6D657269634D61726B65720008506F736974696F6E070A70705269676874546F
@@ -484,7 +485,7 @@ object MainForm: TMainForm
                 RotationAngle = 160
                 ShapeStyle = gsPolygon
                 TotalAngle = 140.000000000000000000
-                Value = 16.286506941542030000
+                Value = -20.159130245447160000
               end
             end
           end
@@ -578,6 +579,7 @@ object MainForm: TMainForm
           Gradient.StartColor = 15395562
           Gradient.Visible = True
           LeftWall.Color = clLightyellow
+          Legend.CheckBoxes = True
           Legend.Font.Name = 'Verdana'
           Legend.Shadow.Transparency = 0
           RightWall.Color = clLightyellow
@@ -621,9 +623,9 @@ object MainForm: TMainForm
           TopAxis.TicksInner.Color = clDarkgray
           TopAxis.Title.Font.Name = 'Verdana'
           View3D = False
+          OnAfterDraw = LapChartAfterDraw
           Align = alClient
           TabOrder = 0
-          ExplicitLeft = 1
           DefaultCanvas = 'TGDIPlusCanvas'
           ColorPaletteIndex = 13
           object CurveSeries: TPointSeries
@@ -671,6 +673,7 @@ object MainForm: TMainForm
           LeftWall.Color = clLightyellow
           Legend.Font.Name = 'Verdana'
           Legend.Shadow.Transparency = 0
+          Legend.Visible = False
           RightWall.Color = clLightyellow
           Title.Font.Name = 'Verdana'
           Title.Text.Strings = (
@@ -679,11 +682,14 @@ object MainForm: TMainForm
           BottomAxis.Grid.Color = clDarkgray
           BottomAxis.LabelsFormat.Font.Name = 'Verdana'
           BottomAxis.TicksInner.Color = clDarkgray
+          BottomAxis.Title.Caption = 'Lap'
           BottomAxis.Title.Font.Name = 'Verdana'
+          Chart3DPercent = 74
           DepthAxis.Axis.Color = 4210752
           DepthAxis.Grid.Color = clDarkgray
           DepthAxis.LabelsFormat.Font.Name = 'Verdana'
           DepthAxis.TicksInner.Color = clDarkgray
+          DepthAxis.Title.Caption = 'Rider'
           DepthAxis.Title.Font.Name = 'Verdana'
           DepthTopAxis.Axis.Color = 4210752
           DepthTopAxis.Grid.Color = clDarkgray
@@ -694,6 +700,7 @@ object MainForm: TMainForm
           LeftAxis.Grid.Color = clDarkgray
           LeftAxis.LabelsFormat.Font.Name = 'Verdana'
           LeftAxis.TicksInner.Color = clDarkgray
+          LeftAxis.Title.Caption = 'Lap Time'
           LeftAxis.Title.Font.Name = 'Verdana'
           RightAxis.Axis.Color = 4210752
           RightAxis.Grid.Color = clDarkgray
@@ -709,6 +716,15 @@ object MainForm: TMainForm
           TabOrder = 0
           DefaultCanvas = 'TGDIPlusCanvas'
           ColorPaletteIndex = 13
+          object TowerLapRider: TTowerSeries
+            Pen.Visible = False
+            XValues.Name = 'X'
+            XValues.Order = loNone
+            YValues.Name = 'Y'
+            YValues.Order = loNone
+            ZValues.Name = 'Z'
+            ZValues.Order = loNone
+          end
         end
       end
       object TabChampionShip: TTabSheet
@@ -818,7 +834,6 @@ object MainForm: TMainForm
             ParentBackground = False
             ParentColor = False
             TabOrder = 0
-            ExplicitLeft = 1
             _Headers = (
               1
               'TColumnHeaderBand'
