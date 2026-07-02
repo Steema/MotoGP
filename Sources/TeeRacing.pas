@@ -11,6 +11,9 @@ interface
 uses
   SysUtils, Types, Graphics, TeCanvas, Diagnostics;
 
+const
+  RealTimeFactor = 0.2; // 5 times per second (no realtime)
+
 type
   TWeatherStyle=(wsDry, wsWet, wsRain);
 
@@ -98,7 +101,9 @@ type
 
     Horses : Single; // CV
     Watts : Single; // Watts
+
     MaxRPM : Integer; // 14000
+    IdleRPM : Integer; // 4000
 
     Torque : TTorqueCurve;
     GearRatios : TGearRatios;
@@ -173,7 +178,10 @@ type
     LeanAngle : Single; // 0..65° degree (or crash, or Lowside)
 
     procedure Init(const StartPosition:Single);
-    procedure Step(var Bike:TBike; const Prev:TRiderData);
+
+    procedure Step(const TimeFactor:Single; // 0.1 = 10 times per second
+                   var Bike:TBike;
+                   const Prev:TRiderData);
 
     procedure StandUp;
     procedure TrailBrake(const ApexPosition:Single);
@@ -240,13 +248,13 @@ var
 type
   TBrakeDecision = record
     NeedsToBrake: Boolean;
-    DistanceToBrakePoint: Double;  // Meters to start braking
-    BrakingDistanceNeeded: Double; // Meters needed to brake until corner's entry position
+    DistanceToBrakePoint: Single;  // Meters to start braking
+    BrakingDistanceNeeded: Single; // Meters needed to brake until corner's entry position
   end;
 
-function EvaluateBrakingPoint(const ABikePosition, ABikeSpeedMPS: Double;
+function EvaluateBrakingPoint(const ABikePosition, ABikeSpeedMPS: Single;
                               const ACorner: TCurve;
-                              const AMaxDecelerationMPS2: Double): TBrakeDecision;
+                              const AMaxDecelerationMPS2: Single): TBrakeDecision;
 
 type
   TTurnPhase = (tpApproach, tpBraking, tpCornering, tpAcceleration);
@@ -466,7 +474,7 @@ begin
   end;
 end;
 
-procedure TRiderData.Step(var Bike:TBike; const Prev: TRiderData);
+procedure TRiderData.Step(const TimeFactor:Single; var Bike:TBike; const Prev: TRiderData);
 const G = 9.81; // Earth Gravity meters/sec2
       RGear = 5;
       RFinal = 3;
@@ -482,9 +490,16 @@ var Thrust,
 begin
   RPM:=Prev.RPM;
 
-  MotorTorque:=TorqueAtRPM(Bike.Torque,RPM);
-
-  ThrustTorque:=(MotorTorque*RGear*RFinal*0.01*Bike.TransmissionEficiency)/(0.5*Bike.Back.Tire.Diameter*0.01);
+  if RPM>Bike.IdleRPM then
+  begin
+    MotorTorque:=TorqueAtRPM(Bike.Torque,RPM);
+    ThrustTorque:=(MotorTorque*RGear*RFinal*0.01*Bike.TransmissionEficiency)/(0.5*Bike.Back.Tire.Diameter*0.01);
+  end
+  else
+  begin
+    MotorTorque:=0;
+    ThrustTorque:=0;
+  end;
 
   TotalMass:=Bike.Weight+Bike.Fuel+DefaultPilot.TotalMass;
   TotalGrip:= Bike.Back.Tire.Grip * TotalMass * G;
@@ -518,16 +533,16 @@ begin
   TotalBrakingForce:=(Bike.Front.BrakeForce*FrontBrake*0.01)+(Bike.Back.BrakeForce*BackBrake*0.01);
 
   if TotalBrakingForce>0 then
-     Acceleration:=-(TotalBrakingForce + AirResistance + RollingFriction) / TotalMass
+     Acceleration:= -(TotalBrakingForce + AirResistance + RollingFriction) / TotalMass
   else
      Acceleration:=(Thrust - AirResistance - RollingFriction) / TotalMass;
 
-  Speed:=Prev.Speed+Prev.Acceleration;  // Prev.Acceleration or new Acceleration?
+  Speed:=Prev.Speed+Acceleration*TimeFactor;
 
   if Speed<0 then
      Speed:=0; // Brake to stop
 
-  Position:=Prev.Position+Speed;
+  Position:=Prev.Position+Speed*TimeFactor;
 
   Gear:=Prev.Gear;
   Throttle:=Prev.Throttle;
@@ -537,7 +552,8 @@ begin
 
   if Bike.Fuel<=0 then
   begin
-    RPM:=0; // Force stop
+    RPM:=Bike.IdleRPM; // Force stop
+    Throttle:=0;
   end;
 end;
 
@@ -586,19 +602,21 @@ begin
   DefaultBike.Fuel:=20; // kg
   DefaultBike.Horses:=250; // CV
   DefaultBike.Watts:=DefaultBike.Horses*735.5; // Watts
+
   DefaultBike.MaxRPM:=14000;
+  DefaultBike.IdleRPM:=4000;
 
   DefaultBike.Back.Wheel:=17; // inch  x 2.54 = 43.18 cm
   DefaultBike.Back.Tire.Grip:=1.7;
   DefaultBike.Back.Tire.Diameter:=69; // cm
   DefaultBike.Back.Tire.Friction:=0.02; // coefficient
-  DefaultBike.Back.BrakeForce:=500.0; // Newtons
+  DefaultBike.Back.BrakeForce:=600.0; // Newtons
 
   DefaultBike.Front.Wheel:=17; // inch  x 2.54 = 43.18 cm
   DefaultBike.Front.Tire.Grip:=1.7;
   DefaultBike.Front.Tire.Diameter:=60; // cm
   DefaultBike.Front.Tire.Friction:=0.02; // coefficient
-  DefaultBike.Back.BrakeForce:=3200.0; // Newtons, very big due to Carbon Disks
+  DefaultBike.Back.BrakeForce:=5200.0; // Newtons, very big due to Carbon Disks
 
   DefaultBike.Torque:=DefaultTorqueCurve;
 
@@ -739,12 +757,11 @@ begin
      Result := tpApproach; // Full speed
 end;
 
-function EvaluateBrakingPoint(const ABikePosition, ABikeSpeedMPS: Double;
+function EvaluateBrakingPoint(const ABikePosition, ABikeSpeedMPS: Single;
                               const ACorner: TCurve;
-                              const AMaxDecelerationMPS2: Double): TBrakeDecision;
+                              const AMaxDecelerationMPS2: Single): TBrakeDecision;
 var
-  vRequiredBrakingDistance: Double;
-  vBrakingTriggerPosition: Double;
+  BrakingTriggerPosition: Single;
 begin
   // If the bike is already going slower than the corner target speed, no need to brake yet
   if ABikeSpeedMPS <= ACorner.EntrySpeed/3.6 then
@@ -757,24 +774,23 @@ begin
 
   // 1. Calculate how many meters are required to slow down to the target speed
   // Formula: d = (V_actual² - V_target²) / (2 * a)
-  vRequiredBrakingDistance := (Sqr(ABikeSpeedMPS) - Sqr(ACorner.EntrySpeed/3.6)) / (2.0 * AMaxDecelerationMPS2);
-  Result.BrakingDistanceNeeded := vRequiredBrakingDistance;
+  Result.BrakingDistanceNeeded := (Sqr(ABikeSpeedMPS) - Sqr(ACorner.EntrySpeed/3.6)) / (2.0 * AMaxDecelerationMPS2);
 
   // 2. Determine the exact track coordinate where braking MUST start
-  vBrakingTriggerPosition := ACorner.Position - vRequiredBrakingDistance;
+  BrakingTriggerPosition := ACorner.Position - Result.BrakingDistanceNeeded;
 
   // 3. Compare with current bike position
-  if ABikePosition >= vBrakingTriggerPosition then
+  if ABikePosition >= BrakingTriggerPosition then
   begin
     // The bike has reached or passed the limit! Must brake immediately.
     Result.NeedsToBrake := True;
-    Result.DistanceToBrakePoint := 0.0;
+    Result.DistanceToBrakePoint := 0;
   end
   else
   begin
     // Still safe, returning how many meters are left before the braking zone
     Result.NeedsToBrake := False;
-    Result.DistanceToBrakePoint := vBrakingTriggerPosition - ABikePosition;
+    Result.DistanceToBrakePoint := BrakingTriggerPosition - ABikePosition;
   end;
 end;
 

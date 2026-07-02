@@ -725,7 +725,9 @@ begin
 end;
 
 procedure TMainForm.FrontViewBeforeDrawSeries(Sender: TObject);
-var Rider, tmp, L : Integer;
+var Rider,
+    //tmp,
+    L : Integer;
     Speed,
     LeanAngle : Single;
 begin
@@ -740,7 +742,7 @@ begin
 
     if L>-1 then
     begin
-      tmp:=Race.Circuit.IndexOfPosition(Race.Data[L].Data[Rider].Position);
+      {tmp:=}Race.Circuit.IndexOfPosition(Race.Data[L].Data[Rider].Position);
 
       Speed:=Race.Data[L].Data[Rider].Speed;
 
@@ -1046,6 +1048,7 @@ begin
       Race.Riders[t].Start(Race.TotalLaps);
 
   Race.Ellapsed.Start;
+
   Race.Data[0].Time:=Race.Ellapsed.ElapsedMilliseconds;
 
   TowerLapRider.NumXValues:=Race.TotalLaps;
@@ -1117,6 +1120,7 @@ function TMainForm.DoStep:Boolean;
   function StepRiders(const L:Integer):Boolean;
   var t : Integer;
       NumLap : Integer; // Current finished lap for a rider (starting at 1)
+      Delta : Integer;
       LapTime : Int64;
       Brake : TBrakeDecision;
       CurrentPhase : TTurnPhase;
@@ -1128,7 +1132,9 @@ function TMainForm.DoStep:Boolean;
     for t:=0 to High(Race.Riders) do
       if Race.Riders[t].Active then
       begin
-        Race.Data[L].Data[t].Step(Race.Riders[t].Bike,Race.Data[L-1].Data[t]);
+        Delta:=Race.Data[L].Time-Race.Data[L-1].Time;
+
+        Race.Data[L].Data[t].Step(Delta/1000, Race.Riders[t].Bike,Race.Data[L-1].Data[t]);
 
         // Finished lap?
         if Race.Data[L].Data[t].Position>Race.Circuit.TotalLength then
@@ -1165,15 +1171,6 @@ function TMainForm.DoStep:Boolean;
 
         if result then
         begin
-          if Race.Data[L].Data[t].Position>Race.Circuit.Curves[Race.Riders[t].NextCurve-1].Position then
-          begin
-            // Next Curve
-            Inc(Race.Riders[t].NextCurve);
-
-            if Race.Riders[t].NextCurve>Length(Race.Circuit.Curves) then
-               Race.Riders[t].NextCurve:=1;
-          end;
-
           Brake:=EvaluateBrakingPoint(Race.Data[L].Data[t].Position, Race.Data[L].Data[t].Speed,
                                       Race.Circuit.Curves[Race.Riders[t].NextCurve-1],
                                       Race.Riders[t].Bike.MaxBrakeDeceleration);
@@ -1194,9 +1191,7 @@ function TMainForm.DoStep:Boolean;
 
 
                   // No brakes
-
                   Race.Data[L].Data[t].FrontBrake:=0;
-
                   Race.Data[L].Data[t].BackBrake:=0;
 
                   // Bike upright
@@ -1209,13 +1204,11 @@ function TMainForm.DoStep:Boolean;
                 if Race.Data[L].Data[t].Throttle>0 then
                 begin
                   Race.Data[L].Data[t].Throttle:=0;
-                  Race.Data[L].Data[t].RPM:=0;
+                  Race.Data[L].Data[t].RPM:=Race.Riders[t].Bike.IdleRPM;
 
 
                   // Brake Bite
-
                   Race.Data[L].Data[t].FrontBrake:=90;
-
                   Race.Data[L].Data[t].BackBrake:=30;
 
                   // Bike Upright
@@ -1244,6 +1237,15 @@ function TMainForm.DoStep:Boolean;
                 Race.Data[L].Data[t].RPM:=Race.Riders[t].Bike.MaxRPM;
 
              end;
+          end;
+
+          if Race.Data[L].Data[t].Position>Race.Circuit.Curves[Race.Riders[t].NextCurve-1].ApexPosition then
+          begin
+            // Next Curve
+            Inc(Race.Riders[t].NextCurve);
+
+            if Race.Riders[t].NextCurve>Length(Race.Circuit.Curves) then
+               Race.Riders[t].NextCurve:=1;
           end;
 
         end;
@@ -1278,7 +1280,10 @@ begin
   L:=Length(Race.Data);
   SetLength(Race.Data,L+1);
 
-  Race.Data[L].Time:=Race.Ellapsed.ElapsedMilliseconds;
+  if RealTimeFactor=0 then
+     Race.Data[L].Time:=Race.Ellapsed.ElapsedMilliseconds
+  else
+     Race.Data[L].Time:=Race.Data[L-1].Time+Round(1000*RealTimeFactor);
 
   SetLength(Race.Data[L].Data,Length(Race.Riders));
 
