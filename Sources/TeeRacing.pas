@@ -1,5 +1,8 @@
 {
   @davidberneda
+
+  https://github.com/Steema/MotoGP
+
 }
 unit TeeRacing;
 
@@ -26,10 +29,12 @@ type
 
   // Curves (Corners) of a circuit path
   TCurve=record
-    Position : Single;  // meters from start (might not be from Finish line)
+    Position : Single; // Entry position of this curve, (in meters from start, might not be from Finish line)
     Name : String;
     Angle : Single;  // -180..0..+180  (left or right curve)
     EntrySpeed : Single; // km/h safe entry speed, with Dry Track and not super-hot asphalt
+
+    ApexPosition : Single; // Position of Apex in meters
   end;
 
   TTire=record
@@ -62,7 +67,8 @@ type
        const APositions:Array of Single;
        const ANames:Array of String;
        const Angles:Array of Single;
-       const EntrySpeeds: array of Single);
+       const EntrySpeeds: array of Single;
+       const ApexPositions: array of Single);
 
     function IndexOfPosition(const APosition:Single):Integer; // Index of Points, rounded to near APosition
     function PointPosition(const APosition:Single):TPoint;
@@ -72,6 +78,7 @@ type
   public
     Wheel : Single; // Inches diameter
     Tire : TTire;
+    BrakeForce : Single; // in Newtons
   end;
 
   TGearRatios=Array of Single; // Ratio for every Gear, 0=Neutral
@@ -86,8 +93,8 @@ type
 
   TBike=record
     Weight : Single; // kg
+
     Fuel : Single; // kg
-    FuelLiquid : Single; // cubic centimeters
 
     Horses : Single; // CV
     Watts : Single; // Watts
@@ -103,7 +110,11 @@ type
     CdAeroDynamic : Single; // 0.3 .. 0.7 coefficient
     FrontArea : Single; // 0.5 m²
 
-    MaxBreakDecelaration : Single; // 15 .. 18 m/s²
+    MaxBrakeDeceleration : Single; // 15 .. 18 m/s²
+
+    MaxLeanAngle : Single; // Degrees 64°
+
+    function FuelLiquid : Single; // in cubic centimeters
   end;
 
   TPilot=record
@@ -125,7 +136,7 @@ type
     TotalMass : Single; // Read-only, calculated
 
     // Parameters:
-    // Breaking : 0..100%  (breaks very soon or too late?)
+    // Braking : 0..100%  (brakes very soon or too late?)
     // Curve pass:   (fast inside curves?)
     // Start Reaction time: 0 .. 200 msec
 
@@ -134,7 +145,7 @@ type
 
   TTireData=record
   public
-    Temperature : Single; // degree
+    Temperature : Single; // degree °C
     Pressure : Single;
   end;
 
@@ -155,15 +166,20 @@ type
 
     // FrontTire : TTireData
     // BackTire : TTireData
-    // FrontBreak : Single;  %
-    // BackBreak : Single;   %
-    // LeanAngle : Single; // 0..65 degree (or crash, or Lowside)
+
+    FrontBrake : Single; // 0..100 %
+    BackBrake : Single;  // 0..100 %
+
+    LeanAngle : Single; // 0..65° degree (or crash, or Lowside)
 
     procedure Init(const StartPosition:Single);
-    procedure Step(const Prev:TRiderData);
+    procedure Step(var Bike:TBike; const Prev:TRiderData);
+
+    procedure StandUp;
+    procedure TrailBrake(const ApexPosition:Single);
   end;
 
-  TAllRidersData=Array of TRiderData;
+  TAllRidersData=TArray<TRiderData>;
 
   // All riders at an instant
   TRaceData=record
@@ -185,13 +201,17 @@ type
 
     Color : TColor;
 
+    NextCurve : Integer; // The number of the most closer curve (corner)
+
+    Bike : TBike;
+
     Ellapsed : TArray<Int64>; // Milliseconds of each finished lap
     LapsTime : TArray<Integer>;  // When the rider crosses each lap finish, indexed to TRace.Data
 
     procedure Start(const TotalLaps:Integer);
   end;
 
-  TAllRaceData=Array of TRaceData;
+  TAllRaceData=TArray<TRaceData>;
 
   TRace=record
   public
@@ -220,13 +240,20 @@ var
 type
   TBrakeDecision = record
     NeedsToBrake: Boolean;
-    DistanceToBrakePoint: Double; // Metres que falten per haver de frenar (si és > 0)
-    BrakingDistanceNeeded: Double;// Metres totals que necessitarà per frenar
+    DistanceToBrakePoint: Double;  // Meters to start braking
+    BrakingDistanceNeeded: Double; // Meters needed to brake until corner's entry position
   end;
 
 function EvaluateBrakingPoint(const ABikePosition, ABikeSpeedMPS: Double;
                               const ACorner: TCurve;
                               const AMaxDecelerationMPS2: Double): TBrakeDecision;
+
+type
+  TTurnPhase = (tpApproach, tpBraking, tpCornering, tpAcceleration);
+
+function DetermineTrackPhase(const BikePosition:Single;
+                             const ACorner:TCurve;
+                             const ABrakeTriggerPosition:Single): TTurnPhase;
 
 implementation
 
@@ -253,7 +280,8 @@ uses
 procedure TCircuit.FillCurves(const APositions: array of Single;
                               const ANames: array of String;
                               const Angles: array of Single;
-                              const EntrySpeeds: array of Single);
+                              const EntrySpeeds: array of Single;
+                              const ApexPositions: array of Single);
 var L,t : Integer;
 begin
   Curves:=nil;
@@ -268,6 +296,7 @@ begin
     Curves[t].Name:=ANames[t];
     Curves[t].Angle:=Angles[t];
     Curves[t].EntrySpeed:=EntrySpeeds[t];
+    Curves[t].ApexPosition:=Curves[t].Position+ApexPositions[t];
   end;
 end;
 
@@ -308,6 +337,11 @@ begin
 
   for t:=0 to High(Ellapsed) do
       Ellapsed[t]:=0;
+
+  NextCurve:=1; // At Start
+
+  // Copy default parameters
+  Bike:=DefaultBike;
 end;
 
 function TorqueAtRPM(const Curve:TTorqueCurve; const RPM: Integer): Single;
@@ -363,18 +397,76 @@ end;
 
 procedure TRiderData.Init(const StartPosition:Single);
 begin
-  RPM:=14000;   // Throttle max
+  Throttle:=100; // Full Throttle
+
+  RPM:=14000; // Bike.MaxRPM?  // Throttle max
 
   Clutch:=1;  //
 
   Speed:=0;
 
+  FrontBrake:=0;
+  BackBrake:=0;
+
   Acceleration:=0.7+Random(30)*0.01;
   Position:=StartPosition; // Finish line - pole grid position in meters
 end;
 
+const
+  // Average BSFC for a high-performance racing engine at high load
+  // ~235 grams of fuel per kilowatt-hour
+  BSFC_BASE = 235.0;
+  FUEL_DENSITY_RACING = 0.750; // Racing fuel density is roughly 0.75 kg/L (750 g/L)  g/cm³ (or g/mL)
 
-procedure TRiderData.Step(const Prev: TRiderData);
+// LitersPerHour := (GramsPerSecond * 3600.0) / (FUEL_DENSITY_RACING * 1000.0);
+
+// Returns Grams per Second
+function CalculateInstantFuelConsumption(const TorqueNm: Single;
+                                         const EngineRPM: Integer;
+                                         const ThrottlePercent: Single): Single;
+var
+  vPowerKW: Single;
+  vCurrentBSFC: Single;
+begin
+  // Adjust BSFC based on throttle. Engines are less efficient at partial throttle
+  // If throttle is closed but RPM is high (engine braking), consumption is near zero.
+  if ThrottlePercent < 1.0 then
+  begin
+    Result := 0.02 * (EngineRPM / 15000.0); // Tiny fuel flow to maintain idle/lubrication
+    Exit;
+  end;
+
+  // Convert Torque (Nm) and RPM to Kilowatts (kW)
+  // Constant 9549.2965 comes from (60 * 1000) / (2 * Pi)
+  vPowerKW := (TorqueNm * EngineRPM) / 9549.2965;
+
+  // Guard against negative power calculation just in case
+  if vPowerKW < 0 then vPowerKW := 0;
+
+  // Efficiency correction curve approximation
+  vCurrentBSFC := BSFC_BASE * (1.0 + (1.0 - (ThrottlePercent / 100.0)) * 0.3);
+
+  // 3. Calculate consumption in Grams per Second
+  // Formula: (kW * BSFC) / 3600 seconds in an hour
+  Result := (vPowerKW * vCurrentBSFC) / 3600.0;
+end;
+
+procedure TRiderData.StandUp;
+var Step : Single;
+begin
+  if LeanAngle>0 then
+  begin
+    // 5% of current LeanAngle
+    Step:=5*LeanAngle*0.01;
+
+    LeanAngle := LeanAngle - Step;
+
+    if LeanAngle < 0 then
+       LeanAngle := 0;
+  end;
+end;
+
+procedure TRiderData.Step(var Bike:TBike; const Prev: TRiderData);
 const G = 9.81; // Earth Gravity meters/sec2
       RGear = 5;
       RFinal = 3;
@@ -383,18 +475,19 @@ var Thrust,
     ThrustTorque,
     TotalGrip,
     TotalMass,
+    TotalBrakingForce,
     AirResistance,
     MotorTorque, // Nm
     RollingFriction : Single;
 begin
   RPM:=Prev.RPM;
 
-  MotorTorque:=TorqueAtRPM(DefaultBike.Torque,RPM);
+  MotorTorque:=TorqueAtRPM(Bike.Torque,RPM);
 
-  ThrustTorque:=(MotorTorque*RGear*RFinal*0.01*DefaultBike.TransmissionEficiency)/(0.5*DefaultBike.Back.Tire.Diameter*0.01);
+  ThrustTorque:=(MotorTorque*RGear*RFinal*0.01*Bike.TransmissionEficiency)/(0.5*Bike.Back.Tire.Diameter*0.01);
 
-  TotalMass:=DefaultBike.Weight+DefaultBike.Fuel+DefaultPilot.TotalMass;
-  TotalGrip:= DefaultBike.Back.Tire.Grip * TotalMass * G;
+  TotalMass:=Bike.Weight+Bike.Fuel+DefaultPilot.TotalMass;
+  TotalGrip:= Bike.Back.Tire.Grip * TotalMass * G;
 
   if Prev.Speed=0 then // Start time
   begin
@@ -405,7 +498,7 @@ begin
   end
   else
   begin
-    Thrust:=DefaultBike.Watts/Prev.Speed;
+    Thrust:=Bike.Watts/Prev.Speed;
 
     if ThrustTorque<Thrust then
        Thrust:=ThrustTorque;
@@ -414,15 +507,51 @@ begin
        Thrust:=TotalGrip;
   end;
 
-  AirResistance:=0.5 * DefaultWeather.AirDensity * DefaultBike.CdAeroDynamic * DefaultBike.FrontArea * Sqr(Prev.Speed);
+  AirResistance:=0.5 * DefaultWeather.AirDensity * Bike.CdAeroDynamic * Bike.FrontArea * Sqr(Prev.Speed);
 
   // TODO: Pacejka's Magic Formula o Magic Formula Tire Model
-  RollingFriction:= DefaultBike.Back.Tire.Friction * TotalMass * G;
+  RollingFriction:= Bike.Back.Tire.Friction * TotalMass * G;
 
-  Acceleration:=(Thrust - AirResistance - RollingFriction) / TotalMass;
+  FrontBrake:=Prev.FrontBrake;
+  BackBrake:=Prev.BackBrake;
 
-  Speed:=Prev.Speed+Prev.Acceleration;
+  TotalBrakingForce:=(Bike.Front.BrakeForce*FrontBrake*0.01)+(Bike.Back.BrakeForce*BackBrake*0.01);
+
+  if TotalBrakingForce>0 then
+     Acceleration:=-(TotalBrakingForce + AirResistance + RollingFriction) / TotalMass
+  else
+     Acceleration:=(Thrust - AirResistance - RollingFriction) / TotalMass;
+
+  Speed:=Prev.Speed+Prev.Acceleration;  // Prev.Acceleration or new Acceleration?
+
+  if Speed<0 then
+     Speed:=0; // Brake to stop
+
   Position:=Prev.Position+Speed;
+
+  Gear:=Prev.Gear;
+  Throttle:=Prev.Throttle;
+
+  // Fuel
+  Bike.Fuel:=Bike.Fuel-0.001*CalculateInstantFuelConsumption(MotorTorque,RPM,Throttle);
+
+  if Bike.Fuel<=0 then
+  begin
+    RPM:=0; // Force stop
+  end;
+end;
+
+procedure TRiderData.TrailBrake(const ApexPosition: Single);
+begin
+  FrontBrake:=FrontBrake-(ApexPosition-Position)*0.01;
+
+  if FrontBrake < 0 then
+     FrontBrake := 0;
+
+  BackBrake:=BackBrake-(ApexPosition-Position)*0.01;
+
+  if BackBrake < 0 then
+     BackBrake := 0;
 end;
 
 function DefaultTorqueCurve:TTorqueCurve;
@@ -455,7 +584,6 @@ procedure InitDefaultBike;
 begin
   DefaultBike.Weight:=160; // kg
   DefaultBike.Fuel:=20; // kg
-  DefaultBike.FuelLiquid:=15; // liters
   DefaultBike.Horses:=250; // CV
   DefaultBike.Watts:=DefaultBike.Horses*735.5; // Watts
   DefaultBike.MaxRPM:=14000;
@@ -464,11 +592,13 @@ begin
   DefaultBike.Back.Tire.Grip:=1.7;
   DefaultBike.Back.Tire.Diameter:=69; // cm
   DefaultBike.Back.Tire.Friction:=0.02; // coefficient
+  DefaultBike.Back.BrakeForce:=500.0; // Newtons
 
   DefaultBike.Front.Wheel:=17; // inch  x 2.54 = 43.18 cm
   DefaultBike.Front.Tire.Grip:=1.7;
   DefaultBike.Front.Tire.Diameter:=60; // cm
   DefaultBike.Front.Tire.Friction:=0.02; // coefficient
+  DefaultBike.Back.BrakeForce:=3200.0; // Newtons, very big due to Carbon Disks
 
   DefaultBike.Torque:=DefaultTorqueCurve;
 
@@ -479,7 +609,9 @@ begin
   DefaultBike.CdAeroDynamic:=0.45; // 0.3 .. 0.7 coefficient
   DefaultBike.FrontArea:=0.5; // 0.5 m²
 
-  DefaultBike.MaxBreakDecelaration:=15; // m/s²
+  DefaultBike.MaxBrakeDeceleration:=15; // m/s²
+
+  DefaultBike.MaxLeanAngle:=64; // ° Degree
 
   // Clutch
 end;
@@ -592,6 +724,21 @@ begin
   AirDensity:=1.225; // kg/m3
 end;
 
+function DetermineTrackPhase(const BikePosition:Single; const ACorner:TCurve; const ABrakeTriggerPosition:Single): TTurnPhase;
+begin
+  // On or past Apex?
+  if BikePosition >= ACorner.ApexPosition then
+     Result := tpAcceleration
+  else
+  if BikePosition >= ACorner.Position then
+     Result := tpCornering // Still passing curve
+  else
+  if BikePosition >= ABrakeTriggerPosition then
+     Result := tpBraking // Still braking
+  else
+     Result := tpApproach; // Full speed
+end;
+
 function EvaluateBrakingPoint(const ABikePosition, ABikeSpeedMPS: Double;
                               const ACorner: TCurve;
                               const AMaxDecelerationMPS2: Double): TBrakeDecision;
@@ -629,6 +776,13 @@ begin
     Result.NeedsToBrake := False;
     Result.DistanceToBrakePoint := vBrakingTriggerPosition - ABikePosition;
   end;
+end;
+
+{ TBike }
+
+function TBike.FuelLiquid: Single; // cm³
+begin
+  result:=Fuel/FUEL_DENSITY_RACING; // From Grams to Cubic Centimeters
 end;
 
 initialization

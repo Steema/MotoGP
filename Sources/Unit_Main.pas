@@ -14,12 +14,12 @@ uses
   VCLTee.TeeSVGCanvas,
 
   Tee.GridData.Strings, Tee.Grid.CSV, TeeGIS, TeeRacing, Tee.Painter,
-  Tee.Grid.Columns,
+  Tee.Grid.Columns, Tee.GridData.Rtti,
 
   TeeTorqueCurve,
 
   VCLTee.Series, Vcl.Menus, VCLTee.TeeNumericGauge, VCLTee.TeeGauges,
-  VCLTee.TeeTools, VCLTee.TeeSurfa;
+  VCLTee.TeeTools, VCLTee.TeeSurfa, VCLTee.TeeLinearGauge;
 
 type
   TMainForm = class(TForm)
@@ -89,6 +89,9 @@ type
     LeanGauge: TGaugeSeries;
     CursorLap: TColorLineTool;
     TowerLapRider: TTowerSeries;
+    TabData: TTabSheet;
+    DataGrid: TTeeGrid;
+    FuelGauge: TLinearGauge;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -114,6 +117,7 @@ type
     procedure FrontViewResize(Sender: TObject);
     procedure LapChartAfterDraw(Sender: TObject);
     procedure FrontViewAfterDraw(Sender: TObject);
+    procedure PageControl1Change(Sender: TObject);
   private
     { Private declarations }
 
@@ -169,6 +173,19 @@ uses
 
   TeeGDIPlus, TeeSkia, TeeGLCanvas, TeeFrontView;
 
+function HasParameter(const AParameter:String):Boolean;
+var t : Integer;
+begin
+  for t:=1 to ParamCount do
+      if UpperCase(ParamStr(t))=UpperCase(AParameter) then
+      begin
+        result:=True;
+        Exit;
+      end;
+
+  result:=False;
+end;
+
 const
   PauseCaption='Pause';
   ResumeCaption='Resume';
@@ -191,9 +208,8 @@ begin
 
   StartCount:=0;
 
-  if ParamCount>0 then
-     if ParamStr(1).ToUpper='NOSEMAPHOR' then
-        StartCount:=9;
+  if HasParameter('NOSEMAPHOR') then
+     StartCount:=9;
 
   TimerStart.Enabled:=True;
 end;
@@ -300,7 +316,8 @@ procedure TMainForm.CircuitAfterDraw(Sender: TObject);
       [620,700,950,1300,1650,1820,2000,2120,2350,2900,3150,3350,3650,3950], // Positions in meters
       ['Elf','2','Renault','Repsol','Seat','6','Würth','8','Campsa','La Caixa','11','Banc Sabadell','Europcar','New Holland'], // Names
       [90,-45,180,90,-135,-15,-90,45,60,-80,-45,90,60,90],  // Angles in degrees
-      [100,120,150,105,75,140,115,155,0,85,130,110,125,165]);  // Safe entry speed km/h
+      [100,120,150,105,75,140,115,155,0,85,130,110,125,165],   // Safe entry speed km/h
+      [45,30,85,40,25,0,35,45,0,35,0,55,40,60]); // Meters from entry position to Apex
 
 
     CurveSeries.GetVertAxis.SetMinMax(-180,180);
@@ -434,9 +451,8 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  if ParamCount>0 then
-     if ParamStr(1).ToUpper='SLOW' then
-        Timer1.Interval:=100;
+  if HasParameter('SLOW') then
+     Timer1.Interval:=100;
 
   WindowState:=TWindowState.wsMaximized;
 end;
@@ -489,7 +505,9 @@ begin
   Pole.Free;
 
   RiderQuantity:=PilotsData.Rows; // <-- use to test, for example 1 or 2 riders only
-//  RiderQuantity:=1;
+
+  if HasParameter('SINGLERIDER') then
+     RiderQuantity:=1;
 
   Pole:=TStringsData.Create(9,RiderQuantity);
 
@@ -652,10 +670,15 @@ begin
   LeanGauge.HandDistance:=30;
   LeanGauge.CircleBrush.Style:=bsClear;
 
+  FuelGauge.Value:=20;
+  FuelGauge.Maximum:=22;
+  FuelGauge.Ranges[0].EndValue:=FuelGauge.Maximum;
+
   Race.Weather.Init;
   Race.Weather.CalculateAirDensity(Race.Circuit.Elevation);
 end;
 
+{
 function CalcLeanAngle(const APoints: TPointFloatArray; Current: Integer; const Speed:Single): Single;
 const MaxLean=64;
 var
@@ -683,6 +706,7 @@ begin
   else
   if Result < -MaxLean then Result := -MaxLean;
 end;
+}
 
 procedure TMainForm.FrontViewAfterDraw(Sender: TObject);
 var Rider, L : Integer;
@@ -720,9 +744,14 @@ begin
 
       Speed:=Race.Data[L].Data[Rider].Speed;
 
-      LeanAngle:=CalcLeanAngle(Race.Circuit.Points,tmp,Speed);
+      //LeanAngle:=CalcLeanAngle(Race.Circuit.Points,tmp,Speed);
+
+      LeanAngle:=Race.Data[L].Data[Rider].LeanAngle;
+
       LeanGauge.Value:=Round(LeanAngle);
       SpeedGauge.Value:=Round(Speed*3.6); // to km/h
+
+      FuelGauge.Value:=Race.Riders[Rider].Bike.Fuel;
 
       TFrontView.Draw(FrontView,LeanGauge.Value);
     end;
@@ -738,6 +767,7 @@ procedure TMainForm.FrontViewResize(Sender: TObject);
 begin
   SpeedGauge.CustomBounds:=Rect(10,10,FrontView.Width-10,100);
   LeanGauge.CustomBounds:=Rect(10,90,FrontView.Width-10,(FrontView.Height div 2)-140);
+  FuelGauge.CustomBounds:=Rect(10,260,50,(FrontView.Height div 2)-140);
 end;
 
 procedure TMainForm.SetTeeCanvas(const AClass:TTeeCanvasClass);
@@ -765,6 +795,16 @@ end;
 procedure TMainForm.OpenGL1Click(Sender: TObject);
 begin
   SetTeeCanvas(TGLCanvas);
+end;
+
+procedure TMainForm.PageControl1Change(Sender: TObject);
+begin
+  if PageControl1.ActivePage=TabData then
+  begin
+    if DataGrid.Data=nil then
+       //DataGrid.Data:=TVirtualData<TRace>.Create(Race);
+       DataGrid.Data:=TVirtualArrayData<TRider>.Create(Race.Riders);
+  end;
 end;
 
 procedure TMainForm.PoleChartAfterDraw(Sender: TObject);
@@ -817,11 +857,8 @@ begin
 end;
 
 procedure TMainForm.RefillCharts;
-var Rider,
-    t : Integer;
-    X : Single;
-begin
-  if SeriesSpeed=nil then
+
+  procedure CreateSeries;
   begin
     SeriesSpeed:=TFastLineSeries.Create(Self);
     SeriesAcceleration:=TFastLineSeries.Create(Self);
@@ -835,15 +872,22 @@ begin
     SeriesGear.ParentChart:=LapChart;
     SeriesThrottle.ParentChart:=LapChart;
 
-    SeriesSpeed.Title:='Speed';
-    SeriesAcceleration.Title:='Acceleration';
+    SeriesSpeed.Title:='Speed m/s';
+    SeriesAcceleration.Title:='Acceleration m/s²';
     SeriesRPM.Title:='RPM';
     SeriesGear.Title:='Gear';
-    SeriesThrottle.Title:='Throttle';
+    SeriesThrottle.Title:='Throttle %';
 
     // Brakes
     // Tires Temperature and pressure
   end;
+
+var Rider,
+    StartLap, t : Integer;
+    X : Single;
+begin
+  if SeriesSpeed=nil then
+     CreateSeries;
 
   if PoleGrid.Selected.Row>-1 then
   begin
@@ -851,24 +895,32 @@ begin
 
     LapChart.Title.Caption:=Pole.Cells[1,Rider]+' '+Pole.Cells[2,Rider];
 
-    SeriesSpeed.GetHorizAxis.SetMinMax(0,Race.Circuit.TotalLength);
-
-    SeriesSpeed.BeginUpdate;
-    SeriesAcceleration.BeginUpdate;
-
-    SeriesSpeed.Clear;
-    SeriesAcceleration.Clear;
-
-    for t:=0 to High(Race.Data) do
+    if Length(Race.Riders)>Rider then
     begin
-      X:=Race.Data[t].Data[Rider].Position;
+      SeriesSpeed.GetHorizAxis.SetMinMax(0,Race.Circuit.TotalLength);
 
-      SeriesSpeed.AddXY(X,Race.Data[t].Data[Rider].Speed);
-      SeriesAcceleration.AddXY(X,Race.Data[t].Data[Rider].Acceleration);
+      SeriesSpeed.BeginUpdate;
+      SeriesAcceleration.BeginUpdate;
+
+      SeriesSpeed.Clear;
+      SeriesAcceleration.Clear;
+
+      if Race.Riders[Rider].Laps=0 then
+         StartLap:=0
+      else
+         StartLap:=Race.Riders[Rider].LapsTime[Race.Riders[Rider].Laps-1];
+
+      for t:=StartLap to High(Race.Data) do
+      begin
+        X:=Race.Data[t].Data[Rider].Position;
+
+        SeriesSpeed.AddXY(X,Race.Data[t].Data[Rider].Speed);
+        SeriesAcceleration.AddXY(X,Race.Data[t].Data[Rider].Acceleration);
+      end;
+
+      SeriesAcceleration.EndUpdate;
+      SeriesSpeed.EndUpdate;
     end;
-
-    SeriesAcceleration.EndUpdate;
-    SeriesSpeed.EndUpdate;
   end;
 end;
 
@@ -1052,10 +1104,23 @@ function TMainForm.DoStep:Boolean;
     end;
   end;
 
+  // Percent of Throttle depending on Lean Angle in degrees
+  function CalculateThrottle(const ALeanAngle,MaxAngle:Single):Single;
+  begin
+    Result := 100.0 * (1.0 - (ALeanAngle / MaxAngle));
+
+    // At least 10% throttle
+    if Result < 10.0 then
+       Result := 10.0;
+  end;
+
   function StepRiders(const L:Integer):Boolean;
   var t : Integer;
       NumLap : Integer; // Current finished lap for a rider (starting at 1)
       LapTime : Int64;
+      Brake : TBrakeDecision;
+      CurrentPhase : TTurnPhase;
+      TriggerBrakeDist  : Single;
   begin
     result:=False;
 
@@ -1063,7 +1128,7 @@ function TMainForm.DoStep:Boolean;
     for t:=0 to High(Race.Riders) do
       if Race.Riders[t].Active then
       begin
-        Race.Data[L].Data[t].Step(Race.Data[L-1].Data[t]);
+        Race.Data[L].Data[t].Step(Race.Riders[t].Bike,Race.Data[L-1].Data[t]);
 
         // Finished lap?
         if Race.Data[L].Data[t].Position>Race.Circuit.TotalLength then
@@ -1090,11 +1155,99 @@ function TMainForm.DoStep:Boolean;
           Inc(Race.Riders[t].Laps);
           Race.RiderEndsLap(t,Race.Riders[t].Laps);
 
+          Race.Riders[t].NextCurve:=1;
+
           if Race.Riders[t].Laps>=Race.TotalLaps then
              Race.Riders[t].Active:=False; // Rider Race Finished
         end;
 
         result:=Race.Riders[t].Active;
+
+        if result then
+        begin
+          if Race.Data[L].Data[t].Position>Race.Circuit.Curves[Race.Riders[t].NextCurve-1].Position then
+          begin
+            // Next Curve
+            Inc(Race.Riders[t].NextCurve);
+
+            if Race.Riders[t].NextCurve>Length(Race.Circuit.Curves) then
+               Race.Riders[t].NextCurve:=1;
+          end;
+
+          Brake:=EvaluateBrakingPoint(Race.Data[L].Data[t].Position, Race.Data[L].Data[t].Speed,
+                                      Race.Circuit.Curves[Race.Riders[t].NextCurve-1],
+                                      Race.Riders[t].Bike.MaxBrakeDeceleration);
+
+
+          TriggerBrakeDist:= Race.Circuit.Curves[Race.Riders[t].NextCurve-1].Position - Brake.BrakingDistanceNeeded;
+
+          CurrentPhase := DetermineTrackPhase(Race.Data[L].Data[t].Position, Race.Circuit.Curves[Race.Riders[t].NextCurve-1], TriggerBrakeDist);
+
+          case CurrentPhase of
+
+            tpApproach:
+              begin
+                if Race.Data[L].Data[t].Throttle<100 then
+                begin
+                  Race.Data[L].Data[t].Throttle:=100;
+                  Race.Data[L].Data[t].RPM:=Race.Riders[t].Bike.MaxRPM;
+
+
+                  // No brakes
+
+                  Race.Data[L].Data[t].FrontBrake:=0;
+
+                  Race.Data[L].Data[t].BackBrake:=0;
+
+                  // Bike upright
+                  Race.Data[L].Data[t].LeanAngle:=0;
+                end;
+              end;
+
+            tpBraking:
+              begin
+                if Race.Data[L].Data[t].Throttle>0 then
+                begin
+                  Race.Data[L].Data[t].Throttle:=0;
+                  Race.Data[L].Data[t].RPM:=0;
+
+
+                  // Brake Bite
+
+                  Race.Data[L].Data[t].FrontBrake:=90;
+
+                  Race.Data[L].Data[t].BackBrake:=30;
+
+                  // Bike Upright
+                  Race.Data[L].Data[t].LeanAngle:=0;
+                end;
+              end;
+
+            tpCornering:
+              begin
+                // TrailBraking progressively (The Release)
+                Race.Data[L].Data[t].TrailBrake(Race.Circuit.Curves[Race.Riders[t].NextCurve-1].ApexPosition);
+              end;
+
+            tpAcceleration:
+              begin
+                // Un-brake
+                Race.Data[L].Data[t].FrontBrake:=0;
+
+                Race.Data[L].Data[t].BackBrake:=0;
+
+                // Bike up progressive
+                Race.Data[L].Data[t].StandUp;
+
+                // Throttle depends on Lean angle
+                Race.Data[L].Data[t].Throttle:=CalculateThrottle(Race.Data[L].Data[t].LeanAngle,Race.Riders[t].Bike.MaxLeanAngle);
+                Race.Data[L].Data[t].RPM:=Race.Riders[t].Bike.MaxRPM;
+
+             end;
+          end;
+
+        end;
+
       end;
   end;
 

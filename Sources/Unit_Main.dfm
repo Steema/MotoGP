@@ -365,8 +365,10 @@ object MainForm: TMainForm
               AxisVisible = False
               BottomAxis.Axis.Color = 4210752
               BottomAxis.Grid.Color = clDarkgray
-              BottomAxis.LabelsFormat.Font.Name = 'Verdana'
+              BottomAxis.LabelsFormat.Font.Color = 6579300
+              BottomAxis.LabelsFormat.Font.Style = [fsBold]
               BottomAxis.TicksInner.Color = clDarkgray
+              BottomAxis.Title.Font.Color = 6579300
               BottomAxis.Title.Font.Name = 'Verdana'
               DepthAxis.Axis.Color = 4210752
               DepthAxis.Grid.Color = clDarkgray
@@ -379,12 +381,20 @@ object MainForm: TMainForm
               DepthTopAxis.TicksInner.Color = clDarkgray
               DepthTopAxis.Title.Font.Name = 'Verdana'
               Frame.Visible = False
+              LeftAxis.Automatic = False
+              LeftAxis.AutomaticMaximum = False
+              LeftAxis.AutomaticMinimum = False
               LeftAxis.Axis.Color = 4210752
               LeftAxis.Grid.Color = clDarkgray
-              LeftAxis.LabelsFormat.Font.Name = 'Verdana'
-              LeftAxis.MinorTickLength = 6
-              LeftAxis.TickLength = 14
+              LeftAxis.LabelsFormat.Font.Color = 6579300
+              LeftAxis.LabelsFormat.Font.Style = [fsBold]
+              LeftAxis.Maximum = 100.000000000000000000
+              LeftAxis.MinorTickLength = 1
+              LeftAxis.MinorTicks.Color = 13408767
+              LeftAxis.TickLength = 10
+              LeftAxis.Ticks.Color = 13408767
               LeftAxis.TicksInner.Color = clDarkgray
+              LeftAxis.Title.Font.Color = 6579300
               LeftAxis.Title.Font.Name = 'Verdana'
               RightAxis.Axis.Color = 4210752
               RightAxis.Grid.Color = clDarkgray
@@ -418,14 +428,14 @@ object MainForm: TMainForm
                 Frame.MiddleBrush.BackColor = clYellow
                 Frame.OuterBrush.BackColor = clGreen
                 Frame.OuterBrush.Gradient.EndColor = clGreen
-                Value = 58.450000000000000000
+                Value = 25.200000000000000000
                 InternalMarkers = {
                   03000000545046300E544E756D657269634D61726B65720008506F736974696F
                   6E0708707043656E7465720B53686170652E436F6C6F7204DBDBC80010536861
                   70652E466F6E742E436F6C6F7204282828001153686170652E466F6E742E4865
                   6967687402D00F53686170652E466F6E742E4E616D65060A44532D4469676974
                   616C1353686170652E4672616D652E56697369626C65081453686170652E5368
-                  61646F772E56697369626C65080A53686170652E54657874060535382C343513
+                  61646F772E56697369626C65080A53686170652E54657874060532352C323013
                   53686170652E54657874416C69676E6D656E74070E746152696768744A757374
                   6966791153686170652E5472616E73706172656E74090000545046300E544E75
                   6D657269634D61726B65720008506F736974696F6E070A70705269676874546F
@@ -485,7 +495,80 @@ object MainForm: TMainForm
                 RotationAngle = 160
                 ShapeStyle = gsPolygon
                 TotalAngle = 140.000000000000000000
-                Value = -20.159130245447160000
+                Value = 61.822142894379790000
+              end
+              object FuelGauge: TLinearGauge
+                Legend.Visible = False
+                XValues.Name = 'X'
+                XValues.Order = loAscending
+                YValues.Name = 'Y'
+                YValues.Order = loNone
+                Frame.InnerBrush.BackColor = clRed
+                Frame.InnerBrush.Gradient.EndColor = clRed
+                Frame.MiddleBrush.BackColor = clYellow
+                Frame.OuterBrush.BackColor = clGreen
+                Frame.OuterBrush.Gradient.EndColor = clGreen
+                Horizontal = False
+                Maximum = 100.000000000000000000
+                MaxValueIndicator.Brush.Color = clRed
+                MaxValueIndicator.Draw3D = False
+                MaxValueIndicator.InflateMargins = True
+                MaxValueIndicator.Style = psLeftTriangle
+                MaxValueIndicator.VertSize = 5
+                MaxValueIndicator.GaugeStyle = gpHand
+                MinorTicks.Brush.Color = clNone
+                MinorTicks.HorizSize = 1
+                MinorTicks.InflateMargins = True
+                MinorTicks.Pen.Color = 13408767
+                MinorTicks.Style = psRectangle
+                MinorTicks.VertSize = 1
+                MinorTicks.GaugeStyle = gpMinorTick
+                Ranges = <
+                  item
+                    Format.Brush.Color = clAqua
+                    Format.Brush.Gradient.Direction = gdBottomTop
+                    Format.Brush.Gradient.EndColor = clAqua
+                    Format.Brush.Gradient.MidColor = clYellow
+                    Format.Brush.Gradient.StartColor = clFuchsia
+                    Format.Brush.Gradient.Visible = True
+                    Format.Gradient.Direction = gdBottomTop
+                    Format.Gradient.EndColor = clAqua
+                    Format.Gradient.MidColor = clYellow
+                    Format.Gradient.StartColor = clFuchsia
+                    Format.Gradient.Visible = True
+                    Format.InflateMargins = True
+                    Format.Style = psRectangle
+                    Format.VertSize = 5
+                    Format.GaugeStyle = gpColorLine
+                    Format.EndValue = 40.000000000000000000
+                  end
+                  item
+                    Format.Brush.Color = clNavy
+                    Format.Brush.Gradient.Direction = gdBottomTop
+                    Format.Brush.Gradient.EndColor = clNavy
+                    Format.Brush.Gradient.MidColor = 16764108
+                    Format.Brush.Gradient.StartColor = 13395456
+                    Format.Brush.Gradient.Visible = True
+                    Format.Gradient.Direction = gdBottomTop
+                    Format.Gradient.EndColor = clNavy
+                    Format.Gradient.MidColor = 16764108
+                    Format.Gradient.StartColor = 13395456
+                    Format.Gradient.Visible = True
+                    Format.InflateMargins = True
+                    Format.Style = psRectangle
+                    Format.VertSize = 5
+                    Format.GaugeStyle = gpColorLine
+                    Format.EndValue = 100.000000000000000000
+                    Format.StartValue = 80.000000000000000000
+                  end>
+                Ticks.Brush.Style = bsClear
+                Ticks.InflateMargins = True
+                Ticks.Pen.Color = 13408767
+                Ticks.Style = psRectangle
+                Ticks.VertSize = 10
+                Ticks.GaugeStyle = gpTick
+                Value = 67.000000000000000000
+                ValueArea.Transparent = True
               end
             end
           end
@@ -559,6 +642,7 @@ object MainForm: TMainForm
       ActivePage = TabLap
       Align = alClient
       TabOrder = 1
+      OnChange = PageControl1Change
       object TabLap: TTabSheet
         Caption = 'Current Lap'
         object LapChart: TChart
@@ -802,6 +886,44 @@ object MainForm: TMainForm
             Caption = 'Torque Curve'
             ImageIndex = 1
           end
+        end
+      end
+      object TabData: TTabSheet
+        Caption = 'Data'
+        ImageIndex = 4
+        object DataGrid: TTeeGrid
+          Left = 0
+          Top = 0
+          Width = 441
+          Height = 620
+          Cells.Format.Font.Name = 'Segoe UI'
+          Cells.Format.Font.Size = 9.000000000000000000
+          Columns = <>
+          Header.Format.Font.Name = 'Segoe UI'
+          Header.Format.Font.Size = 9.000000000000000000
+          Rows.Format.Font.Name = 'Segoe UI'
+          Rows.Format.Font.Size = 9.000000000000000000
+          Rows.Hover.Format.Font.Name = 'Segoe UI'
+          Rows.Hover.Format.Font.Size = 9.000000000000000000
+          Selected.Format.Font.Name = 'Segoe UI'
+          Selected.Format.Font.Size = 9.000000000000000000
+          Selected.UnFocused.Format.Font.Name = 'Segoe UI'
+          Selected.UnFocused.Format.Font.Size = 9.000000000000000000
+          Align = alClient
+          ParentFont = True
+          UseDockManager = False
+          ParentBackground = False
+          ParentColor = False
+          TabOrder = 0
+          ExplicitLeft = -1
+          _Headers = (
+            1
+            'TColumnHeaderBand'
+            <
+              item
+                Format.Font.Name = 'Segoe UI'
+                Format.Font.Size = 9.000000000000000000
+              end>)
         end
       end
     end
