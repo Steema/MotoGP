@@ -32,8 +32,10 @@
 
 ### Statistics Lap by Lap
 
-
 <img width="946" height="838" alt="image" src="https://github.com/user-attachments/assets/86732e04-7a4d-464c-8e8c-69642a31bb25" />
 
+### Motor Torque Curve
+
+<img width="577" height="456" alt="image" src="https://github.com/user-attachments/assets/7b446a21-7c3f-4155-8bc2-59a1cd1d746c" />
 
 
