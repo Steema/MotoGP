@@ -1,0 +1,23 @@
+"Circuit","City","Country","svg","Length","FinishOffset","AMSL"
+"Chang International Circuit","Buriram","Tailandia","",4554,,155
+"Autódromo Internacional Ayrton Senna","Goiânia","Brasil","",4200,,740
+"Circuit of The Americas","Austin","Estados Unidos","austin-1",5513,,165
+"Circuito de Jerez-Ángel Nieto","Jerez de la Frontera","España","jerez-2",4423,,55
+"Bugatti Circuit","Le Mans","Francia","",4185,,80
+"Circuit de Barcelona-Catalunya","Montmeló","España","catalunya-6",4657,120,130
+"Mugello Circuit","Scarperia e San Piero","Italia","mugello-1",5245,,292
+"Balaton Park Circuit","Balatonfőkajár","Hungría","",4075,,115
+"Automotodrom Brno","Brno","República Checa","",5403,,450
+"TT Circuit Assen","Assen","Países Bajos","",4542,,12
+"Sachsenring","Hohenstein-Ernstthal","Alemania","",3671,,360
+"Silverstone Circuit","Silverstone","Reino Unido","silverstone-1",5900,,133
+"MotorLand Aragón","Alcañiz","España","",5078,,350
+"Misano World Circuit Marco Simoncelli","Misano Adriatico","Italia","",4226,,15
+"Red Bull Ring","Spielberg","Austria","",4318,,677
+"Mobility Resort Motegi","Motegi","Japón","",4801,,135
+"Pertamina Mandalika International Circuit","Lombok","Indonesia","",4310,,5
+"Phillip Island Grand Prix Circuit","Phillip Island","Australia","",4448,,30
+"Petronas Sepang International Circuit","Sepang","Malasia","sepang-1",5543,,18
+"Lusail International Circuit","Lusail","Catar","",5380,,12
+"Autódromo Internacional do Algarve","Portimão","Portugal","portimao-1",4592,,110
+"Circuito de Ricardo Tormo","Cheste","España","valencia-1",4005,,60

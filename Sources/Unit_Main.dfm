@@ -52,7 +52,7 @@ object MainForm: TMainForm
       Caption = '0:00:00.000'
     end
     object BStart: TButton
-      Left = 5
+      Left = 4
       Top = 10
       Width = 75
       Height = 25
@@ -308,7 +308,7 @@ object MainForm: TMainForm
           Top = 305
           Width = 313
           Height = 315
-          ActivePage = TabSheet2
+          ActivePage = TabFrontView
           Align = alClient
           TabOrder = 1
           object TabSheet1: TTabSheet
@@ -333,14 +333,14 @@ object MainForm: TMainForm
                   end>)
             end
           end
-          object TabSheet2: TTabSheet
+          object TabFrontView: TTabSheet
             Caption = 'Front View'
             ImageIndex = 1
             object FrontView: TChart
               Left = 0
-              Top = 0
+              Top = 137
               Width = 305
-              Height = 285
+              Height = 107
               BackWall.Brush.Gradient.Direction = gdBottomTop
               BackWall.Brush.Gradient.EndColor = clWhite
               BackWall.Brush.Gradient.StartColor = 15395562
@@ -359,9 +359,10 @@ object MainForm: TMainForm
               Legend.Shadow.Transparency = 0
               RightWall.Color = clLightyellow
               Title.Font.Name = 'Verdana'
+              Title.Margins.Top = 3
               Title.Text.Strings = (
                 'TChart')
-              Title.Visible = False
+              Title.VertMargin = 2
               AxisVisible = False
               BottomAxis.Axis.Color = 4210752
               BottomAxis.Grid.Color = clDarkgray
@@ -409,10 +410,84 @@ object MainForm: TMainForm
               View3D = False
               View3DWalls = False
               OnAfterDraw = FrontViewAfterDraw
-              OnBeforeDrawSeries = FrontViewBeforeDrawSeries
               Align = alClient
               TabOrder = 0
-              OnResize = FrontViewResize
+              DefaultCanvas = 'TGDIPlusCanvas'
+              ColorPaletteIndex = 13
+            end
+            object Dashboard: TChart
+              Left = 0
+              Top = 0
+              Width = 305
+              Height = 137
+              BackWall.Brush.Gradient.Direction = gdBottomTop
+              BackWall.Brush.Gradient.EndColor = clWhite
+              BackWall.Brush.Gradient.StartColor = 15395562
+              BackWall.Brush.Gradient.Visible = True
+              BackWall.Transparent = False
+              Foot.Font.Color = clBlue
+              Foot.Font.Name = 'Verdana'
+              Gradient.Direction = gdBottomTop
+              Gradient.EndColor = clWhite
+              Gradient.MidColor = 15395562
+              Gradient.StartColor = 15395562
+              Gradient.Visible = True
+              LeftWall.Color = clLightyellow
+              Legend.Font.Name = 'Verdana'
+              Legend.Shadow.Transparency = 0
+              Legend.Visible = False
+              RightWall.Color = clLightyellow
+              Title.Font.Name = 'Verdana'
+              Title.Text.Strings = (
+                'TChart')
+              Title.Visible = False
+              AxisVisible = False
+              BottomAxis.Axis.Color = 4210752
+              BottomAxis.Grid.Color = clDarkgray
+              BottomAxis.LabelsFormat.Font.Name = 'Verdana'
+              BottomAxis.TicksInner.Color = clDarkgray
+              BottomAxis.Title.Font.Name = 'Verdana'
+              DepthAxis.Axis.Color = 4210752
+              DepthAxis.Grid.Color = clDarkgray
+              DepthAxis.LabelsFormat.Font.Name = 'Verdana'
+              DepthAxis.TicksInner.Color = clDarkgray
+              DepthAxis.Title.Font.Name = 'Verdana'
+              DepthTopAxis.Axis.Color = 4210752
+              DepthTopAxis.Grid.Color = clDarkgray
+              DepthTopAxis.LabelsFormat.Font.Name = 'Verdana'
+              DepthTopAxis.TicksInner.Color = clDarkgray
+              DepthTopAxis.Title.Font.Name = 'Verdana'
+              LeftAxis.Automatic = False
+              LeftAxis.AutomaticMaximum = False
+              LeftAxis.AutomaticMinimum = False
+              LeftAxis.Axis.Color = 4210752
+              LeftAxis.Grid.Color = clDarkgray
+              LeftAxis.LabelsFormat.Font.Color = 6579300
+              LeftAxis.LabelsFormat.Font.Style = [fsBold]
+              LeftAxis.Maximum = 100.000000000000000000
+              LeftAxis.MinorTickLength = 1
+              LeftAxis.MinorTicks.Color = 13408767
+              LeftAxis.TickLength = 10
+              LeftAxis.Ticks.Color = 13408767
+              LeftAxis.TicksInner.Color = clDarkgray
+              LeftAxis.Title.Font.Color = 6579300
+              LeftAxis.Title.Font.Name = 'Verdana'
+              RightAxis.Axis.Color = 4210752
+              RightAxis.Grid.Color = clDarkgray
+              RightAxis.LabelsFormat.Font.Name = 'Verdana'
+              RightAxis.TicksInner.Color = clDarkgray
+              RightAxis.Title.Font.Name = 'Verdana'
+              TopAxis.Axis.Color = 4210752
+              TopAxis.Grid.Color = clDarkgray
+              TopAxis.LabelsFormat.Font.Name = 'Verdana'
+              TopAxis.TicksInner.Color = clDarkgray
+              TopAxis.Title.Font.Name = 'Verdana'
+              View3D = False
+              View3DWalls = False
+              OnAfterDraw = DashboardAfterDraw
+              Align = alTop
+              TabOrder = 1
+              OnResize = DashboardResize
               DefaultCanvas = 'TGDIPlusCanvas'
               ColorPaletteIndex = 13
               object SpeedGauge: TNumericGauge
@@ -428,14 +503,14 @@ object MainForm: TMainForm
                 Frame.MiddleBrush.BackColor = clYellow
                 Frame.OuterBrush.BackColor = clGreen
                 Frame.OuterBrush.Gradient.EndColor = clGreen
-                Value = 25.200000000000000000
+                Value = 23.450000000000000000
                 InternalMarkers = {
-                  03000000545046300E544E756D657269634D61726B65720008506F736974696F
+                  02000000545046300E544E756D657269634D61726B65720008506F736974696F
                   6E0708707043656E7465720B53686170652E436F6C6F7204DBDBC80010536861
                   70652E466F6E742E436F6C6F7204282828001153686170652E466F6E742E4865
                   6967687402D00F53686170652E466F6E742E4E616D65060A44532D4469676974
                   616C1353686170652E4672616D652E56697369626C65081453686170652E5368
-                  61646F772E56697369626C65080A53686170652E54657874060532352C323013
+                  61646F772E56697369626C65080A53686170652E54657874060532332C343513
                   53686170652E54657874416C69676E6D656E74070E746152696768744A757374
                   6966791153686170652E5472616E73706172656E74090000545046300E544E75
                   6D657269634D61726B65720008506F736974696F6E070A70705269676874546F
@@ -445,12 +520,7 @@ object MainForm: TMainForm
                   742E4E616D65060A44532D4469676974616C1353686170652E4672616D652E56
                   697369626C65081453686170652E536861646F772E56697369626C65080A5368
                   6170652E5465787406046B6D2F681153686170652E5472616E73706172656E74
-                  090000545046300E544E756D657269634D61726B6572000B53686170652E436F
-                  6C6F7204282828001053686170652E466F6E742E436F6C6F7204DBDBC8001153
-                  686170652E466F6E742E48656967687402F10F53686170652E466F6E742E4E61
-                  6D65060A44532D4469676974616C1353686170652E4672616D652E5669736962
-                  6C65081453686170652E536861646F772E56697369626C65080A53686170652E
-                  54657874060553706565640000}
+                  090000}
               end
               object LeanGauge: TGaugeSeries
                 Legend.Visible = False
@@ -487,6 +557,7 @@ object MainForm: TMainForm
                 CirclePen.Visible = False
                 EndPoint.HorizSize = 3
                 EndPoint.InflateMargins = True
+                EndPoint.Pen.Mode = pmNotXor
                 EndPoint.Style = psCircle
                 EndPoint.VertSize = 3
                 EndPoint.Visible = False
@@ -495,7 +566,7 @@ object MainForm: TMainForm
                 RotationAngle = 160
                 ShapeStyle = gsPolygon
                 TotalAngle = 140.000000000000000000
-                Value = 61.822142894379790000
+                Value = 22.455531223677100000
               end
               object FuelGauge: TLinearGauge
                 Legend.Visible = False
@@ -567,8 +638,29 @@ object MainForm: TMainForm
                 Ticks.Style = psRectangle
                 Ticks.VertSize = 10
                 Ticks.GaugeStyle = gpTick
-                Value = 67.000000000000000000
+                Value = 99.000000000000000000
                 ValueArea.Transparent = True
+              end
+            end
+            object DebugLean: TPanel
+              Left = 0
+              Top = 244
+              Width = 305
+              Height = 41
+              Align = alBottom
+              TabOrder = 2
+              Visible = False
+              object TBLean: TTrackBar
+                Left = 9
+                Top = 6
+                Width = 280
+                Height = 32
+                LineSize = 10
+                Max = 70
+                Min = -70
+                Frequency = 5
+                TabOrder = 0
+                OnChange = TBLeanChange
               end
             end
           end
@@ -639,16 +731,16 @@ object MainForm: TMainForm
       Top = 0
       Width = 449
       Height = 650
-      ActivePage = TabLap
+      ActivePage = TabLaps
       Align = alClient
       TabOrder = 1
       OnChange = PageControl1Change
       object TabLap: TTabSheet
         Caption = 'Current Lap'
         object LapChart: TChart
-          Left = 0
+          Left = 121
           Top = 0
-          Width = 441
+          Width = 320
           Height = 620
           BackWall.Brush.Gradient.Direction = gdBottomTop
           BackWall.Brush.Gradient.EndColor = clWhite
@@ -666,7 +758,10 @@ object MainForm: TMainForm
           Legend.CheckBoxes = True
           Legend.Font.Name = 'Verdana'
           Legend.Shadow.Transparency = 0
+          Legend.Title.Font.Height = -16
+          Legend.Visible = False
           RightWall.Color = clLightyellow
+          Title.Font.Height = -13
           Title.Font.Name = 'Verdana'
           Title.Text.Strings = (
             'Lap')
@@ -713,6 +808,7 @@ object MainForm: TMainForm
           DefaultCanvas = 'TGDIPlusCanvas'
           ColorPaletteIndex = 13
           object CurveSeries: TPointSeries
+            Title = 'Curves'
             VertAxis = aCustomVertAxis
             ClickableLine = False
             Pointer.InflateMargins = True
@@ -733,15 +829,25 @@ object MainForm: TMainForm
             end
           end
         end
+        object SeriesList: TCheckListBox
+          Left = 0
+          Top = 0
+          Width = 121
+          Height = 620
+          Align = alLeft
+          ItemHeight = 17
+          TabOrder = 1
+          OnClickCheck = SeriesListClickCheck
+        end
       end
       object TabLaps: TTabSheet
         Caption = 'All Laps'
         ImageIndex = 1
         object Chart2: TChart
           Left = 0
-          Top = 0
+          Top = 33
           Width = 441
-          Height = 620
+          Height = 587
           BackWall.Brush.Gradient.Direction = gdBottomTop
           BackWall.Brush.Gradient.EndColor = clWhite
           BackWall.Brush.Gradient.StartColor = 15395562
@@ -796,12 +902,17 @@ object MainForm: TMainForm
           TopAxis.LabelsFormat.Font.Name = 'Verdana'
           TopAxis.TicksInner.Color = clDarkgray
           TopAxis.Title.Font.Name = 'Verdana'
+          OnGetAxisLabel = Chart2GetAxisLabel
           Align = alClient
           TabOrder = 0
           DefaultCanvas = 'TGDIPlusCanvas'
           ColorPaletteIndex = 13
           object TowerLapRider: TTowerSeries
+            PercentDepth = 50
+            Transparency = 40
+            PercentWidth = 50
             Pen.Visible = False
+            UseColorRange = False
             XValues.Name = 'X'
             XValues.Order = loNone
             YValues.Name = 'Y'
@@ -809,6 +920,16 @@ object MainForm: TMainForm
             ZValues.Name = 'Z'
             ZValues.Order = loNone
           end
+        end
+        object TeeCommander1: TTeeCommander
+          Left = 0
+          Top = 0
+          Width = 441
+          Height = 33
+          Panel = Chart2
+          Align = alTop
+          ParentShowHint = False
+          TabOrder = 1
         end
       end
       object TabChampionShip: TTabSheet
@@ -915,7 +1036,6 @@ object MainForm: TMainForm
           ParentBackground = False
           ParentColor = False
           TabOrder = 0
-          ExplicitLeft = -1
           _Headers = (
             1
             'TColumnHeaderBand'
@@ -1004,9 +1124,12 @@ object MainForm: TMainForm
             Legend.Font.Name = 'Verdana'
             Legend.Shadow.Transparency = 0
             RightWall.Color = clLightyellow
+            Title.Font.Color = 2854101
+            Title.Font.Height = -31
             Title.Font.Name = 'Verdana'
             Title.Text.Strings = (
-              'TChart')
+              'Pole')
+            AxisVisible = False
             BottomAxis.Axis.Color = 4210752
             BottomAxis.Grid.Color = clDarkgray
             BottomAxis.LabelsFormat.Font.Name = 'Verdana'
@@ -1093,6 +1216,39 @@ object MainForm: TMainForm
           Caption = 'OpenGL'
           RadioItem = True
           OnClick = OpenGL1Click
+        end
+      end
+      object N1: TMenuItem
+        Caption = '-'
+      end
+      object Dashboard1: TMenuItem
+        Caption = '&Dashboard'
+        Checked = True
+        OnClick = Dashboard1Click
+      end
+      object FrontView1: TMenuItem
+        Caption = '&Front View'
+        Checked = True
+        OnClick = FrontView1Click
+      end
+      object Pole1: TMenuItem
+        Caption = '&Pole'
+        Checked = True
+        OnClick = Pole1Click
+      end
+      object Circuit1: TMenuItem
+        Caption = '&Circuit'
+        Checked = True
+        OnClick = Circuit1Click
+      end
+      object N2: TMenuItem
+        Caption = '-'
+      end
+      object Debug1: TMenuItem
+        Caption = 'Debug'
+        object Lean1: TMenuItem
+          Caption = 'Lean'
+          OnClick = Lean1Click
         end
       end
     end

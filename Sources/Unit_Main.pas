@@ -1,3 +1,9 @@
+{
+  @davidberneda
+
+  https://github.com/Steema/MotoGP
+
+}
 unit Unit_Main;
 
 interface
@@ -16,10 +22,10 @@ uses
   Tee.GridData.Strings, Tee.Grid.CSV, TeeGIS, TeeRacing, Tee.Painter,
   Tee.Grid.Columns, Tee.GridData.Rtti,
 
-  TeeTorqueCurve,
+  TeeTorqueCurve, PNGImage,
 
   VCLTee.Series, Vcl.Menus, VCLTee.TeeNumericGauge, VCLTee.TeeGauges,
-  VCLTee.TeeTools, VCLTee.TeeSurfa, VCLTee.TeeLinearGauge;
+  VCLTee.TeeTools, VCLTee.TeeSurfa, VCLTee.TeeLinearGauge, VCLTee.TeeComma;
 
 type
   TMainForm = class(TForm)
@@ -77,7 +83,7 @@ type
     ChampionGrid: TTeeGrid;
     PageControl4: TPageControl;
     TabSheet1: TTabSheet;
-    TabSheet2: TTabSheet;
+    TabFrontView: TTabSheet;
     FrontView: TChart;
     TabSheet3: TTabSheet;
     LBBikes: TListBox;
@@ -92,6 +98,19 @@ type
     TabData: TTabSheet;
     DataGrid: TTeeGrid;
     FuelGauge: TLinearGauge;
+    FrontView1: TMenuItem;
+    Pole1: TMenuItem;
+    N1: TMenuItem;
+    Circuit1: TMenuItem;
+    SeriesList: TCheckListBox;
+    Dashboard: TChart;
+    Dashboard1: TMenuItem;
+    DebugLean: TPanel;
+    TBLean: TTrackBar;
+    N2: TMenuItem;
+    Debug1: TMenuItem;
+    Lean1: TMenuItem;
+    TeeCommander1: TTeeCommander;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -112,17 +131,28 @@ type
     procedure Button1Click(Sender: TObject);
     procedure PoleGridSelect(Sender: TObject);
     procedure LBBikesClick(Sender: TObject);
-    procedure FrontViewBeforeDrawSeries(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
-    procedure FrontViewResize(Sender: TObject);
     procedure LapChartAfterDraw(Sender: TObject);
-    procedure FrontViewAfterDraw(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
+    procedure FrontView1Click(Sender: TObject);
+    procedure Pole1Click(Sender: TObject);
+    procedure Circuit1Click(Sender: TObject);
+    procedure SeriesListClickCheck(Sender: TObject);
+    procedure Dashboard1Click(Sender: TObject);
+    procedure DashboardAfterDraw(Sender: TObject);
+    procedure DashboardResize(Sender: TObject);
+    procedure FrontViewAfterDraw(Sender: TObject);
+    procedure Lean1Click(Sender: TObject);
+    procedure TBLeanChange(Sender: TObject);
+    procedure Chart2GetAxisLabel(Sender: TChartAxis; Series: TChartSeries;
+      ValueIndex: Integer; var LabelText: string);
   private
     { Private declarations }
 
     CircuitPath : TTeeBasePath;
     GIS : TGISRaster;
+
+    RearBike : TGraphic;
 
     BikeData,
     SeasonData,
@@ -137,8 +167,8 @@ type
 
     Torque : TFormTorqueCurve;
 
-    RacePoleIndex, // Current pole during race
-    StartPoleIndex // Pole at grid, race start
+    RacePoleIndex, // Current pole during race (keeps changing)
+    StartPoleIndex // Pole at grid, race start, immutable
      : TArray<Integer>;
 
     SeriesSpeed,
@@ -154,6 +184,7 @@ type
     procedure InitPoleData;
     procedure InitRaceData;
     procedure RefillCharts;
+    procedure SetDashboard;
     procedure SetTeeCanvas(const AClass:TTeeCanvasClass);
     procedure SetupPilotGrid(const AGrid:TTeeGrid; const AColorColumn,ANumColumn:Integer);
     procedure StartRace;
@@ -171,7 +202,7 @@ implementation
 uses
   Math, IOUtils, Tee.Format, UITypes,
 
-  TeeGDIPlus, TeeSkia, TeeGLCanvas, TeeFrontView;
+  TeeGDIPlus, TeeSkia, TeeGLCanvas;
 
 function HasParameter(const AParameter:String):Boolean;
 var t : Integer;
@@ -223,6 +254,9 @@ begin
   BStop.Enabled:=False;
   BStart.Enabled:=True;
 
+  TBLean.Enabled:=True;
+  DebugLean.Visible:=Lean1.Visible;
+
   Race.Ellapsed.Stop;
 
   BRandomPole.Enabled:=True;
@@ -264,18 +298,47 @@ begin
   Circuit.Axes.Visible:=GIS.Visible;
 end;
 
-procedure DrawPilotNumber(const ACanvas:TTeeCanvas; const ShowNumbers:Boolean; const P:TPoint; const Rider:TRider);
+procedure TMainForm.Chart2GetAxisLabel(Sender: TChartAxis; Series: TChartSeries;
+  ValueIndex: Integer; var LabelText: string);
+var tmp : Integer;
 begin
-  ACanvas.Brush.Color:=Rider.Color;
+  if Sender=Chart2.DepthAxis then
+     if ValueIndex=-1 then
+     begin
+       ValueIndex:=StrToInt(LabelText);
+
+       if (ValueIndex>=0) and (ValueIndex<=High(Race.Riders)) then
+       begin
+         tmp:=FindRiderInPole(Race.Riders[ValueIndex].Number);
+
+         LabelText:=IntToStr(Race.Riders[ValueIndex].Number)+' '+Pole.Cells[2,tmp];
+       end;
+     end;
+end;
+
+procedure DrawPilotNumber(const ACanvas:TTeeCanvas; const ShowNumbers:Boolean;
+                          const P:TPoint;
+                          const ASize:Integer;
+                          const AColor:TColor; const ANumber:String);
+begin
+  ACanvas.Brush.Color:=AColor;
 
   if ShowNumbers then
   begin
-    ACanvas.Ellipse(RectFromCenter(P,14,14));
+    ACanvas.Ellipse(RectFromCenter(P,ASize,ASize));
     ACanvas.TextAlign:=TA_CENTER;
-    ACanvas.TextOut(P.X+1,P.Y-8,Rider.Number.ToString);
+
+    ACanvas.Font.Color:=clWhite;
+    ACanvas.TextOut(P.X+1,P.Y-8,ANumber);
   end
   else
-    ACanvas.FillRect(RectFromCenter(P,4,4));
+    ACanvas.FillRect(RectFromCenter(P,ASize div 3,ASize div 3));
+end;
+
+procedure TMainForm.Circuit1Click(Sender: TObject);
+begin
+  PanelCircuit.Visible:=not PanelCircuit.Visible;
+  Circuit1.Checked:=PanelCircuit.Visible;
 end;
 
 procedure TMainForm.CircuitAfterDraw(Sender: TObject);
@@ -297,21 +360,19 @@ procedure TMainForm.CircuitAfterDraw(Sender: TObject);
 
   // Montmeló
   procedure AddCircuitPath;
-  const CRLF=#13#10;
+  var PathFile : String;
   begin
     CircuitPath:=LapChart.Canvas.CreatePath;
-    TSVGParser.ParsePath(CircuitPath,LoadCircuitPath(CircuitsData[3,Circuits.Selected.Row]));
 
-    Race.Circuit.Points:=CircuitPath.Flatten(0.25);
+    PathFile:=CircuitsData[3,Circuits.Selected.Row];
 
-    Race.Circuit.TotalLength:=4657; // Circuite (ie: Montmeló) length in meters
+    if PathFile<>'' then
+    begin
+      TSVGParser.ParsePath(CircuitPath,LoadCircuitPath(PathFile));
 
-    Race.Circuit.PolePosition:=120; // Offset in meters
-    Race.Circuit.PolePositionIndex:=8;  // Offset in point indexes
+      Race.Circuit.Points:=CircuitPath.Flatten(0.25);
 
-    Race.Circuit.Elevation:=80; // Average 60 .. 100
-
-    Race.Circuit.FillCurves(
+      Race.Circuit.FillCurves(
 
       [620,700,950,1300,1650,1820,2000,2120,2350,2900,3150,3350,3650,3950], // Positions in meters
       ['Elf','2','Renault','Repsol','Seat','6','Würth','8','Campsa','La Caixa','11','Banc Sabadell','Europcar','New Holland'], // Names
@@ -320,16 +381,15 @@ procedure TMainForm.CircuitAfterDraw(Sender: TObject);
       [45,30,85,40,25,0,35,45,0,35,0,55,40,60]); // Meters from entry position to Apex
 
 
-    CurveSeries.GetVertAxis.SetMinMax(-180,180);
+       CurveSeries.GetVertAxis.SetMinMax(-180,180);
 
-    CurveSeries.Clear;
-    CurveSeries.Title:='Curves';
+      CurveSeries.Clear;
+      CurveSeries.Title:='Curves';
 
-    AddCurves(Race.Circuit.Curves);
+      AddCurves(Race.Circuit.Curves);
 
-    CurveSeries.GetVertAxis.Title.Caption:='Angles';
-    LapChart.Axes.Bottom.SetMinMax(0,Race.Circuit.TotalLength);
-    LapChart.Axes.Left.EndPosition:=75;
+      CurveSeries.GetVertAxis.Title.Caption:='Angles';
+    end;
   end;
 
   procedure DrawCircuit(const ACanvas:TTeeCanvas);
@@ -365,7 +425,7 @@ procedure TMainForm.CircuitAfterDraw(Sender: TObject);
           begin
             P:=Race.Circuit.PointPosition(Last[t].Position);
 
-            DrawPilotNumber(ACanvas,ShowNumbers,P,Race.Riders[t]);
+            DrawPilotNumber(ACanvas,ShowNumbers,P,14,Race.Riders[t].Color, IntToStr(Race.Riders[t].Number));
           end;
       end;
   end;
@@ -429,9 +489,25 @@ procedure TMainForm.CircuitAfterDraw(Sender: TObject);
     Circuit.Canvas.TextOut(15,140,'Length: '+Race.Circuit.TotalLength.ToString+' m');
   end;
 
+  procedure SelectCircuit;
+  begin
+    Race.Circuit.TotalLength:=StrToFloat(CircuitsData[4,Circuits.Selected.Row]); // Circuite (ie: Montmeló) length in meters
+    Race.Circuit.PolePosition:=StrToFloat(CircuitsData[5,Circuits.Selected.Row]); // Circuite (ie: Montmeló) 120 // Offset in meters
+
+    // TODO: Find index using PolePosition
+    Race.Circuit.PolePositionIndex:=8;  // Offset in point indexes
+
+    Race.Circuit.Elevation:=StrToFloat(CircuitsData[6,Circuits.Selected.Row]); // Mean above sea level
+
+    LapChart.Axes.Bottom.SetMinMax(0,Race.Circuit.TotalLength);
+    LapChart.Axes.Left.EndPosition:=75;
+  end;
+
 begin
   if CircuitPath=nil then
      AddCircuitPath;
+
+  SelectCircuit;
 
   PaintCircuitPath;
 
@@ -447,6 +523,7 @@ end;
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   CircuitPath.Free;
+  RearBike.Free;
 end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
@@ -477,6 +554,7 @@ end;
 
 procedure TMainForm.CreatePole;
 
+  // Randomly choose and sort riders
   procedure ShufflePoleIndex;
   var t : Integer;
   begin
@@ -499,8 +577,59 @@ procedure TMainForm.CreatePole;
         result[t]:=RacePoleIndex[t];
   end;
 
-var t,tmp : Integer;
-    RiderQuantity : Integer;
+  procedure InitPoleGrid;
+  var t : Integer;
+      tmp : Integer;
+  begin
+    for t:=0 to Pole.Count-1 do
+    begin
+      Pole[0,t]:=(t+1).ToString;
+
+      tmp:=RacePoleIndex[t];
+
+      Pole[1,t]:=PilotsData[0,tmp];
+      Pole[2,t]:=PilotsData[1,tmp];
+      Pole[3,t]:='0:0.0'; // Current lap time
+      Pole[4,t]:='0:0.0';// Last lap time
+      Pole[5,t]:='0:0.0'; // Best lap time
+      Pole[6,t]:='0'; // Lap with best time
+
+      Pole[7,t]:=''; // flag
+      Pole[8,t]:=PilotsData[2,tmp];
+    end;
+
+    PoleGrid.Data:=Pole;
+
+    PoleGrid.Columns[0].Header.Text:='#';
+    PoleGrid.Columns[1].Header.Text:='Num';
+    PoleGrid.Columns[2].Header.Text:='Name';
+    PoleGrid.Columns[3].Header.Text:='Current'; // Current lap time
+    PoleGrid.Columns[4].Header.Text:='Last'; // Last lap time
+    PoleGrid.Columns[5].Header.Text:='Best'; // Best lap time
+    PoleGrid.Columns[6].Header.Text:='Num'; // Lap with best time
+    PoleGrid.Columns[7].Header.Text:=''; // flag
+    PoleGrid.Columns[8].Header.Text:='Team';
+
+    PoleGrid.Columns[3].Width.Value:=90;
+    PoleGrid.Columns[4].Width.Value:=90;
+    PoleGrid.Columns[5].Width.Value:=90;
+  end;
+
+  procedure InitRaceRiders;
+  var t : Integer;
+  begin
+    SetLength(Race.Riders,Pole.Count);
+
+    for t:=0 to High(Race.Riders) do
+    begin
+      Race.Riders[t].Active:=True; // In Starting Grid
+      Race.Riders[t].Number:=PilotsData.Cells[0,t].ToInteger;
+      Race.Riders[t].Color:=HTMLColor(PilotsData.Cells[4,t]);
+      Race.Riders[t].Pole:=FindRiderInPole(Race.Riders[t].Number);
+    end;
+  end;
+
+var RiderQuantity : Integer;
 begin
   Pole.Free;
 
@@ -515,50 +644,11 @@ begin
 
   StartPoleIndex:=CopyPoleIndex;
 
-  for t:=0 to Pole.Count-1 do
-  begin
-    Pole[0,t]:=(t+1).ToString;
-
-    tmp:=RacePoleIndex[t];
-
-    Pole[1,t]:=PilotsData[0,tmp];
-    Pole[2,t]:=PilotsData[1,tmp];
-    Pole[3,t]:='0:0.0'; // Current lap time
-    Pole[4,t]:='0:0.0';// Last lap time
-    Pole[5,t]:='0:0.0'; // Best lap time
-    Pole[6,t]:='0'; // Lap with best time
-
-    Pole[7,t]:=''; // flag
-    Pole[8,t]:=PilotsData[2,tmp];
-  end;
-
-  PoleGrid.Data:=Pole;
-
-  PoleGrid.Columns[0].Header.Text:='#';
-  PoleGrid.Columns[1].Header.Text:='Num';
-  PoleGrid.Columns[2].Header.Text:='Name';
-  PoleGrid.Columns[3].Header.Text:='Current'; // Current lap time
-  PoleGrid.Columns[4].Header.Text:='Last'; // Last lap time
-  PoleGrid.Columns[5].Header.Text:='Best'; // Best lap time
-  PoleGrid.Columns[6].Header.Text:='Num'; // Lap with best time
-  PoleGrid.Columns[7].Header.Text:=''; // flag
-  PoleGrid.Columns[8].Header.Text:='Team';
-
-  PoleGrid.Columns[3].Width.Value:=90;
-  PoleGrid.Columns[4].Width.Value:=90;
-  PoleGrid.Columns[5].Width.Value:=90;
+  InitPoleGrid;
 
   SetupPilotGrid(PoleGrid,1,1);
 
-  SetLength(Race.Riders,Pole.Count);
-
-  for t:=0 to High(Race.Riders) do
-  begin
-    Race.Riders[t].Active:=True; // In Starting Grid
-    Race.Riders[t].Number:=PilotsData.Cells[0,t].ToInteger;
-    Race.Riders[t].Color:=HTMLColor(PilotsData.Cells[4,t]);
-    Race.Riders[t].Pole:=FindRiderInPole(Race.Riders[t].Number);
-  end;
+  InitRaceRiders;
 
   InitRaceData;
 end;
@@ -613,10 +703,12 @@ begin
 
   SetupPilotGrid(Pilots,0,-1);
 
+  Pilots.Columns['Color'].Hide;
+
   SensorsData:=TCSVDataImport.FromFile(MotoGP+'\Sensors.txt');
   Sensors.Data:=SensorsData;
 
-  CircuitsData:=TCSVDataImport.FromFile(MotoGP+'\Circuits.csv');
+  CircuitsData:=TCSVDataImport.FromFile(MotoGP+'\Circuits.txt');
   Circuits.Data:=CircuitsData;
 
   Circuits.Selected.Row:=5; // Barcelona
@@ -666,9 +758,10 @@ begin
 
   PageControl1.ActivePage:=TabLap;
 
-  LeanGauge.Value:=0;
+  SpeedGauge.Value:=0;
   LeanGauge.HandDistance:=30;
   LeanGauge.CircleBrush.Style:=bsClear;
+  LeanGauge.Value:=0;
 
   FuelGauge.Value:=20;
   FuelGauge.Maximum:=22;
@@ -676,100 +769,94 @@ begin
 
   Race.Weather.Init;
   Race.Weather.CalculateAirDensity(Race.Circuit.Elevation);
+
+  RearBike:=TPngImage.Create;
+  RearBike.LoadFromFile(MotoGP+'\rear_bike.png');
 end;
 
-{
-function CalcLeanAngle(const APoints: TPointFloatArray; Current: Integer; const Speed:Single): Single;
-const MaxLean=64;
-var
-  P1, P2, P3: TPointFloat;
-  L : Integer;
-  Angle1, Angle2, DeltaAngle: Single;
+procedure TMainForm.FrontView1Click(Sender: TObject);
 begin
-  L:=Length(APoints);
+  FrontView.Visible:=not FrontView.Visible;
+  FrontView1.Checked:=FrontView.Visible;
 
-  P1 := APoints[Current];
-  P2 := APoints[(Current + 1) mod L];
-  P3 := APoints[(Current + 2) mod L];
-
-  Angle1 := ArcTan2(P2.Y - P1.Y, P2.X - P1.X);
-  Angle2 := ArcTan2(P3.Y - P2.Y, P3.X - P2.X);
-
-  DeltaAngle := Angle2 - Angle1;
-
-  if DeltaAngle > Pi then DeltaAngle := DeltaAngle - (2 * Pi);
-  if DeltaAngle < -Pi then DeltaAngle := DeltaAngle + (2 * Pi);
-
-  Result := DeltaAngle * Speed * 15.0;
-
-  if Result > MaxLean then Result := MaxLean
-  else
-  if Result < -MaxLean then Result := -MaxLean;
+  TabFrontView.TabVisible:=Dashboard.Visible or FrontView.Visible;
 end;
-}
 
 procedure TMainForm.FrontViewAfterDraw(Sender: TObject);
-var Rider, L : Integer;
-begin
-  Rider:=PoleGrid.Selected.Row;
 
-  if Rider>-1 then
+  procedure DrawTrack;
+  var C : TTeeCanvas;
+      W, H, HTop: Integer;
   begin
-    L:=High(Race.Data);
+    C:=FrontView.Canvas;
+    C.Pen.Style:=psClear;
+    C.Pen.Color:=RGB(100,100,100);
+    C.Brush.Color:=C.Pen.Color;
+    C.Brush.Style:=bsSolid;
 
-    if L>-1 then
+    C.Gradient.Visible:=True;
+    C.Gradient.StartColor:=C.Pen.Color;
+    C.Gradient.EndColor:=RGB(200,200,200);
+
+    W:=FrontView.Width;
+    H:=FrontView.Height;
+    HTop:=340;
+
+    C.Polygon([Point(20,H),Point(160,HTop),Point(W-160,HTop),Point(W-20,H)]);
+  end;
+
+  procedure DrawKerbs(const APos:Single);
+  var C : TTeeCanvas;
+      t, W, H : Integer;
+  begin
+    Exit;
+
+    C:=FrontView.Canvas;
+    C.Pen.Style:=psClear;
+    C.Brush.Color:=RGB(130,20,10);
+    C.Brush.Style:=bsSolid;
+    C.Gradient.Visible:=False;
+
+    for t:=0 to 5 do
     begin
-      FrontView.Canvas.TextOut(10,50,Race.Data[L].Data[Rider].RPM.ToString+' RPM');
+      H:=FrontView.Height-Round(40*t)+(Round(APos) mod 10);
+      W:=20+Round(7*t);
+
+      C.Polygon([Point(W,H),Point(W+14-t,H-35),Point(W+14-2*t+60,H-35),Point(W+60,H)]);
+
+      W:=FrontView.Width-180+Round(7*t);
+
+      C.Polygon([Point(W,H),Point(W+14-t,H-35),Point(W+14-t+60,H-35),Point(W+60,H)]);
     end;
   end;
-end;
 
-procedure TMainForm.FrontViewBeforeDrawSeries(Sender: TObject);
-var Rider,
-    //tmp,
-    L : Integer;
-    Speed,
-    LeanAngle : Single;
+var L, tmp : Integer;
+    R : TRect;
 begin
-  if Race.Circuit.Points=nil then
-     Exit;
+  DrawTrack;
 
-  Rider:=PoleGrid.Selected.Row;
+  tmp:=PoleGrid.Selected.Row;
 
-  if Rider>-1 then
-  begin
-    L:=High(Race.Data);
+  L:=High(Race.Data);
 
-    if L>-1 then
-    begin
-      {tmp:=}Race.Circuit.IndexOfPosition(Race.Data[L].Data[Rider].Position);
-
-      Speed:=Race.Data[L].Data[Rider].Speed;
-
-      //LeanAngle:=CalcLeanAngle(Race.Circuit.Points,tmp,Speed);
-
-      LeanAngle:=Race.Data[L].Data[Rider].LeanAngle;
-
-      LeanGauge.Value:=Round(LeanAngle);
-      SpeedGauge.Value:=Round(Speed*3.6); // to km/h
-
-      FuelGauge.Value:=Race.Riders[Rider].Bike.Fuel;
-
-      TFrontView.Draw(FrontView,LeanGauge.Value);
-    end;
-  end
+  if (tmp=-1) or (L=-1) then
+     DrawKerbs(Race.Circuit.PolePosition)
   else
-  begin
-    LeanGauge.Value:=0;
-    SpeedGauge.Value:=0;
-  end;
-end;
+     DrawKerbs(Race.Data[L].Data[tmp].Position);
 
-procedure TMainForm.FrontViewResize(Sender: TObject);
-begin
-  SpeedGauge.CustomBounds:=Rect(10,10,FrontView.Width-10,100);
-  LeanGauge.CustomBounds:=Rect(10,90,FrontView.Width-10,(FrontView.Height div 2)-140);
-  FuelGauge.CustomBounds:=Rect(10,260,50,(FrontView.Height div 2)-140);
+  if tmp<>-1 then
+  begin
+    tmp:=RacePoleIndex[tmp];
+    DrawPilotNumber(FrontView.Canvas,True,Point(20,20),14,Race.Riders[tmp].Color, IntToStr(Race.Riders[tmp].Number));
+
+    R:=Rect(110,450,FrontView.Width-110,860);
+
+    if Lean1.Checked then
+       FrontView.Canvas.StretchRotate(R,RearBike,TBLean.Position)
+    else
+    if L<>-1 then
+       FrontView.Canvas.StretchRotate(R,RearBike,Race.Data[L].Data[tmp].LeanAngle);
+  end;
 end;
 
 procedure TMainForm.SetTeeCanvas(const AClass:TTeeCanvasClass);
@@ -809,17 +896,29 @@ begin
   end;
 end;
 
+procedure TMainForm.Pole1Click(Sender: TObject);
+begin
+  PanelPole.Visible:=not PanelPole.Visible;
+  Pole1.Checked:=PanelPole.Visible;
+
+  if PanelPole.Visible then
+     Splitter2.Left:=PanelPole.Left-5;
+end;
+
 procedure TMainForm.PoleChartAfterDraw(Sender: TObject);
 var XS,YS : Integer;
     C : TTeeCanvas;
 
   procedure DrawAt(X,Y:Integer; const Pilot:Integer);
+  var tmp : TRider;
   begin
     C.Line(X,Y+10,X,Y);
     C.LineTo(X+XS,Y);
     C.LineTo(X+XS,Y+10);
 
-    DrawPilotNumber(C,True,Point(X+20,Y+30),Race.Riders[StartPoleIndex[Pilot]]);
+    tmp:=Race.Riders[StartPoleIndex[Pilot]];
+
+    DrawPilotNumber(C,True,Point(X+20,Y+30),14,tmp.Color,IntToStr(tmp.Number));
   end;
 
 var X,XSep,
@@ -884,12 +983,26 @@ procedure TMainForm.RefillCharts;
     // Tires Temperature and pressure
   end;
 
+  procedure AddSeriesList;
+  var t : Integer;
+  begin
+    SeriesList.Clear;
+
+    for t:=0 to LapChart.SeriesCount-1 do
+        SeriesList.Items.Add(LapChart.Series[t].Title);
+
+    SeriesList.CheckAll(TCheckBoxState.cbChecked);
+  end;
+
 var Rider,
     StartLap, t : Integer;
     X : Single;
 begin
   if SeriesSpeed=nil then
-     CreateSeries;
+  begin
+    CreateSeries;
+    AddSeriesList;
+  end;
 
   if PoleGrid.Selected.Row>-1 then
   begin
@@ -927,8 +1040,18 @@ begin
 end;
 
 procedure TMainForm.PoleGridSelect(Sender: TObject);
+var tmp : Integer;
 begin
   RefillCharts;
+
+  tmp:=PoleGrid.Selected.Row;
+
+  if tmp=-1 then
+     FrontView.Title.Caption:=''
+  else
+     FrontView.Title.Caption:=Pole.Cells[1,tmp]+' '+Pole.Cells[2,tmp];
+
+   FrontView.Invalidate;
 end;
 
 procedure TMainForm.SemaphorAfterDraw(Sender: TObject);
@@ -947,11 +1070,16 @@ begin
   end;
 end;
 
+procedure TMainForm.SeriesListClickCheck(Sender: TObject);
+begin
+  LapChart.Series[SeriesList.ItemIndex].Active:=SeriesList.Checked[SeriesList.ItemIndex];
+end;
+
 function TMainForm.FindRiderInPole(const ARider:Integer):Integer;
 var t : Integer;
 begin
-  for t:=1 to Pole.Count-1 do
-      if Pole.Cells[0,t].ToInteger=ARider then
+  for t:=0 to Pole.Count-1 do
+      if Pole.Cells[1,t].ToInteger=ARider then
       begin
         result:=t;
         Exit;
@@ -988,6 +1116,12 @@ begin
   Torque.Chart1.Legend.Title.Caption:=LBBikes.Items[LBBikes.ItemIndex];
 end;
 
+procedure TMainForm.Lean1Click(Sender: TObject);
+begin
+  DebugLean.Visible:=not DebugLean.Visible;
+  Lean1.Checked:=DebugLean.Visible;
+end;
+
 procedure TMainForm.InitPoleData;
 var t : Integer;
 begin
@@ -1007,6 +1141,32 @@ begin
 end;
 
 procedure TMainForm.StartRace;
+
+  procedure InitTowerLapRider;
+  var X,Z : Integer;
+  begin
+    TowerLapRider.NumXValues:=Race.TotalLaps;
+    TowerLapRider.NumZValues:=Length(Race.Riders);
+
+    TowerLapRider.FillGridIndex;
+
+    TowerLapRider.GetHorizAxis.Increment:=1;
+
+    TowerLapRider.ParentChart.DepthAxis.Title.Hide;
+
+    TowerLapRider.ParentChart.DepthAxis.Visible:=True;
+//    TowerLapRider.ParentChart.DepthAxis.Texts.Style:=talText;
+    TowerLapRider.ParentChart.DepthAxis.Increment:=1;
+    TowerLapRider.ParentChart.DepthAxis.Texts.Separation:=0;
+
+    for X:=0 to TowerLapRider.NumXValues-1 do
+        for Z:=0 to TowerLapRider.NumZValues-1 do
+        begin
+          TowerLapRider.Value[X,Z]:=0;
+//          TowerLapRider.ValueColor[TowerLapRider.GridIndex[X,Z]]:=Race.Riders[Z].Color;
+        end;
+  end;
+
 var t : Integer;
 begin
   Race.TotalLaps:=TotalLaps.Position;
@@ -1045,26 +1205,89 @@ begin
   end;
 
   for t:=0 to High(Race.Riders) do
-      Race.Riders[t].Start(Race.TotalLaps);
+  begin
+    Race.Riders[t].Start(Race.TotalLaps);
+
+    // Customize pilot
+
+    Race.Riders[t].Pilot.Name:=PilotsData.Cells[1,t];
+    Race.Riders[t].Pilot.Weight:=StrToFloat(PilotsData.Cells[5,t]);
+    Race.Riders[t].Pilot.Height:=StrToFloat(PilotsData.Cells[6,t]);
+  end;
 
   Race.Ellapsed.Start;
 
   Race.Data[0].Time:=Race.Ellapsed.ElapsedMilliseconds;
 
-  TowerLapRider.NumXValues:=Race.TotalLaps;
-  TowerLapRider.NumZValues:=Length(Race.Riders);
-  TowerLapRider.FillSampleValues;
+  InitTowerLapRider;
+end;
+
+procedure TMainForm.Dashboard1Click(Sender: TObject);
+begin
+  Dashboard.Visible:=not Dashboard.Visible;
+  Dashboard1.Checked:=Dashboard.Visible;
+
+  TabFrontView.TabVisible:=Dashboard.Visible or FrontView.Visible;
+end;
+
+procedure TMainForm.DashboardAfterDraw(Sender: TObject);
+
+  procedure DrawParameters(var Rider:TRiderData);
+  var C : TTeeCanvas;
+
+    procedure DrawBrake(const ABrake:Single; X,Y:Integer);
+    var tmp : Integer;
+    begin
+      tmp:=Round(ABrake*0.2);
+
+      if tmp>0 then
+         C.Ellipse(Rect(X-tmp,Y,X+tmp,Y+2*tmp));
+    end;
+
+  begin
+    C:=Dashboard.Canvas;
+    C.TextOut(10,10,IntToStr(Rider.RPM)+' RPM');
+    C.TextOut(DashBoard.Width-80,60,IntToStr(Rider.Gear)+' Gear');
+
+    C.Brush.Style:=bsSolid;
+    C.Brush.Color:=RGB(220,0,60);
+    C.Pen.Style:=psClear;
+
+    DrawBrake(Rider.FrontBrake,DashBoard.Width-70,90);
+    DrawBrake(Rider.BackBrake,DashBoard.Width-70,140);
+  end;
+
+var Rider, L : Integer;
+begin
+  Rider:=PoleGrid.Selected.Row;
+
+  if Rider>-1 then
+  begin
+    L:=High(Race.Data);
+
+    if L>-1 then
+    begin
+      Rider:=RacePoleIndex[Rider];
+      DrawParameters(Race.Data[L].Data[Rider]);
+    end;
+  end;
+end;
+
+procedure TMainForm.DashboardResize(Sender: TObject);
+begin
+  SpeedGauge.CustomBounds:=Rect(10,10,Dashboard.Width-10,60);
+  LeanGauge.CustomBounds:=Rect(10,60,Dashboard.Width-10,Dashboard.Height+40);
+  FuelGauge.CustomBounds:=Rect(10,40,50,Dashboard.Height-40);
 end;
 
 function TMainForm.DoStep:Boolean;
 
   // Any rider passed others?
-  function SwapRiders(const AllRiders:TAllRidersData):Boolean;
+  function SwapRiders(var AllRiders:TAllRidersData):Boolean;
 
     procedure SwapRider(const A,B:Integer);
     var t : Integer;
         tmp : String;
-        tmpI : Integer;
     begin
       for t:=1 to Pole.Columns-1 do
       begin
@@ -1072,21 +1295,21 @@ function TMainForm.DoStep:Boolean;
         Pole.Cells[t,A]:=Pole.Cells[t,B];
         Pole.Cells[t,B]:=tmp;
       end;
-
-      tmpI:=RacePoleIndex[A];
-      RacePoleIndex[A]:=RacePoleIndex[B];
-      RacePoleIndex[B]:=tmpI;
     end;
 
-  var t, tmp : Integer;
+  var t,
+      Num,
+      tmp, tmpI : Integer;
   begin
     result:=False;
 
     t:=1;
 
-    while t<Length(Race.Riders) do
+    while t<Length(RacePoleIndex) do
     begin
-      if Race.Riders[t].Active then
+      Num:=RacePoleIndex[t];
+
+      if Race.Riders[Num].Active then
       begin
         tmp:=t;
 
@@ -1095,6 +1318,10 @@ function TMainForm.DoStep:Boolean;
           result:=True;
 
           SwapRider(tmp,tmp-1);
+
+          tmpI:=RacePoleIndex[tmp];
+          RacePoleIndex[tmp]:=RacePoleIndex[tmp-1];
+          RacePoleIndex[tmp-1]:=tmpI;
 
           tmp:=tmp-1;
 
@@ -1105,16 +1332,6 @@ function TMainForm.DoStep:Boolean;
 
       Inc(t);
     end;
-  end;
-
-  // Percent of Throttle depending on Lean Angle in degrees
-  function CalculateThrottle(const ALeanAngle,MaxAngle:Single):Single;
-  begin
-    Result := 100.0 * (1.0 - (ALeanAngle / MaxAngle));
-
-    // At least 10% throttle
-    if Result < 10.0 then
-       Result := 10.0;
   end;
 
   function StepRiders(const L:Integer):Boolean;
@@ -1134,7 +1351,7 @@ function TMainForm.DoStep:Boolean;
       begin
         Delta:=Race.Data[L].Time-Race.Data[L-1].Time;
 
-        Race.Data[L].Data[t].Step(Delta/1000, Race.Riders[t].Bike,Race.Data[L-1].Data[t]);
+        Race.Data[L].Data[t].Step(Delta/1000, Race.Riders[t].Bike, Race.Riders[t].Pilot, Race.Data[L-1].Data[t]);
 
         // Finished lap?
         if Race.Data[L].Data[t].Position>Race.Circuit.TotalLength then
@@ -1218,6 +1435,15 @@ function TMainForm.DoStep:Boolean;
 
             tpCornering:
               begin
+                // TODO: Accurate LeanAngle
+                // tmp:=Race.Circuit.IndexOfPosition(Race.Data[L].Data[Rider].Position);
+                // Race.Data[L].Data[t].LeanAngle:=CalcLeanAngle(Race.Circuit.Points,tmp,Speed);
+
+                if Race.Circuit.Curves[Race.Riders[t].NextCurve-1].Angle<0 then
+                   Race.Data[L].Data[t].LeanAngle:= -Race.Riders[t].Bike.MaxLeanAngle
+                else
+                   Race.Data[L].Data[t].LeanAngle:=Race.Riders[t].Bike.MaxLeanAngle;
+
                 // TrailBraking progressively (The Release)
                 Race.Data[L].Data[t].TrailBrake(Race.Circuit.Curves[Race.Riders[t].NextCurve-1].ApexPosition);
               end;
@@ -1260,12 +1486,13 @@ function TMainForm.DoStep:Boolean;
     // Current time
     Pole.Cells[3,0]:=IntToTime(Race.Data[L].Time); // First pilot total race time
 
+    // From pilot 1:
     for t:=1 to Pole.Count-1 do
     begin
       Gap:=Race.Data[L].Data[t].Position-Race.Data[L].Data[t-1].Position;
 
       if Race.Data[L].Data[t].Speed>0 then
-         GapTime:=Gap/Race.Data[L].Data[t].Speed
+         GapTime:=(Gap/Race.Data[L].Data[t].Speed)/86400 // seconds per day
       else
          GapTime:=0;
 
@@ -1289,7 +1516,7 @@ begin
 
   result:=StepRiders(L);
 
-  if SwapRiders(Race.Data[L].Data) then
+//  if SwapRiders(Race.Data[L].Data) then
      PoleGrid.Invalidate;
 
   CursorLap.Value:=Race.Data[L].Data[0].Position;
@@ -1298,13 +1525,59 @@ begin
 
   Circuit.Invalidate;
 
-  // Show Speed and Acceleration for selected driver
-  RefillCharts;
+  FrontView.Invalidate;
+
+  if PageControl1.ActivePage=TabLap then
+     // Show Speed and Acceleration for currently selected driver
+     RefillCharts;
+
+  if PageControl1.ActivePage=TabData then
+     DataGrid.Invalidate;
 end;
 
 procedure TMainForm.Exit1Click(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TMainForm.SetDashboard;
+var Rider,
+    //tmp,
+    L : Integer;
+    Speed : Single;
+begin
+  if Race.Circuit.Points=nil then
+     Exit;
+
+  Rider:=PoleGrid.Selected.Row;
+
+  if Rider>-1 then
+  begin
+    L:=High(Race.Data);
+
+    if L>-1 then
+    begin
+      // tmp:=Race.Circuit.IndexOfPosition(Race.Data[L].Data[Rider].Position);
+
+      Speed:=Race.Data[L].Data[Rider].Speed;
+
+      LeanGauge.Value:=Round(Race.Data[L].Data[Rider].LeanAngle);
+      SpeedGauge.Value:=Round(Speed*3.6); // to km/h
+
+      FuelGauge.Value:=Race.Riders[Rider].Bike.Fuel;
+    end;
+  end
+  else
+  begin
+    LeanGauge.Value:=0;
+    SpeedGauge.Value:=0;
+  end;
+end;
+
+procedure TMainForm.TBLeanChange(Sender: TObject);
+begin
+  LeanGauge.Value:=TBLean.Position;
+  FrontView.Invalidate;
 end;
 
 procedure TMainForm.Timer1Timer(Sender: TObject);
@@ -1315,7 +1588,9 @@ begin
   begin
     Timer1.Enabled:=True;
 
-    FrontView.Invalidate;
+    if Dashboard.Visible then
+       SetDashboard;
+
   end
   else
     BStopClick(Self);
@@ -1332,6 +1607,9 @@ begin
     StartCount:=0;
     TimerStart.Enabled:=False;
     Timer1.Enabled:=True;
+
+    TBLean.Enabled:=False;
+    DebugLean.Visible:=False;
 
     BPause.Enabled:=True;
     BStop.Enabled:=True;

@@ -1,0 +1,77 @@
+{
+	"spdxVersion": "SPDX-2.3",
+	"dataLicense": "CC0-1.0",
+	"SPDXID": "SPDXRef-DOCUMENT",
+	"name": "TeeChart_Telemetry-winarm64ec",
+	"documentNamespace": "https://dpm-cli/TeeChart_Telemetry/winarm64ec/c4122547-b910-43bc-ba0a-85ddd25ecd5f",
+	"creationInfo": {
+		"created": "2026-07-03T14:17:34Z",
+		"creators": [
+			"Tool: dpm-1.0.0"
+		]
+	},
+	"packages": [
+		{
+			"SPDXID": "SPDXRef-Package-TeeChart-Telemetry-20.4",
+			"name": "TeeChart_Telemetry",
+			"versionInfo": "20.4",
+			"supplier": "NOASSERTION",
+			"downloadLocation": "NOASSERTION",
+			"filesAnalyzed": false,
+			"licenseDeclared": "NOASSERTION",
+			"licenseConcluded": "NOASSERTION",
+			"copyrightText": "NOASSERTION"
+		},
+		{
+			"SPDXID": "SPDXRef-Package-Delphi-RTL-VCL-FMX-37.0.59082.6021",
+			"name": "Delphi RTL/VCL/FMX",
+			"versionInfo": "37.0.59082.6021",
+			"supplier": "Organization: Embarcadero Technologies",
+			"downloadLocation": "NOASSERTION",
+			"filesAnalyzed": false,
+			"licenseDeclared": "NOASSERTION",
+			"licenseConcluded": "NOASSERTION",
+			"copyrightText": "NOASSERTION",
+			"homepage": "https://www.embarcadero.com/products/delphi",
+			"externalRefs": [
+				{
+					"referenceCategory": "PACKAGE-MANAGER",
+					"referenceType": "purl",
+					"referenceLocator": "pkg:generic/embarcadero/delphi@37.0.59082.6021"
+				}
+			],
+			"annotations": [
+				{
+					"annotator": "Tool: dpm",
+					"annotationDate": "2026-07-03T14:17:34Z",
+					"annotationType": "OTHER",
+					"comment": "dpm:bdsVersion=37.0"
+				},
+				{
+					"annotator": "Tool: dpm",
+					"annotationDate": "2026-07-03T14:17:34Z",
+					"annotationType": "OTHER",
+					"comment": "dpm:compilerExe=C:\\Program Files (x86)\\Embarcadero\\Studio\\37.0\\bin\\dcc32.exe"
+				},
+				{
+					"annotator": "Tool: dpm",
+					"annotationDate": "2026-07-03T14:17:34Z",
+					"annotationType": "OTHER",
+					"comment": "dpm:compilerName=delphi13.0 Florence"
+				}
+			]
+		}
+	],
+	"relationships": [
+		{
+			"spdxElementId": "SPDXRef-DOCUMENT",
+			"relationshipType": "DESCRIBES",
+			"relatedSpdxElement": "SPDXRef-Package-TeeChart-Telemetry-20.4"
+		},
+		{
+			"spdxElementId": "SPDXRef-Package-TeeChart-Telemetry-20.4",
+			"relationshipType": "DEPENDS_ON",
+			"relatedSpdxElement": "SPDXRef-Package-Delphi-RTL-VCL-FMX-37.0.59082.6021"
+		}
+	]
+}

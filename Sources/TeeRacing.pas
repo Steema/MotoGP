@@ -9,7 +9,7 @@ unit TeeRacing;
 interface
 
 uses
-  SysUtils, Types, Graphics, TeCanvas, Diagnostics;
+  Windows, SysUtils, Types, Graphics, TeCanvas, Diagnostics;
 
 const
   RealTimeFactor = 0.2; // 5 times per second (no realtime)
@@ -181,6 +181,7 @@ type
 
     procedure Step(const TimeFactor:Single; // 0.1 = 10 times per second
                    var Bike:TBike;
+                   var Pilot:TPilot;
                    const Prev:TRiderData);
 
     procedure StandUp;
@@ -212,6 +213,7 @@ type
     NextCurve : Integer; // The number of the most closer curve (corner)
 
     Bike : TBike;
+    Pilot : TPilot;
 
     Ellapsed : TArray<Int64>; // Milliseconds of each finished lap
     LapsTime : TArray<Integer>;  // When the rider crosses each lap finish, indexed to TRace.Data
@@ -262,6 +264,11 @@ type
 function DetermineTrackPhase(const BikePosition:Single;
                              const ACorner:TCurve;
                              const ABrakeTriggerPosition:Single): TTurnPhase;
+
+// Percent of Throttle depending on Lean Angle in degrees
+function CalculateThrottle(const ALeanAngle,MaxAngle:Single):Single;
+
+function CalcLeanAngle(const APoints: TPointFloatArray; Current: Integer; const Speed:Single): Single;
 
 implementation
 
@@ -350,6 +357,7 @@ begin
 
   // Copy default parameters
   Bike:=DefaultBike;
+  Pilot:=DefaultPilot;
 end;
 
 function TorqueAtRPM(const Curve:TTorqueCurve; const RPM: Integer): Single;
@@ -410,6 +418,8 @@ begin
   RPM:=14000; // Bike.MaxRPM?  // Throttle max
 
   Clutch:=1;  //
+
+  Gear:=1;
 
   Speed:=0;
 
@@ -474,7 +484,7 @@ begin
   end;
 end;
 
-procedure TRiderData.Step(const TimeFactor:Single; var Bike:TBike; const Prev: TRiderData);
+procedure TRiderData.Step(const TimeFactor:Single; var Bike:TBike; var Pilot:TPilot; const Prev: TRiderData);
 const G = 9.81; // Earth Gravity meters/sec2
       RGear = 5;
       RFinal = 3;
@@ -501,7 +511,7 @@ begin
     ThrustTorque:=0;
   end;
 
-  TotalMass:=Bike.Weight+Bike.Fuel+DefaultPilot.TotalMass;
+  TotalMass:=Bike.Weight+Bike.Fuel+Pilot.TotalMass;
   TotalGrip:= Bike.Back.Tire.Grip * TotalMass * G;
 
   if Prev.Speed=0 then // Start time
@@ -641,8 +651,8 @@ end;
 
 procedure InitDefaultPilot;
 begin
-  DefaultPilot.Name:='Marc Màrquez';
-  DefaultPilot.Height:=1.69;
+  DefaultPilot.Name:='Mr. Dummy';
+  DefaultPilot.Height:=1.69; // cm
   DefaultPilot.Weight:=64;  // kg
 
   DefaultPilot.RaceLeather:=5.0; // kg
@@ -800,6 +810,45 @@ function TBike.FuelLiquid: Single; // cm³
 begin
   result:=Fuel/FUEL_DENSITY_RACING; // From Grams to Cubic Centimeters
 end;
+
+// Percent of Throttle depending on Lean Angle in degrees
+function CalculateThrottle(const ALeanAngle,MaxAngle:Single):Single;
+begin
+  Result := 100.0 * (1.0 - (ALeanAngle / MaxAngle));
+
+  // At least 10% throttle
+  if Result < 10.0 then
+     Result := 10.0;
+end;
+
+function CalcLeanAngle(const APoints: TPointFloatArray; Current: Integer; const Speed:Single): Single;
+const MaxLean=64;
+var
+  P1, P2, P3: TPointFloat;
+  L : Integer;
+  Angle1, Angle2, DeltaAngle: Single;
+begin
+  L:=Length(APoints);
+
+  P1 := APoints[Current];
+  P2 := APoints[(Current + 1) mod L];
+  P3 := APoints[(Current + 2) mod L];
+
+  Angle1 := ArcTan2(P2.Y - P1.Y, P2.X - P1.X);
+  Angle2 := ArcTan2(P3.Y - P2.Y, P3.X - P2.X);
+
+  DeltaAngle := Angle2 - Angle1;
+
+  if DeltaAngle > Pi then DeltaAngle := DeltaAngle - (2 * Pi);
+  if DeltaAngle < -Pi then DeltaAngle := DeltaAngle + (2 * Pi);
+
+  Result := DeltaAngle * Speed * 15.0;
+
+  if Result > MaxLean then Result := MaxLean
+  else
+  if Result < -MaxLean then Result := -MaxLean;
+end;
+
 
 initialization
   InitDefaultBike;

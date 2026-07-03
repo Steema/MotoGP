@@ -1,0 +1,90 @@
+{
+	"bomFormat": "CycloneDX",
+	"specVersion": "1.5",
+	"version": 1,
+	"serialNumber": "urn:uuid:160435d0-65bf-4dab-965e-c64b88a769f2",
+	"metadata": {
+		"timestamp": "2026-07-03T14:17:34Z",
+		"tools": [
+			{
+				"vendor": "DPM",
+				"name": "dpm",
+				"version": "1.0.0"
+			}
+		],
+		"component": {
+			"type": "application",
+			"bom-ref": "project:TeeChart_Telemetry:win64",
+			"name": "TeeChart_Telemetry",
+			"version": "20.4",
+			"properties": [
+				{
+					"name": "dpm:component-kind",
+					"value": "application"
+				}
+			]
+		},
+		"properties": [
+			{
+				"name": "dpm:platform",
+				"value": "win64"
+			},
+			{
+				"name": "dpm:compilerVersion",
+				"value": "delphi13.0"
+			},
+			{
+				"name": "dpm:evidence",
+				"value": "map-file-not-found"
+			},
+			{
+				"name": "dpm:evidence.mapPath",
+				"value": "C:\\GitHub\\Games\\MotoGP\\Sources\\Win64\\Release\\TeeChart_Telemetry.map"
+			}
+		]
+	},
+	"components": [
+		{
+			"type": "framework",
+			"bom-ref": "embarcadero:delphi@37.0",
+			"name": "Delphi RTL/VCL/FMX",
+			"version": "37.0.59082.6021",
+			"supplier": {
+				"name": "Embarcadero Technologies"
+			},
+			"purl": "pkg:generic/embarcadero/delphi@37.0.59082.6021",
+			"externalReferences": [
+				{
+					"type": "website",
+					"url": "https://www.embarcadero.com/products/delphi"
+				}
+			],
+			"properties": [
+				{
+					"name": "dpm:bdsVersion",
+					"value": "37.0"
+				},
+				{
+					"name": "dpm:compilerExe",
+					"value": "C:\\Program Files (x86)\\Embarcadero\\Studio\\37.0\\bin\\dcc32.exe"
+				},
+				{
+					"name": "dpm:compilerName",
+					"value": "delphi13.0 Florence"
+				},
+				{
+					"name": "dpm:component-kind",
+					"value": "delphi-runtime"
+				}
+			]
+		}
+	],
+	"dependencies": [
+		{
+			"ref": "project:TeeChart_Telemetry:win64",
+			"dependsOn": [
+				"embarcadero:delphi@37.0"
+			]
+		}
+	]
+}
