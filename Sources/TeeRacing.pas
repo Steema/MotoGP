@@ -488,6 +488,7 @@ procedure TRiderData.Step(const TimeFactor:Single; var Bike:TBike; var Pilot:TPi
 const G = 9.81; // Earth Gravity meters/sec2
       RGear = 5;
       RFinal = 3;
+      BodyPosition=0.5; // 0..1  1=Standing, 0=Fully Crouched, 0.5=Normal
 
 var Thrust,
     ThrustTorque,
@@ -496,6 +497,7 @@ var Thrust,
     TotalBrakingForce,
     AirResistance,
     MotorTorque, // Nm
+    PilotBodyFactor, // coefficient
     RollingFriction : Single;
 begin
   RPM:=Prev.RPM;
@@ -532,7 +534,11 @@ begin
        Thrust:=TotalGrip;
   end;
 
-  AirResistance:=0.5 * DefaultWeather.AirDensity * Bike.CdAeroDynamic * Bike.FrontArea * Sqr(Prev.Speed);
+  // TODO Body Position: Hanging Off, Lean Angle, Knee Down, Elbow Down, Leg Dangle
+
+  PilotBodyFactor:=(1 + 0.0025 * (Pilot.Height - 175)) * (0.85 + 0.3* BodyPosition);
+
+  AirResistance:=0.5 * DefaultWeather.AirDensity * Bike.CdAeroDynamic * Bike.FrontArea * PilotBodyFactor * Sqr(Prev.Speed);
 
   // TODO: Pacejka's Magic Formula o Magic Formula Tire Model
   RollingFriction:= Bike.Back.Tire.Friction * TotalMass * G;
