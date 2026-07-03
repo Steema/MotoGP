@@ -1,23 +1,23 @@
-"Circuit","City","Country","svg","Length","FinishOffset","AMSL"
-"Chang International Circuit","Buriram","Tailandia","",4554,,155
-"Autódromo Internacional Ayrton Senna","Goiânia","Brasil","",4200,,740
-"Circuit of The Americas","Austin","Estados Unidos","austin-1",5513,,165
-"Circuito de Jerez-Ángel Nieto","Jerez de la Frontera","España","jerez-2",4423,,55
-"Bugatti Circuit","Le Mans","Francia","",4185,,80
-"Circuit de Barcelona-Catalunya","Montmeló","España","catalunya-6",4657,120,130
-"Mugello Circuit","Scarperia e San Piero","Italia","mugello-1",5245,,292
-"Balaton Park Circuit","Balatonfőkajár","Hungría","",4075,,115
-"Automotodrom Brno","Brno","República Checa","",5403,,450
-"TT Circuit Assen","Assen","Países Bajos","",4542,,12
-"Sachsenring","Hohenstein-Ernstthal","Alemania","",3671,,360
-"Silverstone Circuit","Silverstone","Reino Unido","silverstone-1",5900,,133
-"MotorLand Aragón","Alcañiz","España","",5078,,350
-"Misano World Circuit Marco Simoncelli","Misano Adriatico","Italia","",4226,,15
-"Red Bull Ring","Spielberg","Austria","",4318,,677
-"Mobility Resort Motegi","Motegi","Japón","",4801,,135
-"Pertamina Mandalika International Circuit","Lombok","Indonesia","",4310,,5
-"Phillip Island Grand Prix Circuit","Phillip Island","Australia","",4448,,30
-"Petronas Sepang International Circuit","Sepang","Malasia","sepang-1",5543,,18
-"Lusail International Circuit","Lusail","Catar","",5380,,12
-"Autódromo Internacional do Algarve","Portimão","Portugal","portimao-1",4592,,110
-"Circuito de Ricardo Tormo","Cheste","España","valencia-1",4005,,60
+﻿"Circuit","City","Country","svg","Length","FinishOffset","AMSL","Bounds"
+"Chang International Circuit","Buriram","Tailandia","",4554,,155,14.9695 103.0785 14.9585 103.0975
+"Autódromo Internacional Ayrton Senna","Goiânia","Brasil","",4200,,740,-16.6345 -49.1935 -16.6455 -49.1765
+"Circuit of The Americas","Austin","Estados Unidos","austin-1",5513,,165,30.1410 -97.6465 30.1265 -97.6255
+"Circuito de Jerez-Ángel Nieto","Jerez de la Frontera","España","jerez-2",4423,,55,36.7135 -6.0405 36.7035 -6.0235
+"Bugatti Circuit","Le Mans","Francia","",4185,,80,47.9615 0.2035 47.9455 0.2295
+"Circuit de Barcelona-Catalunya","Montmeló","España","catalunya-6",4657,120,130,41.5795 2.2475 41.5605 2.2715
+"Mugello Circuit","Scarperia e San Piero","Italia","mugello-1",5245,,292,43.9855 11.3610 43.9995 11.3815
+"Balaton Park Circuit","Balatonfőkajár","Hungría","",4075,,115,46.9935 18.2345 46.9825 18.2525
+"Automotodrom Brno","Brno","República Checa","",5403,,450,49.2135 16.4320 49.1985 16.4635
+"TT Circuit Assen","Assen","Países Bajos","",4542,,12,52.9695 6.5125 52.9555 6.5335
+"Sachsenring","Hohenstein-Ernstthal","Alemania","",3671,,360,50.7965 12.6805 50.7875 12.6975
+"Silverstone Circuit","Silverstone","Reino Unido","silverstone-1",5900,,133,52.0865 -1.0335 52.0680 -0.9985
+"MotorLand Aragón","Alcañiz","España","",5078,,350,41.0845 -0.2185 41.0725 -0.1915
+"Misano World Circuit Marco Simoncelli","Misano Adriatico","Italia","",4226,,15,43.9665 12.6735 43.9575 12.6905
+"Red Bull Ring","Spielberg","Austria","",4318,,677,47.2285 14.7505 47.2155 14.7695
+"Mobility Resort Motegi","Motegi","Japón","",4801,,135,36.5395 140.2185 36.5235 140.2370
+"Pertamina Mandalika International Circuit","Lombok","Indonesia","",4310,,5,-8.8895 116.2915 -8.9005 116.3095
+"Phillip Island Grand Prix Circuit","Phillip Island","Australia","",4448,,30,-38.4975 145.2215 -38.5085 145.2445
+"Petronas Sepang International Circuit","Sepang","Malasia","sepang-1",5543,,18,2.7685 101.7245 2.7505 101.7475
+"Lusail International Circuit","Lusail","Catar","",5380,,12,25.5010 51.4420 25.4795 51.4625
+"Autódromo Internacional do Algarve","Portimão","Portugal","portimao-1",4592,,110,37.2345 -8.6365 37.2215 -8.6190
+"Circuito de Ricardo Tormo","Cheste","España","valencia-1",4005,,60,39.4895 -0.6385 39.4795 -0.6215

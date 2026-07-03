@@ -113,6 +113,7 @@ type
     TeeCommander1: TTeeCommander;
     TabTires: TTabSheet;
     TiresGrid: TTeeGrid;
+    Splitter3: TSplitter;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -192,6 +193,7 @@ type
     procedure SetTeeCanvas(const AClass:TTeeCanvasClass);
     procedure SetupPilotGrid(const AGrid:TTeeGrid; const AColorColumn,ANumColumn:Integer);
     procedure StartRace;
+    procedure TrySetGISBounds;
   public
     { Public declarations }
   end;
@@ -496,14 +498,25 @@ procedure TMainForm.CircuitAfterDraw(Sender: TObject);
   end;
 
   procedure SelectCircuit;
+  var tmp : Single;
   begin
-    Race.Circuit.TotalLength:=StrToFloat(CircuitsData[4,Circuits.Selected.Row]); // Circuite (ie: Montmeló) length in meters
-    Race.Circuit.PolePosition:=StrToFloat(CircuitsData[5,Circuits.Selected.Row]); // Circuite (ie: Montmeló) 120 // Offset in meters
+    if TryStrToFloat(CircuitsData[4,Circuits.Selected.Row],tmp) then // Circuite (ie: Montmeló) length in meters
+       Race.Circuit.TotalLength:=tmp
+    else
+       Race.Circuit.TotalLength:=0;
+
+    if TryStrToFloat(CircuitsData[5,Circuits.Selected.Row],tmp) then // Circuite (ie: Montmeló) 120 // Offset in meters
+       Race.Circuit.PolePosition:=tmp
+    else
+       Race.Circuit.PolePosition:=0;
 
     // TODO: Find index using PolePosition
     Race.Circuit.PolePositionIndex:=8;  // Offset in point indexes
 
-    Race.Circuit.Elevation:=StrToFloat(CircuitsData[6,Circuits.Selected.Row]); // Mean above sea level
+    if TryStrToFloat(CircuitsData[6,Circuits.Selected.Row],tmp) then // Mean above sea level
+       Race.Circuit.Elevation:=tmp
+    else
+       Race.Circuit.Elevation:=0;
 
     LapChart.Axes.Bottom.SetMinMax(0,Race.Circuit.TotalLength);
     LapChart.Axes.Left.EndPosition:=75;
@@ -524,6 +537,8 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
 begin
   FreeAndNil(CircuitPath);
   Circuit.Invalidate;
+
+  TrySetGISBounds;
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -696,6 +711,30 @@ end;
 const
   Season='2026';
 
+procedure TMainForm.TrySetGISBounds;
+var tmp : TArray<String>;
+    Old : Char;
+    S : String;
+begin
+  if GIS<>nil then
+  begin
+    S:=(CircuitsData.Cells[7,Circuits.Selected.Row]);
+    tmp:=S.Split([' ']);
+
+    if Length(tmp)=4 then // ok: 41.56 41.576 2.24 2.27
+    begin
+      Old:=FormatSettings.DecimalSeparator;
+
+      FormatSettings.DecimalSeparator:='.';
+      try
+        GIS.SetBounds(StrToFloat(tmp[0]),StrToFloat(tmp[2]),StrToFloat(tmp[1]),StrToFloat(tmp[3]));
+      finally
+        FormatSettings.DecimalSeparator:=Old;
+      end;
+    end;
+  end;
+end;
+
 procedure TMainForm.FormShow(Sender: TObject);
 begin
   PoleGrid.ParentFont:=True;
@@ -718,7 +757,7 @@ begin
   CircuitsData:=TCSVDataImport.FromFile(MotoGP+'\Circuits.txt');
   Circuits.Data:=CircuitsData;
 
-  Circuits.Selected.Row:=5; // Barcelona
+  Circuits.Selected.Row:=5; // Montmeló, Barcelona, Catalunya
 
   TiresGrid.Data:=TCSVDataImport.FromFile(MotoGP+'\Tires.txt');
 
@@ -734,10 +773,7 @@ begin
   GIS:=TGISRaster.Create(Self);
   Circuit.AddSeries(GIS);
 
-  // Barcelona Lat Lon
-//  GIS.SetBounds(41,42, 1.4,2.8);
-
-  GIS.SetBounds(41.56, 41.576, 2.24, 2.27);
+  TrySetGISBounds;
 
   // Enable zoooming in-out with the mouse wheel
   Circuit.Panning.MouseWheel:=pmwNone;
