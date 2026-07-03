@@ -111,6 +111,8 @@ type
     Debug1: TMenuItem;
     Lean1: TMenuItem;
     TeeCommander1: TTeeCommander;
+    TabTires: TTabSheet;
+    TiresGrid: TTeeGrid;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -146,6 +148,7 @@ type
     procedure TBLeanChange(Sender: TObject);
     procedure Chart2GetAxisLabel(Sender: TChartAxis; Series: TChartSeries;
       ValueIndex: Integer; var LabelText: string);
+    procedure Edit1Change(Sender: TObject);
   private
     { Private declarations }
 
@@ -184,6 +187,7 @@ type
     procedure InitPoleData;
     procedure InitRaceData;
     procedure RefillCharts;
+    procedure SetCurrentLap(const ACurrent:Integer);
     procedure SetDashboard;
     procedure SetTeeCanvas(const AClass:TTeeCanvasClass);
     procedure SetupPilotGrid(const AGrid:TTeeGrid; const AColorColumn,ANumColumn:Integer);
@@ -322,6 +326,8 @@ procedure DrawPilotNumber(const ACanvas:TTeeCanvas; const ShowNumbers:Boolean;
                           const AColor:TColor; const ANumber:String);
 begin
   ACanvas.Brush.Color:=AColor;
+  ACanvas.Gradient.Visible:=False;
+  ACanvas.Brush.Style:=bsSolid;
 
   if ShowNumbers then
   begin
@@ -697,6 +703,7 @@ begin
   Circuits.ParentFont:=True;
   ChampionGrid.ParentFont:=True;
   BikeGrid.ParentFont:=True;
+  TiresGrid.ParentFont:=True;
 
   PilotsData:=TCSVDataImport.FromFile(MotoGP+'\'+Season+'\Pilots.txt',True,',','');
   Pilots.Data:=PilotsData;
@@ -712,6 +719,8 @@ begin
   Circuits.Data:=CircuitsData;
 
   Circuits.Selected.Row:=5; // Barcelona
+
+  TiresGrid.Data:=TCSVDataImport.FromFile(MotoGP+'\Tires.txt');
 
   SeasonData:=TCSVDataImport.FromFile(MotoGP+'\'+Season+'\Rounds.txt');
   ChampionGrid.Data:=SeasonData;
@@ -1140,6 +1149,11 @@ begin
     Result := Format('%d:%.2d.%.3d', [Trunc(TotalMinutes), Seconds, Milliseconds]);
 end;
 
+procedure TMainForm.SetCurrentLap(const ACurrent:Integer);
+begin
+  CurrentLap.Caption:=IntToStr(ACurrent)+' of '+IntToStr(TotalLaps.Position);
+end;
+
 procedure TMainForm.StartRace;
 
   procedure InitTowerLapRider;
@@ -1184,7 +1198,7 @@ begin
       if Race.Current<Lap then
       begin
         Race.Current:=Lap;
-        CurrentLap.Caption:=Race.Current.ToString+' of '+TotalLaps.Position.ToString;
+        SetCurrentLap(Race.Current);
       end;
 
       Pole.Cells[4,Rider]:=IntToTime(Race.Riders[Rider].Ellapsed[Lap-1]); // Last
@@ -1533,6 +1547,11 @@ begin
 
   if PageControl1.ActivePage=TabData then
      DataGrid.Invalidate;
+end;
+
+procedure TMainForm.Edit1Change(Sender: TObject);
+begin
+  SetCurrentLap(0);
 end;
 
 procedure TMainForm.Exit1Click(Sender: TObject);

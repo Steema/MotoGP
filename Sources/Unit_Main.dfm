@@ -23,6 +23,7 @@ object MainForm: TMainForm
     Height = 41
     Align = alTop
     TabOrder = 0
+    ExplicitTop = -5
     object Label2: TLabel
       Left = 408
       Top = 13
@@ -87,10 +88,11 @@ object MainForm: TMainForm
       Height = 23
       TabOrder = 3
       Text = '12'
+      OnChange = Edit1Change
     end
     object TotalLaps: TUpDown
-      Left = 519
-      Top = 10
+      Left = 525
+      Top = 12
       Width = 16
       Height = 23
       Associate = Edit1
@@ -503,24 +505,24 @@ object MainForm: TMainForm
                 Frame.MiddleBrush.BackColor = clYellow
                 Frame.OuterBrush.BackColor = clGreen
                 Frame.OuterBrush.Gradient.EndColor = clGreen
-                Value = 23.450000000000000000
+                Value = 45.072500000000010000
                 InternalMarkers = {
                   02000000545046300E544E756D657269634D61726B65720008506F736974696F
                   6E0708707043656E7465720B53686170652E436F6C6F7204DBDBC80010536861
                   70652E466F6E742E436F6C6F7204282828001153686170652E466F6E742E4865
                   6967687402D00F53686170652E466F6E742E4E616D65060A44532D4469676974
                   616C1353686170652E4672616D652E56697369626C65081453686170652E5368
-                  61646F772E56697369626C65080A53686170652E54657874060532332C343513
-                  53686170652E54657874416C69676E6D656E74070E746152696768744A757374
-                  6966791153686170652E5472616E73706172656E74090000545046300E544E75
-                  6D657269634D61726B65720008506F736974696F6E070A70705269676874546F
-                  700F53686170652E416C69676E6D656E740708746143656E7465720B53686170
-                  652E436F6C6F7204DBDBC8001053686170652E466F6E742E436F6C6F72042828
-                  28001153686170652E466F6E742E48656967687402E80F53686170652E466F6E
-                  742E4E616D65060A44532D4469676974616C1353686170652E4672616D652E56
-                  697369626C65081453686170652E536861646F772E56697369626C65080A5368
-                  6170652E5465787406046B6D2F681153686170652E5472616E73706172656E74
-                  090000}
+                  61646F772E56697369626C65080A53686170652E54657874060634352C303733
+                  1353686170652E54657874416C69676E6D656E74070E746152696768744A7573
+                  746966791153686170652E5472616E73706172656E74090000545046300E544E
+                  756D657269634D61726B65720008506F736974696F6E070A7070526967687454
+                  6F700F53686170652E416C69676E6D656E740708746143656E7465720B536861
+                  70652E436F6C6F7204DBDBC8001053686170652E466F6E742E436F6C6F720428
+                  2828001153686170652E466F6E742E48656967687402E80F53686170652E466F
+                  6E742E4E616D65060A44532D4469676974616C1353686170652E4672616D652E
+                  56697369626C65081453686170652E536861646F772E56697369626C65080A53
+                  686170652E5465787406046B6D2F681153686170652E5472616E73706172656E
+                  74090000}
               end
               object LeanGauge: TGaugeSeries
                 Legend.Visible = False
@@ -566,7 +568,7 @@ object MainForm: TMainForm
                 RotationAngle = 160
                 ShapeStyle = gsPolygon
                 TotalAngle = 140.000000000000000000
-                Value = 22.455531223677100000
+                Value = -18.369978619739410000
               end
               object FuelGauge: TLinearGauge
                 Legend.Visible = False
@@ -638,7 +640,7 @@ object MainForm: TMainForm
                 Ticks.Style = psRectangle
                 Ticks.VertSize = 10
                 Ticks.GaugeStyle = gpTick
-                Value = 99.000000000000000000
+                Value = 4.000000000000000000
                 ValueArea.Transparent = True
               end
             end
@@ -731,7 +733,7 @@ object MainForm: TMainForm
       Top = 0
       Width = 449
       Height = 650
-      ActivePage = TabLaps
+      ActivePage = TabSheet3
       Align = alClient
       TabOrder = 1
       OnChange = PageControl1Change
@@ -1006,6 +1008,32 @@ object MainForm: TMainForm
           object TabTorqueCurve: TTabSheet
             Caption = 'Torque Curve'
             ImageIndex = 1
+          end
+          object TabTires: TTabSheet
+            Caption = 'Tires'
+            ImageIndex = 2
+            object TiresGrid: TTeeGrid
+              Left = 0
+              Top = 0
+              Width = 312
+              Height = 590
+              Columns = <>
+              Align = alClient
+              UseDockManager = False
+              ParentBackground = False
+              ParentColor = False
+              TabOrder = 0
+              ExplicitLeft = -40
+              ExplicitTop = 168
+              ExplicitWidth = 400
+              ExplicitHeight = 250
+              _Headers = (
+                1
+                'TColumnHeaderBand'
+                <
+                  item
+                  end>)
+            end
           end
         end
       end
