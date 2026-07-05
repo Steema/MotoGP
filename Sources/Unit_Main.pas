@@ -38,9 +38,6 @@ type
     BStart: TButton;
     BPause: TButton;
     BStop: TButton;
-    Label2: TLabel;
-    Edit1: TEdit;
-    TotalLaps: TUpDown;
     PageControl2: TPageControl;
     TabCircuits: TTabSheet;
     TabPilots: TTabSheet;
@@ -114,6 +111,15 @@ type
     TabTires: TTabSheet;
     TiresGrid: TTeeGrid;
     Splitter3: TSplitter;
+    PageControl6: TPageControl;
+    Splitter4: TSplitter;
+    TabLapTimes: TTabSheet;
+    LapTimesGrid: TTeeGrid;
+    CBSeasons: TComboBox;
+    TabAllPilots: TTabSheet;
+    AllPilotsGrid: TTeeGrid;
+    CBRounds: TComboBox;
+    CBRace: TComboBox;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -150,6 +156,8 @@ type
     procedure Chart2GetAxisLabel(Sender: TChartAxis; Series: TChartSeries;
       ValueIndex: Integer; var LabelText: string);
     procedure Edit1Change(Sender: TObject);
+    procedure CBSeasonsChange(Sender: TObject);
+    procedure CBRaceChange(Sender: TObject);
   private
     { Private declarations }
 
@@ -159,11 +167,12 @@ type
     RearBike : TGraphic;
 
     BikeData,
-    SeasonData,
+    RoundsData,
     PilotsData,
     SensorsData,
     CircuitsData,
-    Pole : TStringsData;
+    Pole,
+    LapsTimeData : TStringsData;
 
     StartCount : Integer;
 
@@ -184,10 +193,14 @@ type
 
     procedure CreatePole;
     function DoStep:Boolean;
+    procedure FillRounds;
+    procedure FillSeasons;
     function FindRiderInPole(const ARider:Integer):Integer;
     procedure InitPoleData;
     procedure InitRaceData;
     procedure RefillCharts;
+    function MotoGPSeason:String;
+    function Season:String;
     procedure SetCurrentLap(const ACurrent:Integer);
     procedure SetDashboard;
     procedure SetTeeCanvas(const AClass:TTeeCanvasClass);
@@ -240,8 +253,11 @@ end;
 procedure TMainForm.BStartClick(Sender: TObject);
 begin
   BStart.Enabled:=False;
-
   BRandomPole.Enabled:=False;
+
+  CBSeasons.Enabled:=False;
+  CBRounds.Enabled:=False;
+  CBRace.Enabled:=False;
 
   StartCount:=0;
 
@@ -266,6 +282,10 @@ begin
   Race.Ellapsed.Stop;
 
   BRandomPole.Enabled:=True;
+
+  CBSeasons.Enabled:=True;
+  CBRounds.Enabled:=True;
+  CBRace.Enabled:=True;
 end;
 
 procedure TMainForm.Button1Click(Sender: TObject);
@@ -302,6 +322,38 @@ begin
 
   Circuit.Walls.Visible:=GIS.Visible;
   Circuit.Axes.Visible:=GIS.Visible;
+end;
+
+procedure TMainForm.CBRaceChange(Sender: TObject);
+begin
+  Race.TotalLaps:=StrToInt(RoundsData.Cells[3+CBRace.ItemIndex,CBRounds.ItemIndex]);
+  SetCurrentLap(0);
+end;
+
+procedure TMainForm.CBSeasonsChange(Sender: TObject);
+begin
+  PilotsData:=TCSVDataImport.FromFile(MotoGPSeason+'\Pilots.txt',True,',','');
+  Pilots.Data:=PilotsData;
+
+  SetupPilotGrid(Pilots,0,-1);
+
+  Pilots.Columns['Color'].Hide;
+
+  TiresGrid.Data:=TCSVDataImport.FromFile(MotoGPSeason+'\Tires.txt');
+
+  RoundsData:=TCSVDataImport.FromFile(MotoGPSeason+'\Rounds.txt');
+  ChampionGrid.Data:=RoundsData;
+
+  FillRounds;
+
+  CBRounds.ItemIndex:=0;
+  CBRaceChange(Self);
+
+  CreatePole;
+
+  PoleGrid.Columns[1].Width.Value:=40;
+
+  PoleGrid.Invalidate;
 end;
 
 procedure TMainForm.Chart2GetAxisLabel(Sender: TChartAxis; Series: TChartSeries;
@@ -356,7 +408,7 @@ procedure TMainForm.CircuitAfterDraw(Sender: TObject);
     if ID='' then
        result:=''
     else
-       result:=TFile.ReadAllText(MotoGP+'\Circuits\'+ID+'.svg');
+       result:=TFile.ReadAllText(MotoGP+'\Circuits\Paths\'+ID+'.svg');
   end;
 
   procedure AddCurves(const ACurves:Array of TCurve);
@@ -708,9 +760,6 @@ begin
   end;
 end;
 
-const
-  Season='2026';
-
 procedure TMainForm.TrySetGISBounds;
 var tmp : TArray<String>;
     Old : Char;
@@ -735,6 +784,33 @@ begin
   end;
 end;
 
+function TMainForm.Season:String;
+begin
+  result:=CBSeasons.Text;
+end;
+
+function TMainForm.MotoGPSeason:String;
+begin
+  result:=MotoGP+'\Seasons\'+Season;
+end;
+
+procedure TMainForm.FillRounds;
+var t : Integer;
+begin
+  CBRounds.Clear;
+
+  for t:=0 to RoundsData.Count-1 do
+      CBRounds.Items.Add(RoundsData[1,t]);
+end;
+
+procedure TMainForm.FillSeasons;
+begin
+  CBSeasons.Clear;
+
+  for var S in TDirectory.GetDirectories(MotoGP+'\Seasons') do
+      CBSeasons.Items.Add(ExtractFileName(S));
+end;
+
 procedure TMainForm.FormShow(Sender: TObject);
 begin
   PoleGrid.ParentFont:=True;
@@ -743,30 +819,22 @@ begin
   ChampionGrid.ParentFont:=True;
   BikeGrid.ParentFont:=True;
   TiresGrid.ParentFont:=True;
+  AllPilotsGrid.ParentFont:=True;
 
-  PilotsData:=TCSVDataImport.FromFile(MotoGP+'\'+Season+'\Pilots.txt',True,',','');
-  Pilots.Data:=PilotsData;
-
-  SetupPilotGrid(Pilots,0,-1);
-
-  Pilots.Columns['Color'].Hide;
+  AllPilotsGrid.Data:=TCSVDataImport.FromFile(MotoGP+'\AllPilots.txt');
 
   SensorsData:=TCSVDataImport.FromFile(MotoGP+'\Sensors.txt');
   Sensors.Data:=SensorsData;
 
-  CircuitsData:=TCSVDataImport.FromFile(MotoGP+'\Circuits.txt');
+  CircuitsData:=TCSVDataImport.FromFile(MotoGP+'\Circuits\Circuits.txt');
   Circuits.Data:=CircuitsData;
 
   Circuits.Selected.Row:=5; // Montmeló, Barcelona, Catalunya
 
-  TiresGrid.Data:=TCSVDataImport.FromFile(MotoGP+'\Tires.txt');
+  FillSeasons;
 
-  SeasonData:=TCSVDataImport.FromFile(MotoGP+'\'+Season+'\Rounds.txt');
-  ChampionGrid.Data:=SeasonData;
-
-  CreatePole;
-
-  PoleGrid.Columns[1].Width.Value:=40;
+  CBSeasons.ItemIndex:=CBSeasons.Items.IndexOf(IntToStr(CurrentYear));
+  CBSeasonsChange(Self);
 
   Circuit.Axes.Visible:=False;
 
@@ -816,7 +884,7 @@ begin
   Race.Weather.CalculateAirDensity(Race.Circuit.Elevation);
 
   RearBike:=TPngImage.Create;
-  RearBike.LoadFromFile(MotoGP+'\rear_bike.png');
+  RearBike.LoadFromFile(MotoGP+'\Images\rear_bike.png');
 end;
 
 procedure TMainForm.FrontView1Click(Sender: TObject);
@@ -1092,11 +1160,26 @@ begin
   tmp:=PoleGrid.Selected.Row;
 
   if tmp=-1 then
-     FrontView.Title.Caption:=''
-  else
-     FrontView.Title.Caption:=Pole.Cells[1,tmp]+' '+Pole.Cells[2,tmp];
+  begin
+    FrontView.Title.Caption:='';
 
-   FrontView.Invalidate;
+    TabLapTimes.TabVisible:=False;
+    LapTimesGrid.Data:=nil;
+  end
+  else
+  begin
+    FrontView.Title.Caption:=Pole.Cells[1,tmp]+' '+Pole.Cells[2,tmp];
+
+    TabLapTimes.TabVisible:=True;
+
+    LapsTimeData:=TStringsData.Create(2,Race.TotalLaps);
+    LapTimesGrid.Data:=LapsTimeData;
+
+    LapTimesGrid.Columns[0].Header.Text:='Lap';
+    LapTimesGrid.Columns[1].Header.Text:='Time';
+  end;
+
+  FrontView.Invalidate;
 end;
 
 procedure TMainForm.SemaphorAfterDraw(Sender: TObject);
@@ -1108,8 +1191,13 @@ begin
     Pen.Color:=clBlack;
     Pen.Width:=1;
 
-    for t:=0 to Min(4,StartCount-1) do
+    for t:=0 to 4 do
     begin
+      if StartCount<=t then
+         Brush.Style:=bsClear
+      else
+         Brush.Style:=bsSolid;
+
       Ellipse(12+t*14,8,22+t*14,20);
     end;
   end;
@@ -1153,7 +1241,7 @@ var tmp : String;
 begin
   tmp:=LBBikes.Items[LBBikes.ItemIndex];
 
-  BikeData:=TCSVDataImport.FromFile(MotoGP+'\'+Season+'\Bikes\'+tmp+'\Parameters.txt',True,',','');
+  BikeData:=TCSVDataImport.FromFile(MotoGPSeason+'\Bikes\'+tmp+'\Parameters.txt',True,',','');
   BikeGrid.Data:=BikeData;
 
   Torque.FillSample(DefaultBike.Torque);
@@ -1187,7 +1275,7 @@ end;
 
 procedure TMainForm.SetCurrentLap(const ACurrent:Integer);
 begin
-  CurrentLap.Caption:=IntToStr(ACurrent)+' of '+IntToStr(TotalLaps.Position);
+  CurrentLap.Caption:=IntToStr(ACurrent)+' of '+IntToStr(Race.TotalLaps);
 end;
 
 procedure TMainForm.StartRace;
@@ -1219,8 +1307,6 @@ procedure TMainForm.StartRace;
 
 var t : Integer;
 begin
-  Race.TotalLaps:=TotalLaps.Position;
-
   CursorLap.Value:=0;
 
   InitRaceData;
@@ -1229,7 +1315,7 @@ begin
 
   Race.RiderEndsLap:=procedure(Rider,Lap:Integer)
   begin
-    if Lap<=TotalLaps.Position then
+    if Lap<=Race.TotalLaps then
     begin
       if Race.Current<Lap then
       begin
@@ -1249,6 +1335,9 @@ begin
         Pole.Cells[5,Rider]:='';
         Pole.Cells[6,Rider]:='';
       end;
+
+      LapsTimeData.Cells[0,Lap-1]:=IntToStr(Lap);
+      LapsTimeData.Cells[1,Lap-1]:=Pole.Cells[4,Rider]; // Last
 
       TowerLapRider.Value[Lap-1,Rider]:=Race.Riders[Rider].Ellapsed[Lap-1];
     end;

@@ -23,29 +23,24 @@ object MainForm: TMainForm
     Height = 41
     Align = alTop
     TabOrder = 0
-    object Label2: TLabel
-      Left = 408
-      Top = 13
-      Width = 53
-      Height = 15
-      Caption = 'Total laps:'
-    end
+    ExplicitLeft = -16
+    ExplicitTop = -5
     object CurrentLap: TLabel
-      Left = 560
+      Left = 771
       Top = 13
       Width = 54
       Height = 15
       Caption = 'Lap: 0 of 0'
     end
     object Label1: TLabel
-      Left = 660
+      Left = 844
       Top = 13
-      Width = 74
+      Width = 46
       Height = 15
-      Caption = 'Race Ellapsed:'
+      Caption = 'Ellapsed:'
     end
     object LRaceEllapsed: TLabel
-      Left = 744
+      Left = 896
       Top = 13
       Width = 57
       Height = 15
@@ -80,28 +75,9 @@ object MainForm: TMainForm
       TabOrder = 2
       OnClick = BStopClick
     end
-    object Edit1: TEdit
-      Left = 467
-      Top = 10
-      Width = 52
-      Height = 23
-      TabOrder = 3
-      Text = '12'
-      OnChange = Edit1Change
-    end
-    object TotalLaps: TUpDown
-      Left = 519
-      Top = 10
-      Width = 16
-      Height = 23
-      Associate = Edit1
-      Min = 1
-      Position = 12
-      TabOrder = 4
-    end
     object Semaphor: TChart
       Left = 101
-      Top = 12
+      Top = 13
       Width = 61
       Height = 22
       BackWall.Brush.Gradient.Direction = gdBottomTop
@@ -156,9 +132,40 @@ object MainForm: TMainForm
       TopAxis.Title.Font.Name = 'Verdana'
       View3DWalls = False
       OnAfterDraw = SemaphorAfterDraw
-      TabOrder = 5
+      TabOrder = 3
       DefaultCanvas = 'TGDIPlusCanvas'
       ColorPaletteIndex = 13
+    end
+    object CBSeasons: TComboBox
+      Left = 369
+      Top = 12
+      Width = 80
+      Height = 23
+      Style = csDropDownList
+      TabOrder = 4
+      OnChange = CBSeasonsChange
+    end
+    object CBRounds: TComboBox
+      Left = 464
+      Top = 12
+      Width = 193
+      Height = 23
+      Style = csDropDownList
+      TabOrder = 5
+    end
+    object CBRace: TComboBox
+      Left = 672
+      Top = 12
+      Width = 73
+      Height = 23
+      Style = csDropDownList
+      ItemIndex = 0
+      TabOrder = 6
+      Text = 'Sprint'
+      OnChange = CBRaceChange
+      Items.Strings = (
+        'Sprint'
+        'Full Race')
     end
   end
   object PanelFull: TPanel
@@ -319,7 +326,7 @@ object MainForm: TMainForm
           Top = 308
           Width = 313
           Height = 312
-          ActivePage = TabSheet1
+          ActivePage = TabFrontView
           Align = alClient
           TabOrder = 1
           ExplicitTop = 305
@@ -696,6 +703,7 @@ object MainForm: TMainForm
           ParentBackground = False
           ParentColor = False
           TabOrder = 0
+          ExplicitLeft = 1
           _Headers = (
             1
             'TColumnHeaderBand'
@@ -741,13 +749,39 @@ object MainForm: TMainForm
               end>)
         end
       end
+      object TabAllPilots: TTabSheet
+        Caption = 'All Pilots'
+        ImageIndex = 3
+        object AllPilotsGrid: TTeeGrid
+          Left = 0
+          Top = 0
+          Width = 313
+          Height = 620
+          Columns = <>
+          Align = alClient
+          UseDockManager = False
+          ParentBackground = False
+          ParentColor = False
+          TabOrder = 0
+          ExplicitLeft = -40
+          ExplicitTop = 184
+          ExplicitWidth = 400
+          ExplicitHeight = 250
+          _Headers = (
+            1
+            'TColumnHeaderBand'
+            <
+              item
+              end>)
+        end
+      end
     end
     object PageControl1: TPageControl
       Left = 324
       Top = 0
       Width = 449
       Height = 650
-      ActivePage = TabSheet3
+      ActivePage = TabChampionShip
       Align = alClient
       TabOrder = 1
       OnChange = PageControl1Change
@@ -962,6 +996,7 @@ object MainForm: TMainForm
           ParentBackground = False
           ParentColor = False
           TabOrder = 0
+          ExplicitLeft = 1
           _Headers = (
             1
             'TColumnHeaderBand'
@@ -989,6 +1024,7 @@ object MainForm: TMainForm
             'Yamaha')
           TabOrder = 0
           OnClick = LBBikesClick
+          ExplicitLeft = 2
         end
         object PageControl5: TPageControl
           Left = 121
@@ -1102,11 +1138,21 @@ object MainForm: TMainForm
         TabOrder = 0
         object TabRace: TTabSheet
           Caption = 'Race'
+          object Splitter4: TSplitter
+            Left = 0
+            Top = 422
+            Width = 318
+            Height = 3
+            Cursor = crVSplit
+            Align = alBottom
+            ExplicitTop = 0
+            ExplicitWidth = 384
+          end
           object PoleGrid: TTeeGrid
             Left = 0
             Top = 0
             Width = 318
-            Height = 577
+            Height = 381
             Columns = <>
             OnSelect = PoleGridSelect
             Align = alClient
@@ -1114,6 +1160,7 @@ object MainForm: TMainForm
             ParentBackground = False
             ParentColor = False
             TabOrder = 0
+            ExplicitLeft = -2
             _Headers = (
               1
               'TColumnHeaderBand'
@@ -1123,11 +1170,13 @@ object MainForm: TMainForm
           end
           object Panel4: TPanel
             Left = 0
-            Top = 577
+            Top = 381
             Width = 318
             Height = 41
             Align = alBottom
             TabOrder = 1
+            ExplicitLeft = 3
+            ExplicitTop = 334
             object BRandomPole: TButton
               Left = 9
               Top = 6
@@ -1136,6 +1185,55 @@ object MainForm: TMainForm
               Caption = 'Random'
               TabOrder = 0
               OnClick = BRandomPoleClick
+            end
+          end
+          object PageControl6: TPageControl
+            Left = 0
+            Top = 425
+            Width = 318
+            Height = 193
+            ActivePage = TabLapTimes
+            Align = alBottom
+            TabOrder = 2
+            object TabLapTimes: TTabSheet
+              Caption = 'Lap Times'
+              object LapTimesGrid: TTeeGrid
+                Left = 0
+                Top = 0
+                Width = 310
+                Height = 163
+                Cells.Format.Font.Name = 'Segoe UI'
+                Cells.Format.Font.Size = 9.000000000000000000
+                Columns = <>
+                Header.Format.Font.Name = 'Segoe UI'
+                Header.Format.Font.Size = 9.000000000000000000
+                Rows.Format.Font.Name = 'Segoe UI'
+                Rows.Format.Font.Size = 9.000000000000000000
+                Rows.Hover.Format.Font.Name = 'Segoe UI'
+                Rows.Hover.Format.Font.Size = 9.000000000000000000
+                Selected.Format.Font.Name = 'Segoe UI'
+                Selected.Format.Font.Size = 9.000000000000000000
+                Selected.UnFocused.Format.Font.Name = 'Segoe UI'
+                Selected.UnFocused.Format.Font.Size = 9.000000000000000000
+                Align = alClient
+                ParentFont = True
+                UseDockManager = False
+                ParentBackground = False
+                ParentColor = False
+                TabOrder = 0
+                ExplicitLeft = -48
+                ExplicitTop = -40
+                ExplicitWidth = 400
+                ExplicitHeight = 250
+                _Headers = (
+                  1
+                  'TColumnHeaderBand'
+                  <
+                    item
+                      Format.Font.Name = 'Segoe UI'
+                      Format.Font.Size = 9.000000000000000000
+                    end>)
+              end
             end
           end
         end

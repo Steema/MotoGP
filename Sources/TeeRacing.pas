@@ -12,7 +12,7 @@ uses
   Windows, SysUtils, Types, Graphics, TeCanvas, Diagnostics;
 
 const
-  RealTimeFactor = 0.2; // 5 times per second (no realtime)
+  RealTimeFactor = 0.1; // 5 times per second (no realtime)
 
 type
   TWeatherStyle=(wsDry, wsWet, wsRain);
@@ -102,10 +102,17 @@ type
     Horses : Single; // CV
     Watts : Single; // Watts
 
-    MaxRPM : Integer; // 14000
+    MaxRPM : Integer; // 18000
     IdleRPM : Integer; // 4000
+    GearUpRPM : Integer; // 17200
+    GearDownRPM : Integer; // 11000
 
     Torque : TTorqueCurve;
+
+    PrimaryRatio : Single; // 1.65
+    FinalDrive : Single; // 3.28  =   46/14  Rear/Front Sprocket Teeth
+
+    MaxGear : Integer; // 7
     GearRatios : TGearRatios;
 
     Front : TBikeFrontBack;
@@ -140,6 +147,8 @@ type
 
     TotalMass : Single; // Read-only, calculated
 
+    SweatLoss : Single; // Grams, Starts at Zero
+
     // Parameters:
     // Braking : 0..100%  (brakes very soon or too late?)
     // Curve pass:   (fast inside curves?)
@@ -159,7 +168,7 @@ type
   public
     RPM : Integer;
 
-    Clutch : Single; // from 0 to 1
+    Clutch : Boolean; // from 0 to 1
 
     Speed,    // meters/sec   0..140  (0..400 km/h)
     Acceleration,  // -20 .. 20  m/s² (in G: -2 .. 1.2 "g")
@@ -275,14 +284,10 @@ implementation
 uses
   Math;
 
-// Formulas
-
 { Other factors:
 
-   Motor power curve
    Gear relations
    Wheel radius
-   Transmission efficiency 95%
    Wheelie effect
    Slip effect
    Weight transferences
@@ -358,6 +363,8 @@ begin
   // Copy default parameters
   Bike:=DefaultBike;
   Pilot:=DefaultPilot;
+
+  Pilot.SweatLoss:=0;
 end;
 
 function TorqueAtRPM(const Curve:TTorqueCurve; const RPM: Integer): Single;
@@ -417,7 +424,7 @@ begin
 
   RPM:=14000; // Bike.MaxRPM?  // Throttle max
 
-  Clutch:=1;  //
+  Clutch:=True;  // Ready to start
 
   Gear:=1;
 
@@ -485,15 +492,39 @@ begin
 end;
 
 procedure TRiderData.Step(const TimeFactor:Single; var Bike:TBike; var Pilot:TPilot; const Prev: TRiderData);
-const G = 9.81; // Earth Gravity meters/sec2
-      RGear = 5;
-      RFinal = 3;
-      BodyPosition=0.5; // 0..1  1=Standing, 0=Fully Crouched, 0.5=Normal
 
-var Thrust,
-    ThrustTorque,
+{
+  // Clutch phase, calculate two rpm, the wheel and the engine
+  WheelRPM := Bike.Back.Wheel.AngularVelocity * RGear * RFinal * AltresFactors;
+
+  if WheelRPM < 2500 then
+  begin
+    EngineRPM := EngineRPM + (Throttle * 150.0) - 20.0;
+
+    if (EngineRPM < 1200) then EngineRPM := 1200;
+    if (EngineRPM > 5000) then EngineRPM := 5000;
+  end
+  else
+  begin
+    EngineRPM := RodaRPM;
+  end;
+}
+
+  function CalcRPM:Integer;
+  var RadPerSec : Single;
+  begin
+    RadPerSec:=Prev.Speed/(Bike.Back.Wheel*0.5);
+    result:=Round( (RadPerSec / (2 * Pi)) * 60 * Bike.GearRatios[Gear]);
+  end;
+
+const G = 9.81; // Earth Gravity meters/sec2
+      BodyPosition=0.5; // 0..1  1=Standing, 0=Fully Crouched, 0.5=Normal
+      SweatRate=3000/3600; // Grams per second.   3Kg per hour
+
+var Thrust,  // Nm
+    ThrustTorque, // Nm
     TotalGrip,
-    TotalMass,
+    TotalMass, // Kg
     TotalBrakingForce,
     AirResistance,
     MotorTorque, // Nm
@@ -502,10 +533,37 @@ var Thrust,
 begin
   RPM:=Prev.RPM;
 
-  if RPM>Bike.IdleRPM then
+  Gear:=Prev.Gear;
+
+  if RPM>=Bike.IdleRPM then
   begin
+    if Prev.Clutch then
+    begin
+      Clutch:=Prev.Speed<10; // Tricky, keep Clutch until speed is >10m/sec
+      RPM:=Bike.GearUpRPM;
+    end
+    else
+    begin
+      RPM:=CalcRPM;
+
+      if (RPM>=Bike.GearUpRPM) and (Gear<Bike.MaxGear) then
+      begin
+        Inc(Gear);
+        RPM:=CalcRPM;
+      end
+      else
+      if (RPM<=Bike.GearDownRPM) and (Gear>1) then
+      begin
+        if Speed>1 then
+        begin
+          Dec(Gear);
+          RPM:=CalcRPM;
+        end;
+      end;
+    end;
+
     MotorTorque:=TorqueAtRPM(Bike.Torque,RPM);
-    ThrustTorque:=(MotorTorque*RGear*RFinal*0.01*Bike.TransmissionEficiency)/(0.5*Bike.Back.Tire.Diameter*0.01);
+    ThrustTorque:=(MotorTorque * Bike.PrimaryRatio * Bike.GearRatios[Gear] * Bike.FinalDrive * 0.01 * Bike.TransmissionEficiency)/(0.5*Bike.Back.Tire.Diameter*0.01);
   end
   else
   begin
@@ -513,7 +571,9 @@ begin
     ThrustTorque:=0;
   end;
 
-  TotalMass:=Bike.Weight+Bike.Fuel+Pilot.TotalMass;
+  Pilot.SweatLoss:=Pilot.SweatLoss+TimeFactor*SweatRate;
+
+  TotalMass:=Bike.Weight+Bike.Fuel+Pilot.TotalMass-Pilot.SweatLoss;
   TotalGrip:= Bike.Back.Tire.Grip * TotalMass * G;
 
   if Prev.Speed=0 then // Start time
@@ -560,7 +620,6 @@ begin
 
   Position:=Prev.Position+Speed*TimeFactor;
 
-  Gear:=Prev.Gear;
   Throttle:=Prev.Throttle;
 
   // Fuel
@@ -602,6 +661,17 @@ function DefaultGearRatios:TGearRatios;
 begin
   SetLength(result,8);  // 7 Gears + Neutral
 
+  {
+  result[0]:=0;
+  result[1]:=14.2;
+  result[2]:=11.1;
+  result[3]:=9.3;
+  result[4]:=8.1;
+  result[5]:=7.2;
+  result[6]:=6.5;
+  result[7]:=5;
+  }
+
   result[0]:=0;
   result[1]:=2.6;
   result[2]:=2.1;
@@ -619,8 +689,10 @@ begin
   DefaultBike.Horses:=250; // CV
   DefaultBike.Watts:=DefaultBike.Horses*735.5; // Watts
 
-  DefaultBike.MaxRPM:=14000;
+  DefaultBike.MaxRPM:=18000;
   DefaultBike.IdleRPM:=4000;
+  DefaultBike.GearUpRPM:=17200;
+  DefaultBike.GearDownRPM:=11000;
 
   DefaultBike.Back.Wheel:=17; // inch  x 2.54 = 43.18 cm
   DefaultBike.Back.Tire.Grip:=1.7;
@@ -636,6 +708,10 @@ begin
 
   DefaultBike.Torque:=DefaultTorqueCurve;
 
+  DefaultBike.PrimaryRatio:=1.65;
+  DefaultBike.FinalDrive:=46/14; // = 3.28  Rear/Front Sprocket Teeth
+
+  DefaultBike.MaxGear:=7;
   DefaultBike.GearRatios:=DefaultGearRatios;
 
   DefaultBike.TransmissionEficiency:=95; // %
@@ -646,8 +722,6 @@ begin
   DefaultBike.MaxBrakeDeceleration:=15; // m/s²
 
   DefaultBike.MaxLeanAngle:=64; // ° Degree
-
-  // Clutch
 end;
 
 procedure InitDefaultWeather;

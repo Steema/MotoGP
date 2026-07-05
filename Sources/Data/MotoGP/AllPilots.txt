@@ -1,0 +1,177 @@
+Name,Surname,City,Country,Birth,Weight,Height
+Norick,Abe,Tòquio,Japan,07/09/1975,65,1.73
+Pedro,Acosta,Mazarrón,Spain,25/05/2004,62,1.71
+Giacomo,Agostini,Brescia,Italy,16/06/1942,65,1.72
+Senna,Agius,Sydney,Australia,09/06/2005,66,1.75
+Kiyonari,Akiyoshi,Kurume,Japan,12/01/1975,67,1.74
+David,Almansa,Argamasilla de Calatrava,Spain,22/01/2006,53,1.65
+David,Alonso,Madrid,Colombia,25/04/2006,56,1.66
+Dario,Ambrosini,Cesena,Italy,30/04/1918,62,1.68
+Hugh,Anderson,Hamilton,New Zealand,18/01/1936,55,1.63
+Hans,Anscheidt,Königsberg,Germany,23/12/1935,52,1.60
+Haruchika,Aoki,Numazu,Japan,28/03/1976,58,1.65
+Nobuatsu,Aoki,Numazu,Japan,31/08/1971,66,1.76
+Takuma,Aoki,Numazu,Japan,24/02/1974,62,1.72
+Hiroshi,Aoyama,Chiba,Japan,25/10/1981,59,1.66
+Tony,Arbolino,Garbagnate Milanese,Italy,03/08/2000,64,1.77
+Albert,Arenas,Girona,Spain,11/12/1996,62,1.68
+Xavier,Artigas,Sant Andreu de la Barca,Spain,27/05/2003,58,1.71
+Francesco,Bagnaia,Torí,Italy,14/01/1997,67,1.76
+Kork,Ballington,Durban,South Africa,10/04/1951,62,1.68
+Alex,Barros,São Paulo,Brazil,18/10/1970,72,1.74
+Enea,Bastianini,Rímini,Italy,30/12/1997,64,1.68
+Álvaro,Bautista,Talavera de la Reina,Spain,21/11/1984,60,1.69
+Jean-Michel,Bayle,Manosque,France,01/04/1969,72,1.80
+Troy,Bayliss,Taree,Australia,30/03/1969,68,1.74
+Matteo,Bertelle,Monselice,Italy,18/02/2004,56,1.69
+Marco,Bezzecchi,Rímini,Italy,12/11/1998,61,1.74
+Max,Biaggi,Roma,Italy,26/06/1971,63,1.69
+Pier Paolo,Bianchi,Rímini,Italy,11/03/1952,54,1.62
+Brad,Binder,Potchefstroom,South Africa,11/08/1995,63,1.70
+Darryn,Binder,Potchefstroom,South Africa,21/01/1998,68,1.75
+Stefan,Bradl,Augsburg,Germany,29/11/1989,63,1.70
+Dieter,Braun,Ulm,Germany,02/02/1943,65,1.73
+Shane,Byrne,Londres,UK,10/12/1976,69,1.72
+Arón,Canet,Corbera,Spain,30/09/1999,63,1.75
+Loris,Capirossi,Bolonya,Italy,04/04/1973,59,1.65
+Álvaro,Carpe,Múrcia,Spain,10/06/2007,55,1.68
+Ana,Carrasco,Cehegín,Spain,10/03/1997,52,1.56
+Kel,Carruthers,Sydney,Australia,31/05/1938,64,1.70
+Somkiat,Chantra,Chonburi,Thailand,15/12/1998,64,1.72
+Carlos,Checa,Sant Fruitós de Bages,Spain,15/10/1972,73,1.72
+Pierfrancesco,Chili,Bolonya,Italy,20/06/1964,68,1.73
+Sandro,Cortese,Ochsenhausen,Germany,06/01/1990,62,1.69
+Álex,Crivillé,Seva,Spain,04/03/1970,64,1.69
+Cal,Crutchlow,Coventry,UK,29/10/1985,66,1.70
+Lorenzo,Dalla Porta,Prato,Italy,22/06/1997,61,1.68
+Didier,de Radiguès,Lovaina,Belgium,27/03/1958,61,1.70
+Fabio,Di Giannantonio,Roma,Italy,10/10/1998,68,1.75
+Mick,Doohan,Brisbane,Australia,04/06/1965,68,1.75
+Andrea,Dovizioso,Forlimpopoli,Italy,23/03/1986,67,1.67
+Michael,Duhamel,Mont-real,Canada,26/05/1968,68,1.70
+Colin,Edwards,Conroe,USA,27/02/1974,75,1.78
+Toni,Elías,Manresa,Spain,26/03/1983,63,1.62
+Aleix,Espargaró,Granollers,Spain,30/07/1989,65,1.80
+Pol,Espargaró,Granollers,Spain,10/06/1991,63,1.71
+Joel,Esteban,Barcelona,Spain,26/07/2005,56,1.69
+Romano,Fenati,Ascoli Piceno,Italy,15/01/1996,61,1.70
+Adrián,Fernández,Madrid,Spain,31/01/2004,59,1.71
+Augusto,Fernández,Madrid,Spain,23/09/1997,72,1.81
+Raúl,Fernández,Madrid,Spain,23/10/2000,68,1.77
+Carl,Fogarty,Blackburn,UK,01/07/1965,66,1.73
+Dennis,Foggia,Roma,Italy,07/01/2001,62,1.70
+Jonas,Folger,Mühldorf,Germany,13/08/1993,65,1.80
+Taiyo,Furusato,Kanoya,Japan,12/07/2005,57,1.72
+Sergio,García,Borriana,Spain,22/03/2003,63,1.71
+Wayne,Gardner,Wollongong,Australia,11/10/1959,65,1.70
+Sete,Gibernau,Barcelona,Spain,15/12/1972,71,1.77
+Manuel,González,Madrid,Spain,04/08/2002,64,1.72
+Rodney,Gould,Banbury,UK,10/03/1943,62,1.70
+Izan,Guevara,Palma,Spain,28/06/2004,63,1.74
+Sylvain,Guintoli,Montélimar,France,24/06/1982,68,1.79
+Werner,Haas,Augsburg,Germany,30/05/1927,60,1.65
+Noriyuki,Haga,Nagoya,Japan,02/03/1975,66,1.68
+Mike,Hailwood,Great Milton,UK,02/04/1940,74,1.80
+Ron,Haslam,Langley Mill,UK,22/06/1956,66,1.73
+Nicky,Hayden,Owensboro,USA,30/07/1981,69,1.73
+Daniel,Holgado,Sant Vicent del Raspeig,Spain,27/04/2005,58,1.68
+Rupert,Hollaus,Traisen,Austria,04/09/1931,58,1.66
+John,Hopkins,Ramona,USA,22/05/1983,68,1.70
+Bill,Ivy,Maidstone,UK,27/08/1942,54,1.60
+Olivier,Jacque,Evreux,France,29/08/1974,63,1.68
+Mika,Kallio,Valkeakoski,Finland,07/11/1982,60,1.68
+Daijiro,Kato,Saitama,Japan,04/07/1976,51,1.62
+Joel,Kelso,Nambour,Australia,12/06/2003,57,1.68
+Danny,Kent,Tetbury,UK,25/11/1993,64,1.74
+John,Kocinski,Little Rock,USA,20/03/1968,62,1.68
+Regis,Laconi,Saint-Dizier,France,08/07/1975,70,1.76
+Eddie,Lawson,Upland,USA,11/03/1958,68,1.73
+Eugenio,Lazzarini,Urbino,Italy,26/03/1945,52,1.58
+Iker,Lecuona,València,Spain,06/01/2000,70,1.79
+Alonso,López,Madrid,Spain,21/12/2001,64,1.75
+Jorge,Lorenzo,Palma,Spain,04/05/1987,65,1.71
+Alex,Lowes,Lincoln,UK,14/09/1990,68,1.70
+Sam,Lowes,Lincoln,UK,14/09/1990,67,1.70
+Luca,Lunetta,Roma,Italy,27/05/2006,58,1.72
+Thomas,Lüthi,Linden,Switzerland,06/09/1986,65,1.72
+Niall,Mackenzie,Stirling,UK,19/07/1961,61,1.67
+Anton,Mang,Inzell,Germany,29/09/1949,68,1.74
+Luca,Marini,Urbino,Italy,10/08/1997,69,1.84
+Marc,Márquez,Cervera,Spain,17/02/1993,65,1.69
+Álex,Márquez,Cervera,Spain,23/04/1996,65,1.77
+Jorge,Martín,Madrid,Spain,29/01/1998,70,1.68
+Jaume,Masià,Algemesí,Spain,31/10/2000,57,1.66
+Garry,McCoy,Sydney,Australia,18/04/1972,60,1.64
+Jeremy,McWilliams,Belfast,UK,04/04/1964,66,1.71
+Marco,Melandri,Ravenna,Italy,07/08/1982,64,1.66
+Jack,Miller,Townsville,Australia,18/01/1995,64,1.73
+Joan,Mir,Palma,Spain,01/09/1997,69,1.81
+Franco,Morbidelli,Roma,Italy,04/12/1994,64,1.76
+Diogo,Moreira,São Paulo,Brazil,23/04/2004,62,1.69
+David,Muñoz,Sevilla,Spain,15/05/2006,58,1.67
+Takaaki,Nakagami,Chiba,Japan,09/02/1992,70,1.75
+Shinya,Nakano,Chiba,Japan,10/10/1977,61,1.67
+Jorge,Navarro,La Pobla de Vallbona,Spain,03/02/1996,62,1.72
+Ángel,Nieto,Zamora,Spain,25/01/1947,52,1.57
+Scott,Ogden,Doncaster,UK,16/10/2003,58,1.73
+Ai,Ogura,Kiyose,Japan,26/01/2001,62,1.68
+Miguel,Oliveira,Almada,Portugal,04/01/1995,64,1.70
+Deniz,Öncü,Alanya,Turkey,26/07/2003,61,1.68
+Iván,Ortolá,València,Spain,04/08/2004,59,1.72
+Nello,Pagani,Milà,Italy,11/10/1911,63,1.70
+Mattia,Pasini,Rímini,Italy,13/08/1985,65,1.74
+Dani,Pedrosa,Castellar del Vallès,Spain,29/09/1985,51,1.58
+Valentín,Perrone,Buenos Aires,Argentina,13/01/2008,55,1.69
+Danilo,Petrucci,Terni,Italy,24/10/1990,80,1.81
+Tom,Phillis,Sydney,Australia,09/04/1934,60,1.68
+Paolo,Pileri,Terni,Italy,31/07/1944,59,1.66
+Ángel,Piqueras,Ayora,Spain,30/11/2006,57,1.70
+Patrick,Pons,París,France,24/12/1952,66,1.75
+Tarquinio,Provini,Roveleto,Italy,29/05/1933,58,1.65
+Randy,de Puniet,Andrésy,France,14/02/1981,64,1.69
+Fabio,Quartararo,Niça,France,20/04/1999,68,1.77
+Máximo,Quiles,Múrcia,Spain,19/03/2008,53,1.66
+Tito,Rabat,Barcelona,Spain,25/05/1989,64,1.78
+Wayne,Rainey,Downey,USA,23/10/1960,68,1.73
+Marcos,Ramírez,Conil de la Frontera,Spain,16/12/1997,62,1.72
+Phil,Read,Luton,UK,01/01/1939,66,1.72
+Scott,Redding,Quedgeley,UK,04/01/1993,74,1.85
+Jim,Redman,Londres,UK,08/11/1931,65,1.73
+Alex,Rins,Barcelona,Spain,08/12/1995,72,1.76
+Joe,Roberts,Los Angeles,USA,16/06/1997,68,1.80
+Kenny,Roberts,Modesto,USA,31/12/1951,62,1.65
+Kenny,Roberts Jr.,Mountain View,USA,25/07/1973,68,1.70
+Raymond,Roche,Ollioules,France,21/02/1957,67,1.72
+Valentino,Rossi,Urbino,Italy,16/02/1979,69,1.81
+Michel,Rougerie,París,France,21/04/1950,69,1.78
+José Antonio,Rueda,Sevilla,Spain,29/10/2005,56,1.66
+Bruno,Ruffo,Verona,Italy,09/12/1920,60,1.67
+Jean-Philippe,Ruggia,Toló,France,01/10/1965,64,1.70
+Jarno,Saarinen,Turku,Finland,11/12/1945,62,1.69
+Filip,Salač,Mladá Boleslav,Txequia,12/12/2001,68,1.78
+Cecil,Sandford,Ilford,UK,21/02/1928,60,1.68
+Christian,Sarron,Clarmont-Ferrand,France,27/03/1955,62,1.74
+Ayumu,Sasaki,Yokosuka,Japan,04/10/2000,55,1.67
+Kevin,Schwantz,Houston,USA,19/06/1964,71,1.80
+Barry,Sheene,Londres,UK,11/09/1950,60,1.71
+Dave,Simmonds,Londres,UK,25/10/1939,61,1.67
+Marco,Simoncelli,Cattolica,Italy,20/01/1987,76,1.83
+Bradley,Smith,Oxford,UK,28/11/1990,64,1.75
+Freddie,Spencer,Shreveport,USA,20/12/1961,68,1.78
+Ben,Spies,Memphis,USA,11/07/1984,71,1.80
+Casey,Stoner,Southport,Australia,16/10/1985,58,1.71
+Makoto,Tamada,Matsuyama,Japan,04/11/1976,64,1.70
+Luigi,Taveri,Horgen,Switzerland,19/09/1929,54,1.62
+Nicolas,Terol,Alcoi,Spain,27/09/1988,64,1.71
+Kaito,Toba,Fukuoka,Japan,07/04/2000,54,1.65
+Jean-Louis,Tournadre,Clarmont-Ferrand,France,17/11/1958,62,1.68
+Carlo,Ubbiali,Bèrgam,Italy,22/09/1929,52,1.59
+Tohru,Ukawa,Chiba,Japan,18/05/1973,62,1.68
+Collin,Veijer,Staphorst,Netherlands,19/02/2005,59,1.72
+Chris,Vermeulen,Brisbane,Australia,19/06/1982,68,1.75
+Celestino,Vietti,Cirié,Italy,13/10/2001,63,1.73
+Walter,Villa,Castelnuovo Rangone,Italy,13/08/1943,62,1.67
+Maverick,Viñales,Figueres,Spain,12/01/1995,64,1.71
+Anthony,West,Brisbane,Australia,17/07/1981,68,1.74
+Ryusei,Yamanaka,Chiba,Japan,06/11/2001,55,1.67
+Johann,Zarco,Canes,France,16/07/1990,67,1.71
