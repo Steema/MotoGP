@@ -242,7 +242,7 @@ type
 
     Current : Integer; // Current lap (of faster pilot)
 
-    Ellapsed: TStopwatch;
+    Ellapsed: Int64; // Milliseconds from Race Start
 
     Weather : TWeather;
 
@@ -287,7 +287,6 @@ uses
 { Other factors:
 
    Gear relations
-   Wheel radius
    Wheelie effect
    Slip effect
    Weight transferences
@@ -510,11 +509,14 @@ procedure TRiderData.Step(const TimeFactor:Single; var Bike:TBike; var Pilot:TPi
   end;
 }
 
+const
+  InchToCm = 2.54;
+
   function CalcRPM:Integer;
   var RadPerSec : Single;
   begin
-    RadPerSec:=Prev.Speed/(Bike.Back.Wheel*0.5);
-    result:=Round( (RadPerSec / (2 * Pi)) * 60 * Bike.GearRatios[Gear]);
+    RadPerSec:=Prev.Speed/(Bike.Back.Wheel * InchToCm * 0.5 * 0.01);
+    result:=Round( (RadPerSec / (2 * Pi)) * 60 * Bike.GearRatios[Gear] * Bike.FinalDrive * Bike.PrimaryRatio);
   end;
 
 const G = 9.81; // Earth Gravity meters/sec2
@@ -540,6 +542,9 @@ begin
     if Prev.Clutch then
     begin
       Clutch:=Prev.Speed<10; // Tricky, keep Clutch until speed is >10m/sec
+
+      // TODO: Clutch from 0 to 100% during start, first 1.5 seconds
+
       RPM:=Bike.GearUpRPM;
     end
     else
@@ -554,7 +559,7 @@ begin
       else
       if (RPM<=Bike.GearDownRPM) and (Gear>1) then
       begin
-        if Speed>1 then
+        if Prev.Speed>1 then
         begin
           Dec(Gear);
           RPM:=CalcRPM;
@@ -603,6 +608,8 @@ begin
   // TODO: Pacejka's Magic Formula o Magic Formula Tire Model
   RollingFriction:= Bike.Back.Tire.Friction * TotalMass * G;
 
+  // TODO: Tire degradation (weight loss, grip)
+
   FrontBrake:=Prev.FrontBrake;
   BackBrake:=Prev.BackBrake;
 
@@ -629,6 +636,7 @@ begin
   begin
     RPM:=Bike.IdleRPM; // Force stop
     Throttle:=0;
+    Gear:=0;
   end;
 end;
 
