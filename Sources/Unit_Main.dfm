@@ -326,30 +326,6 @@ object MainForm: TMainForm
           ActivePage = TabFrontView
           Align = alClient
           TabOrder = 1
-          ExplicitLeft = -2
-          ExplicitTop = 311
-          object TabSheet1: TTabSheet
-            Caption = 'Circuits'
-            object Circuits: TTeeGrid
-              Left = 0
-              Top = 0
-              Width = 305
-              Height = 282
-              Columns = <>
-              OnSelect = CircuitsSelect
-              Align = alClient
-              UseDockManager = False
-              ParentBackground = False
-              ParentColor = False
-              TabOrder = 0
-              _Headers = (
-                1
-                'TColumnHeaderBand'
-                <
-                  item
-                  end>)
-            end
-          end
           object TabFrontView: TTabSheet
             Caption = 'Front View'
             ImageIndex = 1
@@ -770,11 +746,10 @@ object MainForm: TMainForm
       Top = 0
       Width = 449
       Height = 650
-      ActivePage = TabLap
+      ActivePage = TabSheet1
       Align = alClient
       TabOrder = 1
       OnChange = PageControl1Change
-      ExplicitLeft = 323
       object TabLap: TTabSheet
         Caption = 'Current Lap'
         object LapChart: TChart
@@ -1110,6 +1085,60 @@ object MainForm: TMainForm
               item
                 Format.Font.Name = 'Segoe UI'
                 Format.Font.Size = 9.000000000000000000
+              end>)
+        end
+      end
+      object TabSheet1: TTabSheet
+        Caption = 'Circuits'
+        ImageIndex = 5
+        object Splitter5: TSplitter
+          Left = 0
+          Top = 181
+          Width = 441
+          Height = 3
+          Cursor = crVSplit
+          Align = alBottom
+          ExplicitTop = 0
+          ExplicitWidth = 370
+        end
+        object Circuits: TTeeGrid
+          Left = 0
+          Top = 0
+          Width = 441
+          Height = 181
+          Columns = <>
+          OnSelect = CircuitsSelect
+          Align = alClient
+          UseDockManager = False
+          ParentBackground = False
+          ParentColor = False
+          TabOrder = 0
+          ExplicitLeft = 3
+          ExplicitTop = -3
+          ExplicitHeight = 367
+          _Headers = (
+            1
+            'TColumnHeaderBand'
+            <
+              item
+              end>)
+        end
+        object CurvesGrid: TTeeGrid
+          Left = 0
+          Top = 184
+          Width = 441
+          Height = 436
+          Columns = <>
+          Align = alBottom
+          UseDockManager = False
+          ParentBackground = False
+          ParentColor = False
+          TabOrder = 1
+          _Headers = (
+            1
+            'TColumnHeaderBand'
+            <
+              item
               end>)
         end
       end

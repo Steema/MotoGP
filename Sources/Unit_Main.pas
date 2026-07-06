@@ -60,7 +60,6 @@ type
     TabPole: TTabSheet;
     PoleGrid: TTeeGrid;
     Sensors: TTeeGrid;
-    Circuits: TTeeGrid;
     PoleChart: TChart;
     Semaphor: TChart;
     TimerStart: TTimer;
@@ -84,7 +83,6 @@ type
     Button1: TButton;
     ChampionGrid: TTeeGrid;
     PageControl4: TPageControl;
-    TabSheet1: TTabSheet;
     TabFrontView: TTabSheet;
     FrontView: TChart;
     TabSheet3: TTabSheet;
@@ -130,6 +128,10 @@ type
     Dark1: TMenuItem;
     About1: TMenuItem;
     CurveSpeeds: TPointSeries;
+    TabSheet1: TTabSheet;
+    Circuits: TTeeGrid;
+    CurvesGrid: TTeeGrid;
+    Splitter5: TSplitter;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -184,7 +186,8 @@ type
     SensorsData,
     CircuitsData,
     Pole,
-    LapsTimeData : TStringsData;
+    LapsTimeData,
+    CurvesGridData : TStringsData;
 
     StartCount : Integer;
 
@@ -454,6 +457,7 @@ procedure TMainForm.CircuitAfterDraw(Sender: TObject);
   // Montmeló
   procedure AddCircuitPath;
   var PathFile : String;
+      t : Integer;
   begin
     CircuitPath:=LapChart.Canvas.CreatePath;
 
@@ -465,14 +469,24 @@ procedure TMainForm.CircuitAfterDraw(Sender: TObject);
 
       Race.Circuit.Points:=CircuitPath.Flatten(0.25);
 
-      Race.Circuit.FillCurves(
+      SetLength(Race.Circuit.Curves,CurvesGridData.Count);
 
+      for t:=0 to CurvesGridData.Count-1 do
+      begin
+        Race.Circuit.Curves[t].Position:=StrToFloat(CurvesGridData.Cells[1,t]);
+        Race.Circuit.Curves[t].Name:=CurvesGridData.Cells[2,t];
+        Race.Circuit.Curves[t].Angle:=StrToFloatDef(CurvesGridData.Cells[3,t],0);
+        Race.Circuit.Curves[t].EntrySpeed:=StrToFloatDef(CurvesGridData.Cells[4,t],0);
+        Race.Circuit.Curves[t].ApexPosition:=Race.Circuit.Curves[t].Position+StrToFloatDef(CurvesGridData.Cells[5,t],0);
+      end;
+
+      { Montmeló Curves:
       [620,700,950,1300,1650,1820,2000,2120,2350,2900,3150,3350,3650,3950], // Positions in meters
       ['Elf','2','Renault','Repsol','Seat','6','Würth','8','Campsa','La Caixa','11','Banc Sabadell','Europcar','New Holland'], // Names
       [90,-45,180,90,-135,-15,-90,45,60,-80,-45,90,60,90],  // Angles in degrees
       [100,120,150,105,75,140,115,155,0,85,130,110,125,165],   // Safe entry speed km/h
       [45,30,85,40,25,0,35,45,0,35,0,55,40,60]); // Meters from entry position to Apex
-
+      }
 
       CurveSeries.GetVertAxis.SetMinMax(-180,180);
 
@@ -627,6 +641,13 @@ begin
   Circuit.Invalidate;
 
   TrySetGISBounds;
+
+  if Circuits.Data.Count>0 then
+     if Circuits.Selected.Row>0 then
+     begin
+       CurvesGridData:=TCSVDataImport.FromFile(MotoGP+'\Circuits\Curves\'+CircuitsData[3,Circuits.Selected.Row]+'.txt',True,',','');
+       CurvesGrid.Data:=CurvesGridData;
+     end;
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -868,6 +889,7 @@ begin
   BikeGrid.ParentFont:=True;
   TiresGrid.ParentFont:=True;
   AllPilotsGrid.ParentFont:=True;
+  CurvesGrid.ParentFont:=True;
 
   AllPilotsGrid.Data:=TCSVDataImport.FromFile(MotoGP+'\AllPilots.txt');
 
@@ -1467,6 +1489,7 @@ begin
   ThemeGrid(TiresGrid,clBlack,clWhite);
   ThemeGrid(DataGrid,clBlack,clWhite);
   ThemeGrid(Circuits,clBlack,clWhite);
+  ThemeGrid(CurvesGrid,clBlack,clWhite);
   ThemeGrid(Pilots,clBlack,clWhite);
   ThemeGrid(Sensors,clBlack,clWhite);
   ThemeGrid(AllPilotsGrid,clBlack,clWhite);
