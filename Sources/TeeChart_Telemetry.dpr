@@ -4,7 +4,8 @@ uses
   Vcl.Forms,
   Unit_Main in 'Unit_Main.pas' {MainForm},
   TeeRacing in 'TeeRacing.pas',
-  TeeTorqueCurve in 'TeeTorqueCurve.pas' {FormTorqueCurve};
+  TeeTorqueCurve in 'TeeTorqueCurve.pas' {FormTorqueCurve},
+  TeeRacingAbout in 'TeeRacingAbout.pas' {AboutForm};
 
 {$R *.res}
 

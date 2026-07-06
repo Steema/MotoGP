@@ -9,23 +9,28 @@ unit Unit_Main;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Graphics,
-  System.Types, System.TimeSpan,
+  Windows, Messages, SysUtils, Classes, Graphics, Types, TimeSpan,
 
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.ComCtrls, Vcl.CheckLst,
+  Controls, Forms, Dialogs, StdCtrls, ExtCtrls, ComCtrls, CheckLst, Menus,
 
-  VCLTee.TeEngine, VCLTee.TeCanvas, VCLTee.TeeProcs, VCLTee.Chart,
-  VCLTee.Control, VCLTee.Grid, VCLTee.TeePenDlg,
-  VCLTee.TeeSVGCanvas,
+  TeEngine, TeCanvas, TeeProcs, Chart, Control, Grid, TeePenDlg, TeeSVGCanvas,
+
+  TeeConst,
+
+  {$IF TeeMsg_TeeChartPalette='TeeChart'}
+  {$DEFINE TEEPRO} // <-- TeeChart Lite or Pro ?
+  {$ENDIF}
+
+  {$IFDEF TEEPRO}
+  TeeComma,
+  {$ENDIF}
 
   Tee.GridData.Strings, Tee.Grid.CSV, TeeGIS, TeeRacing, Tee.Painter,
   Tee.Grid.Columns, Tee.GridData.Rtti,
 
   TeeTorqueCurve, PNGImage,
 
-  VCLTee.Series, Vcl.Menus, VCLTee.TeeNumericGauge, VCLTee.TeeGauges,
-  VCLTee.TeeTools, VCLTee.TeeSurfa, VCLTee.TeeLinearGauge, VCLTee.TeeComma;
+  Series, TeeNumericGauge, TeeGauges, TeeTools, TeeSurfa, TeeLinearGauge;
 
 type
   TMainForm = class(TForm)
@@ -33,7 +38,7 @@ type
     TabLap: TTabSheet;
     TabLaps: TTabSheet;
     LapChart: TChart;
-    Chart2: TChart;
+    AllLaps: TChart;
     PanelTop: TPanel;
     BStart: TButton;
     BPause: TButton;
@@ -107,7 +112,6 @@ type
     N2: TMenuItem;
     Debug1: TMenuItem;
     Lean1: TMenuItem;
-    TeeCommander1: TTeeCommander;
     TabTires: TTabSheet;
     TiresGrid: TTeeGrid;
     Splitter3: TSplitter;
@@ -120,6 +124,12 @@ type
     AllPilotsGrid: TTeeGrid;
     CBRounds: TComboBox;
     CBRace: TComboBox;
+    heme1: TMenuItem;
+    Default1: TMenuItem;
+    Clear1: TMenuItem;
+    Dark1: TMenuItem;
+    About1: TMenuItem;
+    CurveSpeeds: TPointSeries;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -153,11 +163,13 @@ type
     procedure FrontViewAfterDraw(Sender: TObject);
     procedure Lean1Click(Sender: TObject);
     procedure TBLeanChange(Sender: TObject);
-    procedure Chart2GetAxisLabel(Sender: TChartAxis; Series: TChartSeries;
+    procedure AllLapsGetAxisLabel(Sender: TChartAxis; Series: TChartSeries;
       ValueIndex: Integer; var LabelText: string);
     procedure Edit1Change(Sender: TObject);
     procedure CBSeasonsChange(Sender: TObject);
     procedure CBRaceChange(Sender: TObject);
+    procedure About1Click(Sender: TObject);
+    procedure Dark1Click(Sender: TObject);
   private
     { Private declarations }
 
@@ -191,6 +203,10 @@ type
 
     SeriesGear : TLineSeries;
 
+    {$IFDEF TEEPRO}
+    TeeCommander1 : TTeeCommander;
+    {$ENDIF}
+
     procedure CreatePole;
     function DoStep:Boolean;
     procedure FillRounds;
@@ -221,7 +237,7 @@ implementation
 uses
   Math, IOUtils, Tee.Format, UITypes,
 
-  TeeGDIPlus, TeeSkia, TeeGLCanvas;
+  TeeGDIPlus, TeeSkia, TeeGLCanvas, TeeRacingAbout;
 
 function HasParameter(const AParameter:String):Boolean;
 var t : Integer;
@@ -239,6 +255,16 @@ end;
 const
   PauseCaption='Pause';
   ResumeCaption='Resume';
+
+procedure TMainForm.About1Click(Sender: TObject);
+begin
+  with TAboutForm.Create(Self) do
+  try
+    ShowModal;
+  finally
+    Free;
+  end;
+end;
 
 procedure TMainForm.BPauseClick(Sender: TObject);
 begin
@@ -278,8 +304,6 @@ begin
 
   TBLean.Enabled:=True;
   DebugLean.Visible:=Lean1.Visible;
-
-  Race.Ellapsed.Stop;
 
   BRandomPole.Enabled:=True;
 
@@ -344,6 +368,9 @@ begin
   RoundsData:=TCSVDataImport.FromFile(MotoGPSeason+'\Rounds.txt');
   ChampionGrid.Data:=RoundsData;
 
+  SetupPilotGrid(ChampionGrid,5,5);
+  SetupPilotGrid(ChampionGrid,6,6);
+
   FillRounds;
 
   CBRounds.ItemIndex:=0;
@@ -356,11 +383,11 @@ begin
   PoleGrid.Invalidate;
 end;
 
-procedure TMainForm.Chart2GetAxisLabel(Sender: TChartAxis; Series: TChartSeries;
+procedure TMainForm.AllLapsGetAxisLabel(Sender: TChartAxis; Series: TChartSeries;
   ValueIndex: Integer; var LabelText: string);
 var tmp : Integer;
 begin
-  if Sender=Chart2.DepthAxis then
+  if Sender=AllLaps.DepthAxis then
      if ValueIndex=-1 then
      begin
        ValueIndex:=StrToInt(LabelText);
@@ -413,9 +440,15 @@ procedure TMainForm.CircuitAfterDraw(Sender: TObject);
 
   procedure AddCurves(const ACurves:Array of TCurve);
   var t : Integer;
+      X : Single;
   begin
     for t:=0 to High(ACurves) do
-        CurveSeries.AddXY(ACurves[t].Position,ACurves[t].Angle,ACurves[t].Name);
+    begin
+      X:=ACurves[t].Position;
+
+      CurveSeries.AddXY(X,ACurves[t].Angle,ACurves[t].Name);
+      CurveSpeeds.AddXY(X,ACurves[t].EntrySpeed/3.6);
+    end;
   end;
 
   // Montmeló
@@ -441,10 +474,13 @@ procedure TMainForm.CircuitAfterDraw(Sender: TObject);
       [45,30,85,40,25,0,35,45,0,35,0,55,40,60]); // Meters from entry position to Apex
 
 
-       CurveSeries.GetVertAxis.SetMinMax(-180,180);
+      CurveSeries.GetVertAxis.SetMinMax(-180,180);
 
       CurveSeries.Clear;
       CurveSeries.Title:='Curves';
+
+      CurveSpeeds.Clear;
+      CurveSpeeds.Title:='Entry Speed';
 
       AddCurves(Race.Circuit.Curves);
 
@@ -605,6 +641,12 @@ begin
      Timer1.Interval:=100;
 
   WindowState:=TWindowState.wsMaximized;
+
+  {$IFDEF TEEPRO}
+  TeeCommander1:=TTeeCommander.Create(Self);
+  TeeCommander1.Parent:=TabLaps;
+  TeeCommander1.Panel:=AllLaps;
+  {$ENDIF}
 end;
 
 procedure Shuffle(var Items:TArray<Integer>);
@@ -747,16 +789,19 @@ var tmp,t : Integer;
 begin
   for t:=0 to AGrid.Data.Count-1 do
   begin
-    f:=AGrid.CellFormat.Cell[t,AColorColumn].Format;
-
     if ANumColumn=-1 then
        tmp:=t
     else
        tmp:=PilotNum(AGrid.Data.AsString(AGrid.Columns[ANumColumn],t));
 
-    f.Brush.Color:=HTMLColor(PilotsData.Cells[4,tmp]);
-    f.Brush.Show;
-    f.Font.Color:=clWhite;
+    if tmp<>-1 then
+    begin
+      f:=AGrid.CellFormat.Cell[t,AColorColumn].Format;
+
+      f.Brush.Color:=HTMLColor(PilotsData.Cells[4,tmp]);
+      f.Brush.Show;
+      f.Font.Color:=clWhite;
+    end;
   end;
 end;
 
@@ -813,6 +858,9 @@ end;
 
 procedure TMainForm.FormShow(Sender: TObject);
 begin
+  LapChart.Axes.FastCalc:=True;
+  AllLaps.Axes.FastCalc:=True;
+
   PoleGrid.ParentFont:=True;
   Pilots.ParentFont:=True;
   Circuits.ParentFont:=True;
@@ -885,6 +933,11 @@ begin
 
   RearBike:=TPngImage.Create;
   RearBike.LoadFromFile(MotoGP+'\Images\rear_bike.png');
+
+  PageControl2.ActivePage:=TabCircuits;
+  PageControl1.ActivePage:=TabLap;
+  PageControl4.ActivePage:=TabFrontView;
+  PageControl3.ActivePage:=TabRace;
 end;
 
 procedure TMainForm.FrontView1Click(Sender: TObject);
@@ -979,9 +1032,11 @@ begin
 
   LapChart.Canvas:=AClass.Create;
   Circuit.Canvas:=AClass.Create;
-  Chart2.Canvas:=AClass.Create;
+  AllLaps.Canvas:=AClass.Create;
   PoleChart.Canvas:=AClass.Create;
   Semaphor.Canvas:=AClass.Create;
+  FrontView.Canvas:=AClass.Create;
+  Dashboard.Canvas:=AClass.Create;
 end;
 
 procedure TMainForm.Skia1Click(Sender: TObject);
@@ -1092,6 +1147,8 @@ procedure TMainForm.RefillCharts;
     SeriesGear.Title:='Gear';
     SeriesThrottle.Title:='Throttle %';
 
+    SeriesGear.Stairs:=True;
+
     // Brakes
     // Tires Temperature and pressure
   end;
@@ -1110,6 +1167,9 @@ procedure TMainForm.RefillCharts;
 var Rider,
     StartLap, t : Integer;
     X : Single;
+
+    tmpGear,
+    tmpNew : Integer;
 begin
   if SeriesSpeed=nil then
   begin
@@ -1127,16 +1187,22 @@ begin
     begin
       SeriesSpeed.GetHorizAxis.SetMinMax(0,Race.Circuit.TotalLength);
 
+      // TODO: Just add new points to series, not re-fill all
+
       SeriesSpeed.BeginUpdate;
       SeriesAcceleration.BeginUpdate;
+      SeriesGear.BeginUpdate;
 
       SeriesSpeed.Clear;
       SeriesAcceleration.Clear;
+      SeriesGear.Clear;
 
       if Race.Riders[Rider].Laps=0 then
          StartLap:=0
       else
          StartLap:=Race.Riders[Rider].LapsTime[Race.Riders[Rider].Laps-1];
+
+      tmpGear:=0;
 
       for t:=StartLap to High(Race.Data) do
       begin
@@ -1144,8 +1210,17 @@ begin
 
         SeriesSpeed.AddXY(X,Race.Data[t].Data[Rider].Speed);
         SeriesAcceleration.AddXY(X,Race.Data[t].Data[Rider].Acceleration);
+
+        tmpNew:=Race.Data[t].Data[Rider].Gear;
+
+        if (tmpNew<>tmpGear) or (t=High(Race.Data)) then
+        begin
+          tmpGear:=tmpNew;
+          SeriesGear.AddXY(X,tmpGear);
+        end;
       end;
 
+      SeriesGear.EndUpdate;
       SeriesAcceleration.EndUpdate;
       SeriesSpeed.EndUpdate;
     end;
@@ -1354,11 +1429,56 @@ begin
     Race.Riders[t].Pilot.Height:=StrToFloat(PilotsData.Cells[6,t]);
   end;
 
-  Race.Ellapsed.Start;
+  Race.Ellapsed:=0;
 
-  Race.Data[0].Time:=Race.Ellapsed.ElapsedMilliseconds;
+  Race.Data[0].Time:=0;
 
   InitTowerLapRider;
+end;
+
+procedure ThemeGrid(const AGrid:TTeeGrid; const ABack,AFont:TColor);
+begin
+  AGrid.Back.Brush.Color:=ABack;
+  AGrid.Cells.Format.Font.Color:=AFont;
+end;
+
+procedure ThemeChart(const AChart:TChart; const ABack,AFont:TColor);
+begin
+  AChart.Gradient.StartColor:=ABack;
+  AChart.Gradient.EndColor:=ABack;
+  AChart.Title.Font.Color:=AFont;
+
+  AChart.Walls.Back.Gradient.Visible:=False;
+  AChart.Walls.Back.Color:=ABack;
+
+  AChart.Axes.Left.Texts.Font.Color:=AFont;
+  AChart.Axes.Right.Texts.Font.Color:=AFont;
+  AChart.Axes.Top.Texts.Font.Color:=AFont;
+  AChart.Axes.Bottom.Texts.Font.Color:=AFont;
+  AChart.Axes.Depth.Texts.Font.Color:=AFont;
+end;
+
+procedure TMainForm.Dark1Click(Sender: TObject);
+begin
+  ThemeGrid(PoleGrid,clBlack,clWhite);
+  ThemeGrid(LapTimesGrid,clBlack,clWhite);
+  ThemeGrid(ChampionGrid,clBlack,clWhite);
+  ThemeGrid(BikeGrid,clBlack,clWhite);
+  ThemeGrid(TiresGrid,clBlack,clWhite);
+  ThemeGrid(DataGrid,clBlack,clWhite);
+  ThemeGrid(Circuits,clBlack,clWhite);
+  ThemeGrid(Pilots,clBlack,clWhite);
+  ThemeGrid(Sensors,clBlack,clWhite);
+  ThemeGrid(AllPilotsGrid,clBlack,clWhite);
+
+  ThemeChart(LapChart,clBlack,clWhite);
+  ThemeChart(Circuit,clBlack,clWhite);
+  ThemeChart(Dashboard,clBlack,clWhite);
+  ThemeChart(FrontView,clBlack,clWhite);
+  ThemeChart(AllLaps,clBlack,clWhite);
+
+  if Torque<>nil then
+     ThemeChart(Torque.Chart1,clBlack,clWhite);
 end;
 
 procedure TMainForm.Dashboard1Click(Sender: TObject);
@@ -1641,15 +1761,16 @@ function TMainForm.DoStep:Boolean;
     PoleGrid.Invalidate;
   end;
 
-var L : Integer;
+var tmp, L : Integer;
 begin
   L:=Length(Race.Data);
   SetLength(Race.Data,L+1);
 
-  if RealTimeFactor=0 then
-     Race.Data[L].Time:=Race.Ellapsed.ElapsedMilliseconds
-  else
-     Race.Data[L].Time:=Race.Data[L-1].Time+Round(1000*RealTimeFactor);
+  tmp:=Round(1000*RealTimeFactor);
+
+  Inc(Race.Ellapsed,tmp);
+
+  Race.Data[L].Time:=Race.Data[L-1].Time+tmp;
 
   SetLength(Race.Data[L].Data,Length(Race.Riders));
 
@@ -1739,7 +1860,7 @@ begin
   else
     BStopClick(Self);
 
-  LRaceEllapsed.Caption:=Race.Ellapsed.Elapsed.ToString;
+  LRaceEllapsed.Caption:=IntToTime(Race.Ellapsed);
 end;
 
 procedure TMainForm.TimerStartTimer(Sender: TObject);
