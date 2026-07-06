@@ -66,13 +66,6 @@ type
 
     Elevation : Single; // Sea level meters
 
-    procedure FillCurves(
-       const APositions:Array of Single;
-       const ANames:Array of String;
-       const Angles:Array of Single;
-       const EntrySpeeds: array of Single;
-       const ApexPositions: array of Single);
-
     function IndexOfPosition(const APosition:Single):Integer; // Index of Points, rounded to near APosition
     function PointPosition(const APosition:Single):TPoint;
   end;
@@ -293,31 +286,6 @@ uses
    Traction controls
 }
 
-
-{ TCircuit }
-
-procedure TCircuit.FillCurves(const APositions: array of Single;
-                              const ANames: array of String;
-                              const Angles: array of Single;
-                              const EntrySpeeds: array of Single;
-                              const ApexPositions: array of Single);
-var L,t : Integer;
-begin
-  Curves:=nil;
-
-  L:=High(APositions);
-
-  SetLength(Curves,L+1);
-
-  for t:=0 to L do
-  begin
-    Curves[t].Position:=APositions[t];
-    Curves[t].Name:=ANames[t];
-    Curves[t].Angle:=Angles[t];
-    Curves[t].EntrySpeed:=EntrySpeeds[t];
-    Curves[t].ApexPosition:=Curves[t].Position+ApexPositions[t];
-  end;
-end;
 
 { TCircuit }
 
