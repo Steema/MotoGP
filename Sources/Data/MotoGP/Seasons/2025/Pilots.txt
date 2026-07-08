@@ -1,0 +1,22 @@
+Code,Number,Team,Weight
+JM1,1,Aprilia Racing,63
+JZ5,5,LCR Honda,65
+LM10,10,Honda HRC Castrol,69
+MV12,12,Red Bull KTM Tech3,64
+FQ20,20,Monster Energy Yamaha MotoGP,69
+FM21,21,Pertamina Enduro VR46 Racing Team,67
+EB23,23,Red Bull KTM Tech3,64
+RF25,25,Trackhouse MotoGP Team,63
+BB33,33,Red Bull KTM Factory Racing,63
+JM36,36,Honda HRC Castrol,60
+PA37,37,Red Bull KTM Factory Racing,62
+AR42,42,Monster Energy Yamaha MotoGP,68
+JM43,43,Prima Pramac Yamaha,64
+FD49,49,Pertamina Enduro VR46 Racing Team,68
+FA54,54,Gresini Racing MotoGP,65
+FB63,63,Ducati Lenovo Team,64
+MB72,72,Aprilia Racing,61
+AM73,73,Gresini Racing MotoGP,65
+TR7,7,Prima Pramac Yamaha,68
+AO79,79,Trackhouse MotoGP Team,60
+MM93,93,Ducati Lenovo Team,64
