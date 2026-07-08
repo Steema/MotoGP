@@ -24,6 +24,9 @@ type
     Humidity : Single; // %
     Style : TWeatherStyle; // wsDry
 
+    Wind : Single; // km/h
+    WindDirection : Single; // 0..360 Degree 0=North, 90=East, 180=South, 270=West
+
     AirDensity: Single; // Pending to calculate = 1.225; //  kg/m3
 
     procedure Init;
@@ -38,6 +41,7 @@ type
     EntrySpeed : Single; // km/h safe entry speed, with Dry Track and not super-hot asphalt
 
     ApexPosition : Single; // Position of Apex in meters
+    Slope : Single; // In degrees, from last curve
   end;
 
   TTire=record
@@ -233,7 +237,10 @@ type
 
     RiderEndsLap : TProc<Integer,Integer>; // Rider,Lap
 
-    Current : Integer; // Current lap (of faster pilot)
+    Fastest : Integer; // Index of Rider that has the Fastest Lap in this Race
+    FastestTime : Int64; // Time of the best lap of Fastest rider
+
+    Current : Integer; // Current lap (of 1st pilot)
 
     Ellapsed: Int64; // Milliseconds from Race Start
 
@@ -242,6 +249,8 @@ type
     Data : TAllRaceData;
 
     Riders : Array of TRider;
+
+    procedure Init;
   end;
 
 var
@@ -400,7 +409,6 @@ begin
   FrontBrake:=0;
   BackBrake:=0;
 
-  Acceleration:=0.7+Random(30)*0.01;
   Position:=StartPosition; // Finish line - pole grid position in meters
 end;
 
@@ -573,8 +581,10 @@ begin
 
   AirResistance:=0.5 * DefaultWeather.AirDensity * Bike.CdAeroDynamic * Bike.FrontArea * PilotBodyFactor * Sqr(Prev.Speed);
 
+  // TODO: Apply wind and wind-direction to AirResistance, SideResistance
+
   // TODO: Pacejka's Magic Formula o Magic Formula Tire Model
-  RollingFriction:= Bike.Back.Tire.Friction * TotalMass * G;
+  RollingFriction:= Bike.Back.Tire.Friction * TotalMass * G;  // TODO slope positive or negative: * Sin(Slope)
 
   // TODO: Tire degradation (weight loss, grip)
 
@@ -598,7 +608,7 @@ begin
   Throttle:=Prev.Throttle;
 
   // Fuel
-  Bike.Fuel:=Bike.Fuel-0.001*CalculateInstantFuelConsumption(MotorTorque,RPM,Throttle);
+  Bike.Fuel:=Bike.Fuel-0.001*CalculateInstantFuelConsumption(MotorTorque,RPM,Throttle)*TimeFactor;
 
   if Bike.Fuel<=0 then
   begin
@@ -805,6 +815,11 @@ begin
   AirTemperature:=24.5;
   TrackTemperature:=40;
   Humidity:=50;
+
+  // No wind
+  Wind:=0;
+  WindDirection:=0;
+
   AirDensity:=1.225; // kg/m3
 end;
 
@@ -905,6 +920,21 @@ begin
   if Result < -MaxLean then Result := -MaxLean;
 end;
 
+
+{ TRace }
+
+procedure TRace.Init;
+var t : Integer;
+begin
+  Fastest:=-1;
+  FastestTime:=0;
+
+  SetLength(Data,1);
+  SetLength(Data[0].Data,Length(Riders));
+
+  for t:=0 to High(Riders) do
+      Data[0].Data[t].Init(Riders[t].Pole*3);
+end;
 
 initialization
   InitDefaultBike;
