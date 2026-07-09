@@ -9,7 +9,7 @@ unit TeeRacing;
 interface
 
 uses
-  Windows, SysUtils, Types, Graphics, TeCanvas, Diagnostics;
+  Windows, SysUtils, Types, TeCanvas;
 
 const
   RealTimeFactor = 0.1; // 5 times per second (no realtime)
@@ -57,6 +57,8 @@ type
     Abrasiveness : Single; // Micro / Macro  0.5 mm ... 2.0 mm
   end;
 
+  //TPointFloatArray=Array of TPointFloat;
+
   TCircuit=record
   public
     Curves : Array of TCurve;
@@ -65,7 +67,7 @@ type
 
     TotalLength : Single; // Total length of circuit
 
-    PolePosition : Single; // Meters from Finish to Start
+    PolePosition : Single; // Offset Meters only to draw pilots at the Circuit path
     PolePositionIndex : Integer; // Index of Pole position point in circuit path
 
     Elevation : Single; // Sea level meters
@@ -78,7 +80,7 @@ type
   public
     Wheel : Single; // Inches diameter
     Tire : TTire;
-    BrakeForce : Single; // in Newtons
+    BrakeForce : Single; // m/s²   3 .. 19.0 front,   3 .. 12.5 back
   end;
 
   TGearRatios=Array of Single; // Ratio for every Gear, 0=Neutral
@@ -92,6 +94,9 @@ type
   TTorqueCurve=Array of TTorqueAtRPM;
 
   TBike=record
+    Code,
+    Factory : String;
+
     Weight : Single; // kg
 
     Fuel : Single; // kg
@@ -105,6 +110,7 @@ type
     GearDownRPM : Integer; // 11000
 
     Torque : TTorqueCurve;
+    MaxTorqueNm : Single; //  Nm  (maximum at peak of curve)
 
     PrimaryRatio : Single; // 1.65
     FinalDrive : Single; // 3.28  =   46/14  Rear/Front Sprocket Teeth
@@ -115,15 +121,33 @@ type
     Front : TBikeFrontBack;
     Back : TBikeFrontBack;
 
-    TransmissionEficiency: Single; // = 95; // %
+    TransmissionEfficiency: Single; // = 95; // %
+
+    Wheelbase : Integer; // mm  distance between axes   1420..1460
+    // CenterOfMassHeight : Integer; // mm distance from track to center of gravity
+
+    EngineLayout : String; // V4 V2 I4 I2 Single
+
+    WeightDistributionFront : Single; // %    ie: 52% Front (48% Back)
+
     CdAeroDynamic : Single; // 0.3 .. 0.7 coefficient
+
+    AerodynamicDownforce : Single; // DragCoefficient
+
+    // WheelieWingEfficiency : Single;
+
     FrontArea : Single; // 0.5 m²
 
-    MaxBrakeDeceleration : Single; // 15 .. 18 m/s²
+    //MaxBrakeDeceleration : Single; // 15 .. 18 m/s²
 
     MaxLeanAngle : Single; // Degrees 64°
 
+    HasHoleshotDevice : Boolean;
+
     function FuelLiquid : Single; // in cubic centimeters
+
+    class function DefaultGearRatios:TGearRatios; static;
+    class function DefaultTorqueCurve:TTorqueCurve; static;
   end;
 
   TPilot=record
@@ -202,6 +226,8 @@ type
     Data : TAllRidersData; // all riders at a given exact time
   end;
 
+  TColor=UInt32;
+
   TRider=record
   public
     Active : Boolean;  // in race, not crashed or out or at pitbox
@@ -254,7 +280,6 @@ type
   end;
 
 var
-  DefaultBike : TBike;
   DefaultPilot : TPilot;
   DefaultWeather : TWeather;
 
@@ -303,7 +328,7 @@ var L : Integer;
 begin
   L:=Length(Points);
 
-  result:=(PolePositionIndex+Round(APosition*(1+L)/TotalLength)) mod L;
+  result:=Round(APosition*(1+L)/TotalLength) mod L;
 end;
 
 function TCircuit.PointPosition(const APosition:Single):TPoint;
@@ -336,8 +361,6 @@ begin
 
   NextCurve:=1; // At Start
 
-  // Copy default parameters
-  Bike:=DefaultBike;
   Pilot:=DefaultPilot;
 
   Pilot.SweatLoss:=0;
@@ -544,7 +567,7 @@ begin
     end;
 
     MotorTorque:=TorqueAtRPM(Bike.Torque,RPM);
-    ThrustTorque:=(MotorTorque * Bike.PrimaryRatio * Bike.GearRatios[Gear] * Bike.FinalDrive * 0.01 * Bike.TransmissionEficiency)/(0.5*Bike.Back.Tire.Diameter*0.01);
+    ThrustTorque:=(MotorTorque * Bike.PrimaryRatio * Bike.GearRatios[Gear] * Bike.FinalDrive * 0.01 * Bike.TransmissionEfficiency)/(0.5*Bike.Back.Tire.Diameter*0.01);
   end
   else
   begin
@@ -591,6 +614,7 @@ begin
   FrontBrake:=Prev.FrontBrake;
   BackBrake:=Prev.BackBrake;
 
+  // Newtons
   TotalBrakingForce:=(Bike.Front.BrakeForce*FrontBrake*0.01)+(Bike.Back.BrakeForce*BackBrake*0.01);
 
   if TotalBrakingForce>0 then
@@ -631,7 +655,9 @@ begin
      BackBrake := 0;
 end;
 
-function DefaultTorqueCurve:TTorqueCurve;
+{ TBike }
+
+class function TBike.DefaultTorqueCurve:TTorqueCurve;
 begin
   SetLength(result,6);
 
@@ -643,76 +669,17 @@ begin
   result[5].RPM:=18000; result[5].Nm:= 90;
 end;
 
-function DefaultGearRatios:TGearRatios;
+class function TBike.DefaultGearRatios:TGearRatios;
 begin
-  SetLength(result,8);  // 7 Gears + Neutral
+  SetLength(result,7);  // 6 Gears + Neutral
 
-  {
-  result[0]:=0;
-  result[1]:=14.2;
-  result[2]:=11.1;
-  result[3]:=9.3;
-  result[4]:=8.1;
-  result[5]:=7.2;
-  result[6]:=6.5;
-  result[7]:=5;
-  }
-
-  result[0]:=0;
+  result[0]:=0;  // Neutral
   result[1]:=2.6;
   result[2]:=2.1;
   result[3]:=1.75;
   result[4]:=1.5;
   result[5]:=1.32;
   result[6]:=1.18;
-  result[7]:=1.1;
-end;
-
-procedure InitDefaultBike;
-begin
-  DefaultBike.Weight:=160; // kg
-  DefaultBike.Fuel:=20; // kg
-  DefaultBike.Horses:=250; // CV
-  DefaultBike.Watts:=DefaultBike.Horses*735.5; // Watts
-
-  DefaultBike.MaxRPM:=18000;
-  DefaultBike.IdleRPM:=4000;
-  DefaultBike.GearUpRPM:=17200;
-  DefaultBike.GearDownRPM:=11000;
-
-  DefaultBike.Back.Wheel:=17; // inch  x 2.54 = 43.18 cm
-  DefaultBike.Back.Tire.Grip:=1.7;
-  DefaultBike.Back.Tire.Diameter:=69; // cm
-  DefaultBike.Back.Tire.Friction:=0.02; // coefficient
-  DefaultBike.Back.BrakeForce:=600.0; // Newtons
-
-  DefaultBike.Front.Wheel:=17; // inch  x 2.54 = 43.18 cm
-  DefaultBike.Front.Tire.Grip:=1.7;
-  DefaultBike.Front.Tire.Diameter:=60; // cm
-  DefaultBike.Front.Tire.Friction:=0.02; // coefficient
-  DefaultBike.Back.BrakeForce:=5200.0; // Newtons, very big due to Carbon Disks
-
-  DefaultBike.Torque:=DefaultTorqueCurve;
-
-  DefaultBike.PrimaryRatio:=1.65;
-  DefaultBike.FinalDrive:=46/14; // = 3.28  Rear/Front Sprocket Teeth
-
-  DefaultBike.MaxGear:=7;
-  DefaultBike.GearRatios:=DefaultGearRatios;
-
-  DefaultBike.TransmissionEficiency:=95; // %
-
-  DefaultBike.CdAeroDynamic:=0.45; // 0.3 .. 0.7 coefficient
-  DefaultBike.FrontArea:=0.5; // 0.5 m²
-
-  DefaultBike.MaxBrakeDeceleration:=15; // m/s²
-
-  DefaultBike.MaxLeanAngle:=64; // ° Degree
-end;
-
-procedure InitDefaultWeather;
-begin
-
 end;
 
 procedure InitDefaultPilot;
@@ -937,7 +904,6 @@ begin
 end;
 
 initialization
-  InitDefaultBike;
   InitDefaultPilot;
   DefaultWeather.Init;
 end.
