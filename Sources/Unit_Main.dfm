@@ -345,7 +345,7 @@ object MainForm: TMainForm
               Left = 0
               Top = 137
               Width = 305
-              Height = 178
+              Height = 137
               BackWall.Brush.Gradient.Direction = gdBottomTop
               BackWall.Brush.Gradient.EndColor = clWhite
               BackWall.Brush.Gradient.StartColor = 15395562
@@ -417,7 +417,8 @@ object MainForm: TMainForm
               OnAfterDraw = FrontViewAfterDraw
               Align = alClient
               TabOrder = 0
-              ExplicitHeight = 104
+              ExplicitLeft = 2
+              ExplicitTop = 138
               DefaultCanvas = 'TGDIPlusCanvas'
               ColorPaletteIndex = 13
             end
@@ -499,6 +500,7 @@ object MainForm: TMainForm
               object SpeedGauge: TNumericGauge
                 Legend.Visible = False
                 ShowInLegend = False
+                ValueFormat = '#,##0#'
                 XValues.Name = 'X'
                 XValues.Order = loAscending
                 YValues.Name = 'Y'
@@ -516,17 +518,16 @@ object MainForm: TMainForm
                   70652E466F6E742E436F6C6F7204282828001153686170652E466F6E742E4865
                   6967687402D00F53686170652E466F6E742E4E616D65060A44532D4469676974
                   616C1353686170652E4672616D652E56697369626C65081453686170652E5368
-                  61646F772E56697369626C65080A53686170652E54657874060634312C313932
-                  1353686170652E54657874416C69676E6D656E74070E746152696768744A7573
-                  746966791153686170652E5472616E73706172656E74090000545046300E544E
-                  756D657269634D61726B65720008506F736974696F6E070A7070526967687454
-                  6F700F53686170652E416C69676E6D656E740708746143656E7465720B536861
-                  70652E436F6C6F7204DBDBC8001053686170652E466F6E742E436F6C6F720428
-                  2828001153686170652E466F6E742E48656967687402E80F53686170652E466F
-                  6E742E4E616D65060A44532D4469676974616C1353686170652E4672616D652E
-                  56697369626C65081453686170652E536861646F772E56697369626C65080A53
-                  686170652E5465787406046B6D2F681153686170652E5472616E73706172656E
-                  74090000}
+                  61646F772E56697369626C65080A53686170652E546578740602343113536861
+                  70652E54657874416C69676E6D656E74070E746152696768744A757374696679
+                  1153686170652E5472616E73706172656E74090000545046300E544E756D6572
+                  69634D61726B65720008506F736974696F6E070A70705269676874546F700F53
+                  686170652E416C69676E6D656E740708746143656E7465720B53686170652E43
+                  6F6C6F7204DBDBC8001053686170652E466F6E742E436F6C6F72042828280011
+                  53686170652E466F6E742E48656967687402E80F53686170652E466F6E742E4E
+                  616D65060A44532D4469676974616C1353686170652E4672616D652E56697369
+                  626C65081453686170652E536861646F772E56697369626C65080A5368617065
+                  2E5465787406046B6D2F681153686170652E5472616E73706172656E74090000}
               end
               object LeanGauge: TGaugeSeries
                 Legend.Visible = False
@@ -668,6 +669,31 @@ object MainForm: TMainForm
                 Frequency = 5
                 TabOrder = 0
                 OnChange = TBLeanChange
+              end
+            end
+            object Panel2: TPanel
+              Left = 0
+              Top = 274
+              Width = 305
+              Height = 41
+              Align = alBottom
+              TabOrder = 3
+              ExplicitLeft = 2
+              object Label4: TLabel
+                Left = 9
+                Top = 10
+                Width = 25
+                Height = 15
+                Caption = 'Bike:'
+              end
+              object CBSelectedBike: TComboBox
+                Left = 41
+                Top = 7
+                Width = 145
+                Height = 23
+                Style = csDropDownList
+                TabOrder = 0
+                OnClick = CBSelectedBikeClick
               end
             end
           end
@@ -888,8 +914,7 @@ object MainForm: TMainForm
           Align = alClient
           TabOrder = 0
           ExplicitLeft = 122
-          ExplicitTop = -2
-          ExplicitHeight = 807
+          ExplicitTop = 39
           DefaultCanvas = 'TGDIPlusCanvas'
           ColorPaletteIndex = 13
           object CurveSeries: TPointSeries
@@ -914,20 +939,6 @@ object MainForm: TMainForm
             XValues.Order = loAscending
             YValues.Name = 'Y'
             YValues.Order = loNone
-          end
-          object SeriesThrottle: TLineSeries
-            Title = 'Throttle'
-            VertAxis = aCustomVertAxis
-            Brush.BackColor = clDefault
-            Pointer.InflateMargins = True
-            Pointer.Style = psRectangle
-            Stairs = True
-            XValues.Name = 'X'
-            XValues.Order = loAscending
-            YValues.Name = 'Y'
-            YValues.Order = loNone
-            CustomVertAxis = 1
-            Data = {0000000000}
           end
           object CursorLap: TColorLineTool
             Pen.Color = 1918068724
@@ -1131,49 +1142,31 @@ object MainForm: TMainForm
       object TabSheet3: TTabSheet
         Caption = 'Bikes'
         ImageIndex = 3
-        object LBBikes: TListBox
+        object PageControl5: TPageControl
           Left = 0
           Top = 0
-          Width = 121
-          Height = 807
-          Align = alLeft
-          ItemHeight = 15
-          Items.Strings = (
-            'Default'
-            'Ducati 26'
-            'Aprilia'
-            'Honda'
-            'KTM'
-            'Yamaha')
-          TabOrder = 0
-          OnClick = LBBikesClick
-          ExplicitHeight = 620
-        end
-        object PageControl5: TPageControl
-          Left = 121
-          Top = 0
-          Width = 546
+          Width = 667
           Height = 807
           ActivePage = TabSheet4
           Align = alClient
-          TabOrder = 1
-          ExplicitWidth = 320
-          ExplicitHeight = 620
+          TabOrder = 0
+          ExplicitLeft = 1
+          ExplicitTop = 1
           object TabSheet4: TTabSheet
             Caption = 'Parameters'
             object BikeGrid: TTeeGrid
               Left = 0
               Top = 0
-              Width = 538
+              Width = 659
               Height = 777
               Columns = <>
+              OnSelect = BikeGridSelect
               Align = alClient
               UseDockManager = False
               ParentBackground = False
               ParentColor = False
               TabOrder = 0
-              ExplicitWidth = 312
-              ExplicitHeight = 590
+              ExplicitLeft = 2
               _Headers = (
                 1
                 'TColumnHeaderBand'
@@ -1182,17 +1175,13 @@ object MainForm: TMainForm
                   end>)
             end
           end
-          object TabTorqueCurve: TTabSheet
-            Caption = 'Torque Curve'
-            ImageIndex = 1
-          end
           object TabTires: TTabSheet
             Caption = 'Tires'
             ImageIndex = 2
             object TiresGrid: TTeeGrid
               Left = 0
               Top = 0
-              Width = 538
+              Width = 659
               Height = 777
               Columns = <>
               Align = alClient
@@ -1398,6 +1387,15 @@ object MainForm: TMainForm
               Caption = 'Random'
               TabOrder = 0
               OnClick = BRandomPoleClick
+            end
+            object CBSingleRider: TCheckBox
+              Left = 112
+              Top = 10
+              Width = 97
+              Height = 17
+              Caption = 'Single Rider'
+              TabOrder = 1
+              OnClick = CBSingleRiderClick
             end
           end
           object PageControl6: TPageControl

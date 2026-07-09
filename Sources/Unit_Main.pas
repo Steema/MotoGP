@@ -87,10 +87,8 @@ type
     TabFrontView: TTabSheet;
     FrontView: TChart;
     TabSheet3: TTabSheet;
-    LBBikes: TListBox;
     PageControl5: TPageControl;
     TabSheet4: TTabSheet;
-    TabTorqueCurve: TTabSheet;
     BikeGrid: TTeeGrid;
     SpeedGauge: TNumericGauge;
     LeanGauge: TGaugeSeries;
@@ -132,7 +130,6 @@ type
     Splitter5: TSplitter;
     TabAllPilots: TTabSheet;
     AllPilotsGrid: TTeeGrid;
-    SeriesThrottle: TLineSeries;
     SiteWeather: TChart;
     rack1: TMenuItem;
     Bike1: TMenuItem;
@@ -143,6 +140,10 @@ type
     CBViewMode: TComboBox;
     EViewLap: TEdit;
     UDViewLap: TUpDown;
+    Panel2: TPanel;
+    Label4: TLabel;
+    CBSelectedBike: TComboBox;
+    CBSingleRider: TCheckBox;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -162,7 +163,6 @@ type
     procedure OpenGL1Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure PoleGridSelect(Sender: TObject);
-    procedure LBBikesClick(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
     procedure LapChartAfterDraw(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
@@ -189,6 +189,9 @@ type
     procedure Clear1Click(Sender: TObject);
     procedure CBViewLastLapClick(Sender: TObject);
     procedure EViewLapChange(Sender: TObject);
+    procedure BikeGridSelect(Sender: TObject);
+    procedure CBSingleRiderClick(Sender: TObject);
+    procedure CBSelectedBikeClick(Sender: TObject);
   private
     { Private declarations }
 
@@ -219,9 +222,11 @@ type
 
     SeriesSpeed,
     SeriesAcceleration,
-    SeriesRPM : TFastLineSeries;
-
-    SeriesGear : TLineSeries;
+    SeriesRPM,
+    SeriesGear,
+    SeriesThrottle,
+    SeriesFrontBrake,
+    SeriesBackBrake : TFastLineSeries;
 
     {$IFDEF TEEPRO}
     TeeCommander1 : TTeeCommander;
@@ -236,6 +241,8 @@ type
     function FindInAllPilots(const S:String):Integer;
     procedure FillRounds;
     procedure FillSeasons;
+    function FindBike(const ABike:String):TBike;
+    function FindPilotNum(const ANum:String):Integer; // index inside PilotsData
     function FindRiderInPole(const ARider:Integer):Integer;
     procedure InitPoleData;
     procedure RefillCharts;
@@ -299,6 +306,15 @@ begin
   FrontView.Visible:=Rack1.Checked or Bike1.Checked;
 
   FrontView.Invalidate;
+end;
+
+procedure TMainForm.BikeGridSelect(Sender: TObject);
+var tmp : String;
+begin
+  tmp:=BikeData.Cells[0,BikeGrid.Selected.Row];
+
+  Torque.FillSample(FindBike(tmp).Torque);
+  Torque.Chart1.Legend.Title.Caption:=tmp;
 end;
 
 procedure TMainForm.BPauseClick(Sender: TObject);
@@ -368,12 +384,31 @@ end;
 procedure TMainForm.BRandomPoleClick(Sender: TObject);
 begin
   CreatePole;
+
   PoleGrid.Invalidate;
   PoleChart.Invalidate;
   Circuit.Invalidate;
 end;
 
-const MotoGP='..\..\Data\MotoGP';
+var DataPath:String='';
+
+function MotoGP:String;
+begin
+  if DataPath='' then
+  begin
+    DataPath:='Data\MotoGP';
+
+    while not FileExists(DataPath+'\AllPilots.txt') do
+    begin
+      DataPath:='..\'+DataPath;
+
+      if Length(DataPath)>100 then
+         raise Exception.Create('Error Cannot find the Data folder');
+    end;
+  end;
+
+  result:=DataPath;
+end;
 
 procedure TMainForm.CBMapChange(Sender: TObject);
 begin
@@ -494,6 +529,19 @@ begin
   PoleGrid.Invalidate;
 end;
 
+procedure TMainForm.CBSelectedBikeClick(Sender: TObject);
+var tmp : Integer;
+begin
+  tmp:=FindPilotNum(Pole.Cells[1,PoleGrid.Selected.Row]);
+
+  PilotsData.Cells[5,tmp]:=CBSelectedBike.Items[CBSelectedBike.ItemIndex];
+end;
+
+procedure TMainForm.CBSingleRiderClick(Sender: TObject);
+begin
+  BRandomPoleClick(Self); // Recreate Pole
+end;
+
 procedure TMainForm.CBViewLastLapClick(Sender: TObject);
 begin
   UDViewLap.Enabled:=not CBViewLastLap.Checked;
@@ -521,7 +569,7 @@ end;
 // Choose a good font color, visible over AColor background
 function CalcFontColor(const AColor:TColor):TColor;
 begin
-  if (AColor=Tee.Format.TColor(clWhite)) or (AColor=$FFE1) then
+  if (AColor=clWhite) or (AColor=$FFE1) then
      result:=clBlack
   else
      result:=clWhite;
@@ -654,7 +702,7 @@ procedure TMainForm.CircuitAfterDraw(Sender: TObject);
       for t:=0 to High(Race.Riders) do
           if Race.Riders[t].Active then
           begin
-            P:=Race.Circuit.PointPosition(Last[t].Position);
+            P:=Race.Circuit.PointPosition(Last[t].Position+Race.Circuit.PolePosition);
 
             DrawPilotNumber(ACanvas,ShowNumbers,P,14,Race.Riders[t].Color, IntToStr(Race.Riders[t].Number));
           end;
@@ -848,6 +896,9 @@ procedure TMainForm.CreatePole;
 
     PoleGrid.Data:=Pole;
 
+    if PoleGrid.Selected.Row>Pole.Count then
+       PoleGrid.Selected.Row:=Pole.Count-1;
+
     PoleGrid.Columns[0].Header.Text:='#';
     PoleGrid.Columns[1].Header.Text:='Num';
     PoleGrid.Columns[2].Header.Text:='Name';
@@ -880,18 +931,31 @@ procedure TMainForm.CreatePole;
     end;
   end;
 
-var RiderQuantity : Integer;
+var tmp,
+    RiderQuantity : Integer;
 begin
+  // Current rider selected
+  if CBSingleRider.Checked then
+     tmp:=FindPilotNum(Pole.Cells[1,PoleGrid.Selected.Row])
+  else
+     tmp:=-1;
+
   Pole.Free;
 
-  RiderQuantity:=PilotsData.Rows; // <-- use to test, for example 1 or 2 riders only
-
-  if HasParameter('SINGLERIDER') then
-     RiderQuantity:=1;
+  if HasParameter('SINGLERIDER') or (tmp<>-1) then
+     RiderQuantity:=1
+  else
+     RiderQuantity:=PilotsData.Rows;
 
   Pole:=TStringsData.Create(9,RiderQuantity);
 
-  ShufflePoleIndex;
+  if tmp=-1 then // All pilots
+     ShufflePoleIndex
+  else
+  begin
+    SetLength(RacePoleIndex,1);
+    RacePoleIndex[0]:=tmp;
+  end;
 
   StartPoleIndex:=CopyPoleIndex;
 
@@ -899,27 +963,28 @@ begin
 
   SetupPilotGrid(PoleGrid,1,1);
 
+  Race.Weather:=DefaultWeather;
+
   InitRaceRiders;
 
   Race.Init;
 end;
 
+function TMainForm.FindPilotNum(const ANum:String):Integer; // index inside PilotsData
+var t : Integer;
+begin
+  for t:=0 to PilotsData.Count-1 do
+      if PilotsData.Cells[1,t]=ANum then
+      begin
+        result:=t;
+        Exit;
+      end;
+
+  result:=-1; // error !
+end;
+
 // Cell colors from pilor color
 procedure TMainForm.SetupPilotGrid(const AGrid:TTeeGrid; const AColorColumn,ANumColumn:Integer);
-
-  function PilotNum(const ANum:String):Integer; // index inside PilotsData
-  var t : Integer;
-  begin
-    for t:=0 to PilotsData.Count-1 do
-        if PilotsData.Cells[1,t]=ANum then
-        begin
-          result:=t;
-          Exit;
-        end;
-
-    result:=-1; // error !
-  end;
-
 var tmp,t : Integer;
     f : Tee.Format.TTextFormat;
 begin
@@ -928,7 +993,7 @@ begin
     if ANumColumn=-1 then
        tmp:=t
     else
-       tmp:=PilotNum(AGrid.Data.AsString(AGrid.Columns[ANumColumn],t));
+       tmp:=FindPilotNum(AGrid.Data.AsString(AGrid.Columns[ANumColumn],t));
 
     if tmp<>-1 then
     begin
@@ -968,6 +1033,10 @@ begin
   C.TextOut(185,10,'Track: '+Race.Weather.TrackTemperature.ToString+'°C');
   C.TextOut(15,32,WeatherStyleToString(Race.Weather.Style));
   C.TextOut(15,54,'Humidity: '+Race.Weather.Humidity.ToString+'%');
+
+  C.TextOut(215,44,'Record: '+CircuitsData.Cells[11,Circuits.Selected.Row]+' '+CircuitsData.Cells[12,Circuits.Selected.Row]);
+  C.TextOut(215,66,CircuitsData.Cells[13,Circuits.Selected.Row]);
+
   C.TextOut(15,76,'Air Density: '+FormatFloat('0.000',Race.Weather.AirDensity)+' kg/m³');
   C.TextOut(15,98,'Wind: '+FormatFloat('0.000',Race.Weather.Wind)+' km/h');
   C.TextOut(215,98,FormatFloat('0.000',Race.Weather.WindDirection)+' °');
@@ -1070,6 +1139,21 @@ begin
 end;
 
 procedure TMainForm.FormShow(Sender: TObject);
+
+  procedure FillBikes(const Items:TStrings);
+  var t : Integer;
+  begin
+    Items.BeginUpdate;
+    try
+      Items.Clear;
+
+      for t:=0 to BikeData.Count-1 do
+          Items.Add(BikeData.Cells[0,t]);
+    finally
+      Items.EndUpdate;
+    end;
+  end;
+
 begin
   LapChart.Axes.FastCalc:=True;
   AllLaps.Axes.FastCalc:=True;
@@ -1090,6 +1174,16 @@ begin
 
   SensorsData:=TCSVDataImport.FromFile(MotoGP+'\Sensors.txt');
   Sensors.Data:=SensorsData;
+
+  Torque:=TFormTorqueCurve.Create(Self);
+  Torque.Align:=alBottom;
+  TTeeVCL.AddFormTo(Torque,TabSheet4);
+
+  BikeData:=TCSVDataImport.FromFile(MotoGP+'\AllBikes.txt');
+  BikeGrid.Data:=BikeData;
+
+  FillBikes(CBSelectedBike.Items);
+  CBSelectedBike.ItemIndex:=0;
 
   CircuitsData:=TCSVDataImport.FromFile(MotoGP+'\Circuits\Circuits.txt');
   Circuits.Data:=CircuitsData;
@@ -1130,14 +1224,9 @@ begin
   // Select top rider
   PoleGrid.Selected.Row:=0;
 
+  PoleGrid.Selected.FullRow:=True;
+
   PoleGrid.Columns['#'].OnPaint:=PaintFastest;
-
-  Torque:=TFormTorqueCurve.Create(Self);
-  Torque.Align:=alClient;
-  TTeeVCL.AddFormTo(Torque,TabTorqueCurve);
-
-  LBBikes.ItemIndex:=0;
-  LBBikesClick(Self);
 
   PageControl1.ActivePage:=TabLap;
 
@@ -1164,9 +1253,11 @@ end;
 
 procedure TMainForm.FrontViewAfterDraw(Sender: TObject);
 
+var HTop : Integer;
+
   procedure DrawTrack;
   var C : TTeeCanvas;
-      W, H, HTop: Integer;
+      W, H : Integer;
   begin
     C:=FrontView.Canvas;
     C.Pen.Style:=psClear;
@@ -1180,33 +1271,31 @@ procedure TMainForm.FrontViewAfterDraw(Sender: TObject);
 
     W:=FrontView.Width;
     H:=FrontView.Height;
-    HTop:=340;
 
     C.Polygon([Point(20,H),Point(160,HTop),Point(W-160,HTop),Point(W-20,H)]);
   end;
 
   procedure DrawKerbs(const APos:Single);
-  var C : TTeeCanvas;
-      t, W, H : Integer;
-  begin
-    Exit;
+  const F=500;
+        H=50;
 
+  var C : TTeeCanvas;
+      t, Y, YC : Integer;
+  begin
     C:=FrontView.Canvas;
-    C.Pen.Style:=psClear;
+    C.Pen.Style:=psSolid;
+
     C.Brush.Color:=RGB(130,20,10);
     C.Brush.Style:=bsSolid;
     C.Gradient.Visible:=False;
 
-    for t:=0 to 5 do
+    YC:=HTop;
+
+    for t:=1 to 20 do
     begin
-      H:=FrontView.Height-Round(40*t)+(Round(APos) mod 10);
-      W:=20+Round(7*t);
+      Y:=YC+Round(H*F/((5*t)-(Round(APos) mod 5)));
 
-      C.Polygon([Point(W,H),Point(W+14-t,H-35),Point(W+14-2*t+60,H-35),Point(W+60,H)]);
-
-      W:=FrontView.Width-180+Round(7*t);
-
-      C.Polygon([Point(W,H),Point(W+14-t,H-35),Point(W+14-t+60,H-35),Point(W+60,H)]);
+      C.Line(0,Y,100,Y);
     end;
   end;
 
@@ -1216,6 +1305,8 @@ begin
   tmp:=PoleGrid.Selected.Row;
 
   L:=High(Race.Data);
+
+  HTop:=FrontView.Height div 2;
 
   if rack1.Checked then
   begin
@@ -1229,7 +1320,9 @@ begin
 
   if tmp<>-1 then
   begin
-    tmp:=RacePoleIndex[tmp];
+    if Length(RacePoleIndex)>1 then
+       tmp:=RacePoleIndex[tmp];
+
     DrawPilotNumber(FrontView.Canvas,True,Point(20,20),14,Race.Riders[tmp].Color, IntToStr(Race.Riders[tmp].Number));
 
     if Bike1.Checked then
@@ -1302,12 +1395,18 @@ var XS,YS : Integer;
 
   procedure DrawAt(X,Y:Integer; const Pilot:Integer);
   var tmp : TRider;
+      tmpIndex : Integer;
   begin
     C.Line(X,Y+10,X,Y);
     C.LineTo(X+XS,Y);
     C.LineTo(X+XS,Y+10);
 
-    tmp:=Race.Riders[StartPoleIndex[Pilot]];
+    if Length(StartPoleIndex)>1 then
+       tmpIndex:=StartPoleIndex[Pilot]
+    else
+       tmpIndex:=Pilot;
+
+    tmp:=Race.Riders[tmpIndex];
 
     DrawPilotNumber(C,True,Point(X+20,Y+30),14,tmp.Color,IntToStr(tmp.Number));
   end;
@@ -1334,7 +1433,8 @@ begin
   begin
     tmp:=3*Row;
 
-    DrawAt(X,Y+Row*YS,tmp);
+    if tmp<Pole.Rows then
+       DrawAt(X,Y+Row*YS,tmp);
 
     tmp:=1+3*Row;
 
@@ -1354,6 +1454,8 @@ begin
   SeriesAcceleration.Clear;
   SeriesGear.Clear;
   SeriesThrottle.Clear;
+  SeriesFrontBrake.Clear;
+  SeriesBackBrake.Clear;
 end;
 
 procedure TMainForm.RefillCharts;
@@ -1363,23 +1465,34 @@ procedure TMainForm.RefillCharts;
     SeriesSpeed:=TFastLineSeries.Create(Self);
     SeriesAcceleration:=TFastLineSeries.Create(Self);
     SeriesRPM:=TFastLineSeries.Create(Self);
-    SeriesGear:=TLineSeries.Create(Self);
+    SeriesGear:=TFastLineSeries.Create(Self);
+    SeriesThrottle:=TFastLineSeries.Create(Self);
+    SeriesFrontBrake:=TFastLineSeries.Create(Self);
+    SeriesBackBrake:=TFastLineSeries.Create(Self);
 
     SeriesSpeed.ParentChart:=LapChart;
     SeriesAcceleration.ParentChart:=LapChart;
     SeriesRPM.ParentChart:=LapChart;
     SeriesGear.ParentChart:=LapChart;
+    SeriesThrottle.ParentChart:=LapChart;
+    SeriesFrontBrake.ParentChart:=LapChart;
+    SeriesBackBrake.ParentChart:=LapChart;
 
     SeriesSpeed.Title:='Speed m/s';
     SeriesAcceleration.Title:='Acceleration m/s²';
     SeriesRPM.Title:='RPM';
     SeriesGear.Title:='Gear';
-
     SeriesThrottle.Title:='Throttle %';
+    SeriesFrontBrake.Title:='Front Brake';
+    SeriesBackBrake.Title:='Back Brake';
 
     SeriesGear.Stairs:=True;
+    SeriesThrottle.Stairs:=True;
 
-    // Brakes
+    SeriesThrottle.CustomVertAxis:=LapChart.CustomAxes[1];
+    SeriesFrontBrake.CustomVertAxis:=LapChart.CustomAxes[1];
+    SeriesBackBrake.CustomVertAxis:=LapChart.CustomAxes[1];
+
     // Tires Temperature and pressure
   end;
 
@@ -1418,14 +1531,14 @@ begin
 
     if Length(Race.Riders)>Rider then
     begin
-      SeriesSpeed.GetHorizAxis.SetMinMax(0,Race.Circuit.TotalLength);
-
-      // TODO: Just add new points to series, not re-fill all
+      SeriesSpeed.GetHorizAxis.SetMinMax(0 {-Pole.Position},Race.Circuit.TotalLength);
 
       SeriesSpeed.BeginUpdate;
       SeriesAcceleration.BeginUpdate;
       SeriesGear.BeginUpdate;
       SeriesThrottle.BeginUpdate;
+      SeriesFrontBrake.BeginUpdate;
+      SeriesBackBrake.BeginUpdate;
 
       ClearLapCharts;
 
@@ -1442,6 +1555,8 @@ begin
       for t:=StartOfLap to EndOfLap do
           AddRiderData(t,Rider);
 
+      SeriesBackBrake.EndUpdate;
+      SeriesFrontBrake.EndUpdate;
       SeriesThrottle.EndUpdate;
       SeriesGear.EndUpdate;
       SeriesAcceleration.EndUpdate;
@@ -1453,8 +1568,15 @@ end;
 procedure TMainForm.AddRiderData(const APos:Integer; const Rider:Integer);
 var X : Single;
 
-    tmpNewThrottle : Single;
-    tmpNewGear : Integer;
+  procedure CheckNew(const ASeries:TChartSeries; const ANew:Single);
+  begin
+    if (ASeries.Count<2) or (ANew<>ASeries.YValues.Last) then
+       ASeries.AddXY(X,ANew)
+    else
+       ASeries.XValues.Value[ASeries.Count-1]:=X;
+  end;
+
+var tmpNewGear : Integer;
 begin
   X:=Race.Data[APos].Data[Rider].Position;
 
@@ -1463,13 +1585,14 @@ begin
 
   tmpNewGear:=Race.Data[APos].Data[Rider].Gear;
 
-  if {(APos=High(Race.Data)) or } (SeriesGear.Count=0) or (tmpNewGear<>SeriesGear.YValues.Last) then
-     SeriesGear.AddXY(X,tmpNewGear);
+  if (SeriesGear.Count<2) or (tmpNewGear<>SeriesGear.YValues.Last) then
+     SeriesGear.AddXY(X,tmpNewGear)
+  else
+     SeriesGear.XValues.Value[SeriesGear.Count-1]:=X;
 
-  tmpNewThrottle:=Race.Data[APos].Data[Rider].Throttle;
-
-  if {(APos=High(Race.Data)) or } (SeriesThrottle.Count=0) or (tmpNewThrottle<>SeriesThrottle.YValues.Last) then
-     SeriesThrottle.AddXY(X,tmpNewThrottle);
+  CheckNew(SeriesThrottle,Race.Data[APos].Data[Rider].Throttle);
+  CheckNew(SeriesFrontBrake,Race.Data[APos].Data[Rider].FrontBrake);
+  CheckNew(SeriesBackBrake,Race.Data[APos].Data[Rider].BackBrake);
 end;
 
 procedure TMainForm.UpdateLapCharts;
@@ -1480,6 +1603,7 @@ end;
 
 procedure TMainForm.PoleGridSelect(Sender: TObject);
 var tmp : Integer;
+    tmpBike : String;
 begin
   RefillCharts;
 
@@ -1491,6 +1615,8 @@ begin
 
     TabLapTimes.TabVisible:=False;
     LapTimesGrid.Data:=nil;
+
+    CBSelectedBike.ItemIndex:=0;
   end
   else
   begin
@@ -1503,6 +1629,10 @@ begin
 
     LapTimesGrid.Columns[0].Header.Text:='Lap';
     LapTimesGrid.Columns[1].Header.Text:='Time';
+
+    tmpBike:=PilotsData.Cells[5,FindPilotNum(Pole.Cells[1,tmp])];
+
+    CBSelectedBike.ItemIndex:=CBSelectedBike.Items.IndexOf(tmpBike);
   end;
 
   FrontView.Invalidate;
@@ -1546,7 +1676,7 @@ function TMainForm.FindRiderInPole(const ARider:Integer):Integer;
 var t : Integer;
 begin
   for t:=0 to Pole.Count-1 do
-      if Pole.Cells[1,t].ToInteger=ARider then
+      if StrToInt(Pole.Cells[1,t])=ARider then
       begin
         result:=t;
         Exit;
@@ -1558,19 +1688,6 @@ end;
 procedure TMainForm.LapChartAfterDraw(Sender: TObject);
 begin
   LapChart.Canvas.TextOut(10,10,Round(CursorLap.Value).ToString+' m');
-end;
-
-procedure TMainForm.LBBikesClick(Sender: TObject);
-var tmp : String;
-begin
-  tmp:=LBBikes.Items[LBBikes.ItemIndex];
-
-  BikeData:=TCSVDataImport.FromFile(MotoGPSeason+'\Bikes\'+tmp+'\Parameters.txt',True,',','');
-  BikeGrid.Data:=BikeData;
-
-  Torque.FillSample(DefaultBike.Torque);
-
-  Torque.Chart1.Legend.Title.Caption:=LBBikes.Items[LBBikes.ItemIndex];
 end;
 
 procedure TMainForm.Lean1Click(Sender: TObject);
@@ -1605,6 +1722,83 @@ begin
      UDViewLap.Position:=Race.Current;
 end;
 
+function TMainForm.FindBike(const ABike:String):TBike;
+var t : Integer;
+
+   function AsSingle(const ACol:Integer):Single;
+   begin
+     result:=StrToFloat(BikeData.Cells[ACol,t]);
+   end;
+
+   function AsInteger(const ACol:Integer):Integer;
+   begin
+     result:=StrToInt(BikeData.Cells[ACol,t]);
+   end;
+
+var Old : Char;
+begin
+  for t:=0 to BikeData.Count-1 do
+      if BikeData.Cells[0,t]=ABike then
+      begin
+        Old:=FormatSettings.DecimalSeparator;
+
+        FormatSettings.DecimalSeparator:='.';
+        try
+          result.Torque:=TBike.DefaultTorqueCurve;
+          result.GearRatios:=TBike.DefaultGearRatios;
+
+          // Pneumatics
+          result.Front.Tire.Grip:=1.7;
+          result.Front.Tire.Diameter:=60; // cm
+          result.Front.Tire.Friction:=0.02; // coefficient
+
+          result.Back.Tire.Grip:=1.7;
+          result.Back.Tire.Diameter:=69; // cm
+          result.Back.Tire.Friction:=0.02; // coefficient
+
+          result.CdAeroDynamic:=0.45; // 0.3 .. 0.7 coefficient
+
+          //    CenterOfMassHeight : Integer; // mm distance from track to center of gravity
+          //    WheelieWingEfficiency : Single;
+
+          result.FrontArea:=0.5; // 0.5 m²
+
+          result.Code:=BikeData.Cells[0,t];
+          result.Factory:=BikeData.Cells[1,t];
+          result.Weight:=AsSingle(2);
+          result.Fuel:=AsSingle(3);
+          result.Horses:=AsSingle(4);
+          result.Watts:=result.Horses*735.5; // Watts
+          result.MaxRPM:=AsInteger(5);
+          result.GearUpRPM:=AsInteger(6);
+          result.GearDownRPM:=AsInteger(7);
+          result.IdleRPM:=AsInteger(8);
+          result.Front.Wheel:=AsSingle(9);
+          result.Front.BrakeForce:=AsSingle(10);
+          result.Back.Wheel:=AsSingle(11);
+          result.Back.BrakeForce:=AsSingle(12);
+          result.MaxLeanAngle:=AsSingle(13);
+          result.TransmissionEfficiency:=AsSingle(14);
+          result.EngineLayout:=BikeData.Cells[15,7];
+          result.Wheelbase:=AsInteger(16);
+          result.WeightDistributionFront:=AsSingle(17);
+          result.MaxTorqueNm:=AsSingle(18);
+          result.AerodynamicDownforce:=AsSingle(19);
+          result.HasHoleshotDevice:=BikeData.Cells[20,t]='1';
+
+          result.MaxGear:=AsInteger(21);  // 3..7
+          result.PrimaryRatio:=AsSingle(22); // 1.65;
+          result.FinalDrive:=AsSingle(23); // 3.28  =   46/14  Rear/Front Sprocket Teeth
+        finally
+          FormatSettings.DecimalSeparator:=Old;
+        end;
+
+        Exit;
+      end;
+
+  raise Exception.Create('Error Bike not found: '+ABike);
+end;
+
 procedure TMainForm.StartRace;
 
   procedure InitTowerLapRider;
@@ -1632,7 +1826,28 @@ procedure TMainForm.StartRace;
         end;
   end;
 
-var t : Integer;
+  procedure InitRiders;
+  var t, tmp : Integer;
+  begin
+    for t:=0 to High(Race.Riders) do
+    begin
+      Race.Riders[t].Start(Race.TotalLaps);
+
+      tmp:=RacePoleIndex[t];
+
+      Race.Riders[t].Bike:=FindBike(PilotsData.Cells[5,tmp]);
+
+      // Customize pilot
+
+      Race.Riders[t].Pilot.Name:=PilotsData.Cells[1,tmp];
+      Race.Riders[t].Pilot.Weight:=StrToFloat(PilotsData.Cells[3,tmp]);
+
+      tmp:=FindInAllPilots(PilotsData.Cells[0,tmp]);
+
+      Race.Riders[t].Pilot.Height:=StrToFloat(AllPilots.Cells[7,tmp]);
+    end;
+  end;
+
 begin
   CursorLap.Value:=0;
 
@@ -1683,16 +1898,7 @@ begin
     end;
   end;
 
-  for t:=0 to High(Race.Riders) do
-  begin
-    Race.Riders[t].Start(Race.TotalLaps);
-
-    // Customize pilot
-
-    Race.Riders[t].Pilot.Name:=PilotsData.Cells[1,t];
-    Race.Riders[t].Pilot.Weight:=StrToFloat(PilotsData.Cells[3,t]);
-    Race.Riders[t].Pilot.Height:=StrToFloat(AllPilots.Cells[7,t]);
-  end;
+  InitRiders;
 
   Race.Ellapsed:=0;
 
@@ -1808,7 +2014,9 @@ begin
 
     if L>-1 then
     begin
-      Rider:=RacePoleIndex[Rider];
+      if Length(RacePoleIndex)>1 then
+         Rider:=RacePoleIndex[Rider];
+
       DrawParameters(Race.Data[L].Data[Rider]);
     end;
   end;
@@ -1931,7 +2139,7 @@ function TMainForm.DoStep:Boolean;
         begin
           Brake:=EvaluateBrakingPoint(Race.Data[L].Data[t].Position, Race.Data[L].Data[t].Speed,
                                       Race.Circuit.Curves[Race.Riders[t].NextCurve-1],
-                                      Race.Riders[t].Bike.MaxBrakeDeceleration);
+                                      Race.Riders[t].Bike.Front.BrakeForce+Race.Riders[t].Bike.Back.BrakeForce);
 
 
           TriggerBrakeDist:= Race.Circuit.Curves[Race.Riders[t].NextCurve-1].Position - Brake.BrakingDistanceNeeded;
