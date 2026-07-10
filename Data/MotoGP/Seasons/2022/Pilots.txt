@@ -1,4 +1,4 @@
-Code,Number,Team,Weight
+Code,Number,Team,Weight,Color,Bike,Front Tire,Back Tire
 AD4,4,WithU Yamaha RNF MotoGP Team,68
 JZ5,5,Pramac Racing,65
 LM10,10,Mooney VR46 Racing Team,69

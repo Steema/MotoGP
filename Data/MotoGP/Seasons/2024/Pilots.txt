@@ -1,4 +1,4 @@
-Code,Number,Team,Weight
+Code,Number,Team,Weight,Color,Bike,Front Tire,Back Tire
 FB63,1,Ducati Lenovo Team,64
 JZ5,5,Prima Pramac Racing,65
 LM10,10,Repsol Honda Team,69

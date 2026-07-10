@@ -1,4 +1,4 @@
-Code,Number,Team,Weight
+Code,Number,Team,Weight,Color,Bike,Front Tire,Back Tire
 JM1,1,Aprilia Racing,63
 JZ5,5,LCR Honda,65
 LM10,10,Honda HRC Castrol,69

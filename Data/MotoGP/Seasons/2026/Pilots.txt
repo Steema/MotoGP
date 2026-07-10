@@ -1,4 +1,4 @@
-Code,Number,Team,Weight,Color,Bike
+Code,Number,Team,Weight,Color,Bike,Front Tire,Back Tire
 JM89,1,Aprilia Racing,63,#000000,RS-GP26
 JZ5,5,LCR Honda,65,#FFFFFF,RC213V 2026
 LM10,10,Honda HRC Castrol,69,#FF4500,RC213V 2026

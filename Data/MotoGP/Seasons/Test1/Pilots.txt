@@ -1,23 +1,2 @@
-Number,Name,Factory,Birth,Color,Weight,Height
-63,Francesco Bagnaia,Ducati,1997-01-14,#990000,64,176
-93,Marc Márquez,Ducati,1993-02-17,#990000,64,169
-1,Jorge Martín,Aprilia,1998-01-29,#E51C24,63,168
-37,Pedro Acosta,KTM,2004-05-25,#001834,63,171
-33,Brad Binder,KTM,1995-08-11,#001834,63,170
-20,Fabio Quartararo,Yamaha,1999-04-20,#002F6C,69,177
-42,Álex Rins,Yamaha,1995-12-08,#002F6C,68,176
-36,Joan Mir,Honda,1997-09-01,#002F6C,69,181
-73,Álex Márquez,Ducati Gresini,1996-04-23,#A6C2E6,65,180
-72,Marco Bezzecchi,Aprilia,1998-11-12,#E51C24,64,176
-23,Enea Bastianini,KTM,1997-12-30,#FF6600,64,168
-5,Johann Zarco,Honda,1990-07-16,#009354,68,171
-21,Franco Morbidelli,VR46,1994-12-04,#000000,68,176
-49,Fabio Di Giannantonio,VR46,1998-10-10,#000000,62,177
-12,Maverick Viñales,KTM,1995-01-12,#FF6600,64,171
-25,Raúl Fernández,Trackhouse,2000-10-23,#002855,65,178
-43,Jack Miller,Yamaha,1995-01-18,#4B237E,64,173
-7,Toprak Razgatlıoğlu,Prima Pramac Yamaha,1996-10-16,#4B237E,80,185
-10,Luca Marini,Honda HRC,1997-08-10,#002F6C,69,184
-11,Diogo Moreira,Pro Honda LCR,2004-04-23,#D32F2F,60,169
-54,Fermín Aldeguer,BK8 Gresini Racing,2005-04-05,#A6C2E6,69,181
-79,Ai Ogura,SuperFile Trackhouse MotoGP,2001-01-26,#002855,60,169
+Code,Number,Team,Weight,Color,Bike,Front Tire,Back Tire
+ACRI,1,Team Test,64,#000000,Vespa Primavera 125 1967
