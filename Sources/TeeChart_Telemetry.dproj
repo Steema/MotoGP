@@ -134,6 +134,7 @@
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
+        <Debugger_RunParams>singlerider</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
@@ -177,6 +178,11 @@
             <Form>AboutForm</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="TeeCountryFlags.pas">
+            <Form>FormFlags</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="TeeTire.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

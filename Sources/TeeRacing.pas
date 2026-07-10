@@ -65,6 +65,8 @@ type
 
     Points : TPointFloatArray; // Closed path of XY points
 
+    Radius : Array of Single; // Radius in meters at each point of the circuit
+
     TotalLength : Single; // Total length of circuit
 
     PolePosition : Single; // Offset Meters only to draw pilots at the Circuit path
@@ -74,6 +76,8 @@ type
 
     function IndexOfPosition(const APosition:Single):Integer; // Index of Points, rounded to near APosition
     function PointPosition(const APosition:Single):TPoint;
+
+    procedure CalculateRadius;
   end;
 
   TBikeFrontBack=record
@@ -207,7 +211,7 @@ type
 
     LeanAngle : Single; // 0..65° degree (or crash, or Lowside)
 
-    procedure Init(const StartPosition:Single);
+    procedure Init(const AStartPosition:Single);
 
     procedure Step(const TimeFactor:Single; // 0.1 = 10 times per second
                    var Bike:TBike;
@@ -250,6 +254,7 @@ type
     Ellapsed : TArray<Int64>; // Milliseconds of each finished lap
     LapsTime : TArray<Integer>;  // When the rider crosses each lap finish, indexed to TRace.Data
 
+    procedure GoToNextCurve(const ATotalCurves:Integer);
     procedure Start(const TotalLaps:Integer);
   end;
 
@@ -272,6 +277,8 @@ type
 
     Weather : TWeather;
 
+    PoleDistance : Single; // Distance in meters between each rider at starting grid
+
     Data : TAllRaceData;
 
     Riders : Array of TRider;
@@ -293,6 +300,15 @@ type
 function EvaluateBrakingPoint(const ABikePosition, ABikeSpeedMPS: Single;
                               const ACorner: TCurve;
                               const AMaxDecelerationMPS2: Single): TBrakeDecision;
+
+// Returns True is the bike has a LowSide
+function CheckSlidOut(
+  const Speed: Single; // En m/s
+  const Radius: Single;     // En metres
+  const TotalMass: Single;    // Moto + Pilot kg (ex: 250.0)
+  const TireTemp: Single; // Connectat amb el mòdul anterior (°C)
+  const DryOrWet: Single;
+  const Bike:TBike): Boolean;  // Multiplier Factor (1.0 = Dry, 0.5 = Wet)
 
 type
   TTurnPhase = (tpApproach, tpBraking, tpCornering, tpAcceleration);
@@ -323,6 +339,46 @@ uses
 
 { TCircuit }
 
+procedure TCircuit.CalculateRadius;
+var
+  t, N: Integer;
+  A, B, C: TPointFloat;
+  a_len, b_len, c_len: Single;
+  Area2: Single;
+begin
+  N := Length(Points);
+  SetLength(Radius, N);
+
+  if N < 3 then
+  begin
+    for t := 0 to N - 1 do Radius[t] := 0;
+    Exit;
+  end;
+
+  for t := 0 to N - 1 do
+  begin
+    // 1. Obtain 3 points (current, previous and next)
+    A := Points[(t - 1 + N) mod N];
+    B := Points[t];
+    C := Points[(t + 1) mod N];
+
+    // 2. Calc triangle side lengths
+    a_len := Sqrt(Sqr(B.X - A.X) + Sqr(B.Y - A.Y)); // A-B
+    b_len := Sqrt(Sqr(C.X - B.X) + Sqr(C.Y - B.Y)); // B-C
+    c_len := Sqrt(Sqr(A.X - C.X) + Sqr(A.Y - C.Y)); // C-A
+
+    // 3. Calc Area*2 (cross-product)
+    Area2 := Abs((B.X - A.X) * (C.Y - A.Y) - (B.Y - A.Y) * (C.X - A.X));
+
+    // 4. Calc radious, if Area is close to zero, it means we are on a straight line
+    if Area2 < 0.00001 then
+       Radius[t] := 0
+    else
+       // R = (a * b * c) / (4 * Area)
+       Radius[t] := (a_len * b_len * c_len) / (2.0 * Area2);
+  end;
+end;
+
 function TCircuit.IndexOfPosition(const APosition: Single): Integer;
 var L : Integer;
 begin
@@ -340,6 +396,15 @@ begin
 end;
 
 { TRider }
+
+// Next Curve
+procedure TRider.GoToNextCurve(const ATotalCurves: Integer);
+begin
+  if NextCurve=ATotalCurves then
+     NextCurve:=1
+  else
+     Inc(NextCurve);
+end;
 
 procedure TRider.Start(const TotalLaps:Integer);
 var t : Integer;
@@ -417,7 +482,7 @@ end;
 
 { TRiderData }
 
-procedure TRiderData.Init(const StartPosition:Single);
+procedure TRiderData.Init(const AStartPosition:Single);
 begin
   Throttle:=100; // Full Throttle
 
@@ -432,7 +497,7 @@ begin
   FrontBrake:=0;
   BackBrake:=0;
 
-  Position:=StartPosition; // Finish line - pole grid position in meters
+  Position:=AStartPosition; // Finish line - pole grid position in meters
 end;
 
 const
@@ -479,7 +544,7 @@ var Step : Single;
 begin
   if LeanAngle>0 then
   begin
-    // 5% of current LeanAngle
+    // 5% of current LeanAngle // TODO: Depends on speed, pilot etc
     Step:=5*LeanAngle*0.01;
 
     LeanAngle := LeanAngle - Step;
@@ -536,7 +601,9 @@ begin
 
   Gear:=Prev.Gear;
 
-  if RPM>=Bike.IdleRPM then
+  LeanAngle:=Prev.LeanAngle;
+
+  //if RPM>=Bike.IdleRPM then
   begin
     if Prev.Clutch then
     begin
@@ -569,11 +636,12 @@ begin
     MotorTorque:=TorqueAtRPM(Bike.Torque,RPM);
     ThrustTorque:=(MotorTorque * Bike.PrimaryRatio * Bike.GearRatios[Gear] * Bike.FinalDrive * 0.01 * Bike.TransmissionEfficiency)/(0.5*Bike.Back.Tire.Diameter*0.01);
   end
+  {
   else
   begin
     MotorTorque:=0;
     ThrustTorque:=0;
-  end;
+  end};
 
   Pilot.SweatLoss:=Pilot.SweatLoss+TimeFactor*SweatRate;
 
@@ -611,11 +679,16 @@ begin
 
   // TODO: Tire degradation (weight loss, grip)
 
+  // Brembo carbon brake disks 355 mm diameter
+
   FrontBrake:=Prev.FrontBrake;
   BackBrake:=Prev.BackBrake;
 
   // Newtons
-  TotalBrakingForce:=(Bike.Front.BrakeForce*FrontBrake*0.01)+(Bike.Back.BrakeForce*BackBrake*0.01);
+  if (FrontBrake>0) or (BackBrake>0) then
+     TotalBrakingForce:=TotalMass * ((Bike.Front.BrakeForce*FrontBrake*0.01)+(Bike.Back.BrakeForce*BackBrake*0.01))
+  else
+     TotalBrakingForce:=0;
 
   if TotalBrakingForce>0 then
      Acceleration:= -(TotalBrakingForce + AirResistance + RollingFriction) / TotalMass
@@ -644,7 +717,7 @@ end;
 
 procedure TRiderData.TrailBrake(const ApexPosition: Single);
 begin
-  FrontBrake:=FrontBrake-(ApexPosition-Position)*0.01;
+  FrontBrake:=FrontBrake-(ApexPosition-Position)*0.01;  // TODO: Calc dynamic target distance based on speed
 
   if FrontBrake < 0 then
      FrontBrake := 0;
@@ -882,17 +955,19 @@ begin
 
   Result := DeltaAngle * Speed * 15.0;
 
-  if Result > MaxLean then Result := MaxLean
+  if Result > MaxLean then
+     Result := MaxLean
   else
-  if Result < -MaxLean then Result := -MaxLean;
+  if Result < -MaxLean then
+     Result := -MaxLean;
 end;
-
 
 { TRace }
 
 procedure TRace.Init;
 var t : Integer;
 begin
+  PoleDistance:=3; // 3 meters
   Fastest:=-1;
   FastestTime:=0;
 
@@ -900,7 +975,68 @@ begin
   SetLength(Data[0].Data,Length(Riders));
 
   for t:=0 to High(Riders) do
-      Data[0].Data[t].Init(Riders[t].Pole*3);
+      Data[0].Data[t].Init(-Riders[t].Pole*PoleDistance);
+end;
+
+// Returns True is the bike has a LowSide
+function CheckSlidOut(
+  const Speed: Single; // En m/s
+  const Radius: Single;     // En metres
+  const TotalMass: Single;    // Moto + Pilot kg (ex: 250.0)
+  const TireTemp: Single; // Connectat amb el mòdul anterior (°C)
+  const DryOrWet: Single;
+  const Bike:TBike): Boolean;  // Multiplier Factor (1.0 = Dry, 0.5 = Wet)
+const
+  G = 9.81; // Gravetat (m/s²)
+var
+  Centrifugal: Single;
+  Vertical: Single;
+  MuActual: Double;
+  MaxAdherence: Single;
+  NeedsLeanAngle: Single;
+const
+  ANGLE_LIMIT_MOTO = 64.0; // Límit físic d'inclinació en MotoGP (graus)
+begin
+  Result := False; // No crash, no slidout
+
+  // Avoid divide by zero errors when on a straight line
+  if Radius > 9999.0 then Exit;
+
+  if Speed < 5.0 then Exit; // Can't slidout at low speed
+
+  // Calc Grip coefficient based on tire temperature (ok between 80°C .. 110°C)
+  if (TireTemp >= 80.0) and (TireTemp <= 110.0) then
+     MuActual := 1.5 // Max dry Grip
+  else
+  if TireTemp < 50.0 then
+     MuActual := 0.9 // Cold tire, few grip
+  else
+  if TireTemp > 130.0 then
+     MuActual := 1.1 // Hot tire, bad grip
+  else
+     MuActual := 1.2; // Medium range
+
+  // Apply track status penalty
+  MuActual := MuActual * DryOrWet;
+
+  // Calc dynamic forces
+  Vertical := TotalMass * G;
+  Centrifugal := (TotalMass * Sqr(Speed)) / Radius;
+
+  // Max force to tires, before slidout
+  MaxAdherence := Vertical * MuActual;
+
+  // Lateral force is bigger
+  if Centrifugal > MaxAdherence then
+     Result := True
+  else
+  begin
+    // Calc theoric lean angle for current radius and speed
+    NeedsLeanAngle := RadToDeg(ArcTan(Sqr(Speed) / (Radius * G)));
+
+    if NeedsLeanAngle > Bike.MaxLeanAngle then
+       Result := True;
+  end;
 end;
 
 initialization

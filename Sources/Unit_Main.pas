@@ -9,7 +9,7 @@ unit Unit_Main;
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Types, TimeSpan,
+  Windows, Messages, SysUtils, Classes, Graphics, Types,
 
   Controls, Forms, Dialogs, StdCtrls, ExtCtrls, ComCtrls, CheckLst, Menus,
 
@@ -144,6 +144,8 @@ type
     Label4: TLabel;
     CBSelectedBike: TComboBox;
     CBSingleRider: TCheckBox;
+    FrontTire: TPaintBox;
+    BackTire: TPaintBox;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -191,7 +193,9 @@ type
     procedure EViewLapChange(Sender: TObject);
     procedure BikeGridSelect(Sender: TObject);
     procedure CBSingleRiderClick(Sender: TObject);
-    procedure CBSelectedBikeClick(Sender: TObject);
+    procedure CBSelectedBikeChange(Sender: TObject);
+    procedure FrontTirePaint(Sender: TObject);
+    procedure BackTirePaint(Sender: TObject);
   private
     { Private declarations }
 
@@ -237,7 +241,9 @@ type
     function CheckPilotExists(const S:String):Boolean;
     procedure ClearLapCharts;
     procedure CreatePole;
+    procedure DoPaintFlag(const ID:String; var AData: TRenderData);
     function DoStep:Boolean;
+    procedure DrawTireIcon(const ACanvas:TCanvas; const AColumn:Integer);
     function FindInAllPilots(const S:String):Integer;
     procedure FillRounds;
     procedure FillSeasons;
@@ -245,9 +251,11 @@ type
     function FindPilotNum(const ANum:String):Integer; // index inside PilotsData
     function FindRiderInPole(const ARider:Integer):Integer;
     procedure InitPoleData;
+    procedure LoadConfiguration;
     procedure RefillCharts;
     function MotoGPSeason:String;
     procedure PaintFastest(const Sender:TColumn; var AData:TRenderData; var DefaultPaint:Boolean);
+    procedure PaintFlag(const Sender:TColumn; var AData:TRenderData; var DefaultPaint:Boolean);
     function Season:String;
     procedure SetCurrentLap(const ACurrent:Integer);
     procedure SetDashboard;
@@ -269,9 +277,11 @@ implementation
 {$R *.dfm}
 
 uses
-  Math, IOUtils, UITypes,
+  Math, IOUtils, UITypes, Registry, TimeSpan,
 
-  TeeGDIPlus, TeeSkia, TeeGLCanvas, TeeRacingAbout;
+  TeeGDIPlus, TeeSkia, TeeGLCanvas, TeeRacingAbout, Picture,
+
+  TeeCountryFlags;
 
 function HasParameter(const AParameter:String):Boolean;
 var t : Integer;
@@ -300,10 +310,32 @@ begin
   end;
 end;
 
+const
+  MotoGP_Registry='Software\Steema Software\MotoGP';
+
+procedure SaveRegistry(const AKey,AName,AValue:String);
+var R : TRegistry;
+begin
+  R:=TRegistry.Create;
+  try
+    if R.OpenKey(MotoGP_Registry+'\'+AKey,True) then
+       R.WriteString(AName,AValue);
+  finally
+    R.Free;
+  end;
+end;
+
+procedure TMainForm.BackTirePaint(Sender: TObject);
+begin
+  DrawTireIcon(BackTire.Canvas,7);
+end;
+
 procedure TMainForm.Bike1Click(Sender: TObject);
 begin
   Bike1.Checked:=not Bike1.Checked;
   FrontView.Visible:=Rack1.Checked or Bike1.Checked;
+
+  SaveRegistry('View','Bike',BoolToStr(Bike1.Checked,True));
 
   FrontView.Invalidate;
 end;
@@ -525,11 +557,13 @@ begin
   CreatePole;
 
   PoleGrid.Columns[1].Width.Value:=40;
-
   PoleGrid.Invalidate;
+
+  PoleGrid.Selected.Row:=0;
+  PoleGridSelect(Self);
 end;
 
-procedure TMainForm.CBSelectedBikeClick(Sender: TObject);
+procedure TMainForm.CBSelectedBikeChange(Sender: TObject);
 var tmp : Integer;
 begin
   tmp:=FindPilotNum(Pole.Cells[1,PoleGrid.Selected.Row]);
@@ -805,9 +839,53 @@ begin
      end;
 end;
 
+procedure TMainForm.LoadConfiguration;
+var R : TRegistry;
+    tmp : String;
+begin
+  R:=TRegistry.Create(KEY_READ);
+  try
+    if R.OpenKeyReadOnly(MotoGP_Registry+'\View') then
+    begin
+      if R.ValueExists('Theme') then
+      begin
+        tmp:=R.ReadString('Theme');
+
+        if SameText(tmp,'Light') then
+        begin
+          Clear1.Checked:=True;
+          Clear1Click(Self);
+        end
+        else
+        if SameText(tmp,'Dark') then
+        begin
+          Dark1.Checked:=True;
+          Dark1Click(Self);
+        end;
+      end;
+
+      if R.ValueExists('Track') then
+      begin
+        rack1.Checked:=SameText(tmp,'TRUE');
+        rack1Click(Self);
+      end;
+
+      if R.ValueExists('Bike') then
+      begin
+        Bike1.Checked:=SameText(tmp,'TRUE');
+        Bike1Click(Self);
+      end;
+    end;
+
+  finally
+    R.Free;
+  end;
+end;
+
 procedure TMainForm.Clear1Click(Sender: TObject);
 begin
   ApplyTheme(clWhite,clBlack);
+  SaveRegistry('View','Theme','Light');
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -1138,6 +1216,27 @@ begin
   DefaultPaint:=True;
 end;
 
+procedure TMainForm.DoPaintFlag(const ID:String; var AData: TRenderData);
+var tmpFlag : TGraphic;
+    tmp : TPicture;
+begin
+  tmpFlag:=FormFlags.GetFlag(ID);
+
+  tmp:=TVCLPicture.From(tmpFlag);
+  try
+    AData.Painter.Draw(tmp,AData.Bounds.Left+4,AData.Bounds.Top+4);
+  finally
+    tmp.Free;
+  end;
+end;
+
+procedure TMainForm.PaintFlag(const Sender: TColumn; var AData: TRenderData;
+  var DefaultPaint: Boolean);
+begin
+  DoPaintFlag((Sender.TagObject as TStringsData).Cells[Sender.Tag,AData.Row],AData);
+  DefaultPaint:=False;
+end;
+
 procedure TMainForm.FormShow(Sender: TObject);
 
   procedure FillBikes(const Items:TStrings);
@@ -1152,6 +1251,16 @@ procedure TMainForm.FormShow(Sender: TObject);
     finally
       Items.EndUpdate;
     end;
+  end;
+
+  procedure AddFlags(const AGrid:TTeeGrid; const ACountry:Integer; const AStrings:TStringsData);
+  var C : TColumn;
+  begin
+    C:=AGrid.Columns.Add;
+    C.Header.Text:='Flag';
+    C.Tag:=ACountry;
+    C.TagObject:=AStrings;
+    C.OnPaint:=PaintFlag;
   end;
 
 begin
@@ -1171,6 +1280,7 @@ begin
   VerifyAllPilots;
 
   AllPilotsGrid.Data:=AllPilots;
+  AddFlags(AllPilotsGrid,4,AllPilots);
 
   SensorsData:=TCSVDataImport.FromFile(MotoGP+'\Sensors.txt');
   Sensors.Data:=SensorsData;
@@ -1187,6 +1297,8 @@ begin
 
   CircuitsData:=TCSVDataImport.FromFile(MotoGP+'\Circuits\Circuits.txt');
   Circuits.Data:=CircuitsData;
+
+  AddFlags(Circuits,2,CircuitsData);
 
   FillSeasons;
 
@@ -1243,17 +1355,58 @@ begin
   Race.Weather.CalculateAirDensity(Race.Circuit.Elevation);
 
   RearBike:=TPngImage.Create;
-  RearBike.LoadFromFile(MotoGP+'\Images\rear_bike.png');
+  RearBike.LoadFromFile(MotoGP+'\Images\rear_bike_small.png');
 
   PageControl2.ActivePage:=TabCircuits;
   PageControl1.ActivePage:=TabLap;
   PageControl4.ActivePage:=TabFrontView;
   PageControl3.ActivePage:=TabRace;
+
+  LoadConfiguration;
+end;
+
+procedure TMainForm.DrawTireIcon(const ACanvas:TCanvas; const AColumn:Integer);
+
+  function TireLetter(const S:String):String;
+  begin
+    if S='' then
+       result:='S'
+    else
+    begin
+      // TODO: Link with TiresGrid to return info
+      result:='M';
+    end;
+  end;
+
+var tmp : Integer;
+    tmpTire : String;
+begin
+  tmp:=PoleGrid.Selected.Row;
+
+  if tmp<>-1 then
+  begin
+    tmpTire:=PilotsData.Cells[AColumn,FindPilotNum(Pole.Cells[1,tmp])];
+
+    ACanvas.Pen.Width:=3;
+    ACanvas.Ellipse(2,2,30,30);
+    ACanvas.Brush.Style:=bsClear;
+    ACanvas.Font.Style:=[fsBold];
+    ACanvas.TextOut(10,4,TireLetter(tmpTire));
+  end;
+end;
+
+procedure TMainForm.FrontTirePaint(Sender: TObject);
+begin
+  DrawTireIcon(FrontTire.Canvas,6);
 end;
 
 procedure TMainForm.FrontViewAfterDraw(Sender: TObject);
-
 var HTop : Integer;
+
+    TopLeft,
+    BottomLeft,
+    TopRight,
+    BottomRight : Integer;
 
   procedure DrawTrack;
   var C : TTeeCanvas;
@@ -1272,41 +1425,68 @@ var HTop : Integer;
     W:=FrontView.Width;
     H:=FrontView.Height;
 
-    C.Polygon([Point(20,H),Point(160,HTop),Point(W-160,HTop),Point(W-20,H)]);
+    BottomLeft:=W div 20;
+    BottomRight:=W-BottomLeft;
+
+    TopLeft:=W div 3;
+    TopRight:=W-TopLeft;
+
+    C.Polygon([Point(BottomLeft,H),Point(TopLeft,HTop),Point(TopRight,HTop),Point(BottomRight,H)]);
   end;
 
   procedure DrawKerbs(const APos:Single);
   const F=500;
-        H=50;
+        H=10;
 
   var C : TTeeCanvas;
-      t, Y, YC : Integer;
+      t,
+      X, Y : Integer;
+      tmp : Single;
   begin
     C:=FrontView.Canvas;
+
     C.Pen.Style:=psSolid;
+    C.Pen.Width:=3;
 
     C.Brush.Color:=RGB(130,20,10);
     C.Brush.Style:=bsSolid;
     C.Gradient.Visible:=False;
 
-    YC:=HTop;
-
-    for t:=1 to 20 do
+    for t:=1 to 19 do
     begin
-      Y:=YC+Round(H*F/((5*t)-(Round(APos) mod 5)));
+      if C.Pen.Color=clSilver then
+         C.Pen.Color:=RGB(138,0,0)
+      else
+         C.Pen.Color:=clSilver;
 
-      C.Line(0,Y,100,Y);
+      tmp:=Power(t/19,2);
+
+      X:=TopLeft+Round(tmp*(BottomLeft-TopLeft));
+
+      Y:=HTop-50+(Round(APos) mod 50)+Round(tmp*(FrontView.Height-HTop));
+
+      if Y>HTop then
+      begin
+        C.Line(X-3,Y,X-10-t,Y);
+
+        X:=TopRight+Round(tmp*(BottomRight-TopRight));
+
+        C.Line(X+3,Y,X+10+t,Y);
+      end;
     end;
   end;
 
-var L, tmp : Integer;
+var L,
+    tmp,
+    tmpX,
+    tmpY : Integer;
     R : TRect;
 begin
   tmp:=PoleGrid.Selected.Row;
 
   L:=High(Race.Data);
 
-  HTop:=FrontView.Height div 2;
+  HTop:=FrontView.Height div 4;
 
   if rack1.Checked then
   begin
@@ -1327,7 +1507,11 @@ begin
 
     if Bike1.Checked then
     begin
-      R:=Rect(110,450,FrontView.Width-110,860);
+      tmpX:=FrontView.Width div 2;
+      tmpY:=FrontView.Height-20;
+
+      R:=Rect(tmpX-(RearBike.Width div 2), tmpY-RearBike.Height,
+              tmpX+(RearBike.Width div 2), tmpY);
 
       if Lean1.Checked then
          FrontView.Canvas.StretchRotate(R,RearBike,TBLean.Position)
@@ -1374,6 +1558,12 @@ begin
     if DataGrid.Data=nil then
        //DataGrid.Data:=TVirtualData<TRace>.Create(Race);
        DataGrid.Data:=TVirtualArrayData<TRider>.Create(Race.Riders);
+  end
+  else
+  if PageControl1.ActivePage=TabLap then
+  begin
+    if SeriesSpeed.Count<2 then
+       RefillCharts;
   end;
 end;
 
@@ -1488,6 +1678,8 @@ procedure TMainForm.RefillCharts;
 
     SeriesGear.Stairs:=True;
     SeriesThrottle.Stairs:=True;
+    SeriesFrontBrake.Stairs:=True;
+    SeriesBackBrake.Stairs:=True;
 
     SeriesThrottle.CustomVertAxis:=LapChart.CustomAxes[1];
     SeriesFrontBrake.CustomVertAxis:=LapChart.CustomAxes[1];
@@ -1512,7 +1704,10 @@ var Rider,
     EndOfLap,
 
     tmpRider,
+    tmpLap,
     t : Integer;
+
+    tmpMin: Single;
 begin
   if SeriesSpeed=nil then
   begin
@@ -1531,7 +1726,12 @@ begin
 
     if Length(Race.Riders)>Rider then
     begin
-      SeriesSpeed.GetHorizAxis.SetMinMax(0 {-Pole.Position},Race.Circuit.TotalLength);
+      if UDViewLap.Position=1 then
+         tmpMin:=-Race.Riders[RacePoleIndex[Rider]].Pole*Race.PoleDistance
+      else
+         tmpMin:=0;
+
+      SeriesSpeed.GetHorizAxis.SetMinMax(tmpMin,Race.Circuit.TotalLength);
 
       SeriesSpeed.BeginUpdate;
       SeriesAcceleration.BeginUpdate;
@@ -1542,18 +1742,26 @@ begin
 
       ClearLapCharts;
 
-      if Race.Riders[Rider].Laps=0 then
+      if CBViewLastLap.Checked then
+         if Race.Riders[Rider].Laps=0 then
+            tmpLap:=0
+         else
+            tmpLap:=Race.Riders[Rider].Laps-1
+      else
+         tmpLap:=UDViewLap.Position-1;
+
+      if Race.Riders[Rider].Laps<=tmpLap then
          StartOfLap:=0
       else
-         StartOfLap:=Race.Riders[Rider].LapsTime[Race.Riders[Rider].Laps-1];
+         StartOfLap:=Race.Riders[Rider].LapsTime[tmpLap-1];
 
       if CBViewLastLap.Checked or (Length(Race.Riders[Rider].LapsTime)=0) then
          EndOfLap:=High(Race.Data)
       else
-         EndOfLap:=Race.Riders[Rider].LapsTime[Race.Riders[Rider].Laps];
+         EndOfLap:=Race.Riders[Rider].LapsTime[tmpLap];
 
       for t:=StartOfLap to EndOfLap do
-          AddRiderData(t,Rider);
+          AddRiderData(t,RacePoleIndex[Rider]);
 
       SeriesBackBrake.EndUpdate;
       SeriesFrontBrake.EndUpdate;
@@ -1565,6 +1773,9 @@ begin
   end;
 end;
 
+// TODO: Speed opt.
+// Set XValues.Value and YValues.Value arrays directly, instead of calling
+// AddXY
 procedure TMainForm.AddRiderData(const APos:Integer; const Rider:Integer);
 var X : Single;
 
@@ -1576,21 +1787,15 @@ var X : Single;
        ASeries.XValues.Value[ASeries.Count-1]:=X;
   end;
 
-var tmpNewGear : Integer;
 begin
   X:=Race.Data[APos].Data[Rider].Position;
 
   SeriesSpeed.AddXY(X,Race.Data[APos].Data[Rider].Speed);
   SeriesAcceleration.AddXY(X,Race.Data[APos].Data[Rider].Acceleration);
 
-  tmpNewGear:=Race.Data[APos].Data[Rider].Gear;
-
-  if (SeriesGear.Count<2) or (tmpNewGear<>SeriesGear.YValues.Last) then
-     SeriesGear.AddXY(X,tmpNewGear)
-  else
-     SeriesGear.XValues.Value[SeriesGear.Count-1]:=X;
-
+  CheckNew(SeriesGear,Race.Data[APos].Data[Rider].Gear);
   CheckNew(SeriesThrottle,Race.Data[APos].Data[Rider].Throttle);
+
   CheckNew(SeriesFrontBrake,Race.Data[APos].Data[Rider].FrontBrake);
   CheckNew(SeriesBackBrake,Race.Data[APos].Data[Rider].BackBrake);
 end;
@@ -1635,6 +1840,9 @@ begin
     CBSelectedBike.ItemIndex:=CBSelectedBike.Items.IndexOf(tmpBike);
   end;
 
+  FrontTire.Invalidate;
+  BackTire.Invalidate;
+
   FrontView.Invalidate;
 end;
 
@@ -1642,6 +1850,8 @@ procedure TMainForm.rack1Click(Sender: TObject);
 begin
   rack1.Checked:=not rack1.Checked;
   FrontView.Visible:=Rack1.Checked or Bike1.Checked;
+
+  SaveRegistry('View','Track',BoolToStr(rack1.Checked,True));
 
   FrontView.Invalidate;
 end;
@@ -1865,9 +2075,12 @@ begin
       begin
         Race.Current:=Lap+1;
         SetCurrentLap(Race.Current);
-
-        ClearLapCharts;
       end;
+
+      if CBViewLastLap.Checked then
+         // Same rider that is selected, has ended a lap?
+         if Rider=RacePoleIndex[PoleGrid.Selected.Row] then
+            ClearLapCharts;
 
       Pole.Cells[4,Rider]:=IntToTime(Race.Riders[Rider].Ellapsed[Lap-1]); // Last
 
@@ -1912,12 +2125,22 @@ begin
 end;
 
 procedure ThemeGrid(const AGrid:TTeeGrid; const ABack,AFont:TColor);
+var tmpGrid : TColor;
 begin
   AGrid.Back.Brush.Color:=ABack;
   AGrid.Cells.Format.Font.Color:=AFont;
+
+  if ABack=clBlack then
+     tmpGrid:=clRed
+  else
+     tmpGrid:=clSilver;
+
+  AGrid.Rows.Lines.Color:=tmpGrid;
 end;
 
 procedure ThemeChart(const AChart:TChart; const ABack,AFont:TColor);
+var t : Integer;
+    tmpGrid : TColor;
 begin
   if AChart.Gradient.Visible then
   begin
@@ -1932,14 +2155,34 @@ begin
   AChart.Walls.Back.Gradient.Visible:=False;
   AChart.Walls.Back.Color:=ABack;
 
-  AChart.Axes.Left.Texts.Font.Color:=AFont;
-  AChart.Axes.Right.Texts.Font.Color:=AFont;
-  AChart.Axes.Top.Texts.Font.Color:=AFont;
-  AChart.Axes.Bottom.Texts.Font.Color:=AFont;
-  AChart.Axes.Depth.Texts.Font.Color:=AFont;
+  if ABack=clBlack then
+     tmpGrid:=RGB(50,50,50)
+  else
+     tmpGrid:=clSilver;
+
+  for t:=0 to AChart.Axes.Count-1 do
+  begin
+    AChart.Axes[t].Texts.Font.Color:=AFont;
+    AChart.Axes[t].Grid.Color:=tmpGrid;
+  end;
 end;
 
 procedure TMainForm.ApplyTheme(const ABack,AFont:TColor);
+
+  procedure ChangePanel(const APanel:TPanel);
+  begin
+    APanel.ParentBackground:=False;
+    APanel.ParentColor:=False;
+    APanel.Color:=ABack;
+  end;
+
+  procedure ChangeFonts(const ALabels:Array of TLabel);
+  var t : Integer;
+  begin
+    for t:=0 to High(ALabels) do
+        ALabels[t].Font.Color:=AFont;
+  end;
+
 begin
   ThemeGrid(PoleGrid,ABack,AFont);
   ThemeGrid(LapTimesGrid,ABack,AFont);
@@ -1962,11 +2205,30 @@ begin
 
   if Torque<>nil then
      ThemeChart(Torque.Chart1,ABack,AFont);
+
+  SeriesList.Color:=ABack;
+  SeriesList.Font.Color:=AFont;
+
+  ChangePanel(Panel1);
+  ChangePanel(Panel2);
+  ChangePanel(Panel3);
+  ChangePanel(Panel4);
+  ChangePanel(PanelTop);
+
+  ChangeFonts([CurrentLap,Label1,Label2,Label3,Label4,LRaceEllapsed]);
+
+  {
+  CBSingleRider.StyleElements := [];
+  CBSingleRider.ParentFont:=False;
+  CBSingleRider.ParentColor:=False;
+  CBSingleRider.Font.Color:=AFont;
+  }
 end;
 
 procedure TMainForm.Dark1Click(Sender: TObject);
 begin
   ApplyTheme(clBlack,clWhite);
+  SaveRegistry('View','Theme','Dark');
 end;
 
 procedure TMainForm.Dashboard1Click(Sender: TObject);
@@ -2091,6 +2353,7 @@ function TMainForm.DoStep:Boolean;
       Brake : TBrakeDecision;
       CurrentPhase : TTurnPhase;
       TriggerBrakeDist  : Single;
+      Curve : ^TCurve;
   begin
     result:=False;
 
@@ -2137,14 +2400,16 @@ function TMainForm.DoStep:Boolean;
 
         if result then
         begin
+          Curve:=@Race.Circuit.Curves[Race.Riders[t].NextCurve-1];
+
           Brake:=EvaluateBrakingPoint(Race.Data[L].Data[t].Position, Race.Data[L].Data[t].Speed,
-                                      Race.Circuit.Curves[Race.Riders[t].NextCurve-1],
+                                      Curve^,
                                       Race.Riders[t].Bike.Front.BrakeForce+Race.Riders[t].Bike.Back.BrakeForce);
 
 
-          TriggerBrakeDist:= Race.Circuit.Curves[Race.Riders[t].NextCurve-1].Position - Brake.BrakingDistanceNeeded;
+          TriggerBrakeDist:= Curve.Position - Brake.BrakingDistanceNeeded;
 
-          CurrentPhase := DetermineTrackPhase(Race.Data[L].Data[t].Position, Race.Circuit.Curves[Race.Riders[t].NextCurve-1], TriggerBrakeDist);
+          CurrentPhase := DetermineTrackPhase(Race.Data[L].Data[t].Position, Curve^, TriggerBrakeDist);
 
           case CurrentPhase of
 
@@ -2153,7 +2418,7 @@ function TMainForm.DoStep:Boolean;
                 if Race.Data[L].Data[t].Throttle<100 then
                 begin
                   Race.Data[L].Data[t].Throttle:=100;
-                  Race.Data[L].Data[t].RPM:=Race.Riders[t].Bike.MaxRPM;
+                  //Race.Data[L].Data[t].RPM:=Race.Riders[t].Bike.MaxRPM;
 
 
                   // No brakes
@@ -2169,15 +2434,17 @@ function TMainForm.DoStep:Boolean;
               begin
                 if Race.Data[L].Data[t].Throttle>0 then
                 begin
-                  Race.Data[L].Data[t].Throttle:=0;
-                  Race.Data[L].Data[t].RPM:=Race.Riders[t].Bike.IdleRPM;
+                  Race.Data[L].Data[t].Throttle:=0;  // Engine Brake Force
 
 
-                  // Brake Bite
+                  //Race.Data[L].Data[t].RPM:=Race.Riders[t].Bike.IdleRPM;
+
+
+                  // Brake Bite %
                   Race.Data[L].Data[t].FrontBrake:=90;
                   Race.Data[L].Data[t].BackBrake:=30;
 
-                  // Bike Upright
+                  // Put Bike Upright
                   Race.Data[L].Data[t].LeanAngle:=0;
                 end;
               end;
@@ -2188,18 +2455,18 @@ function TMainForm.DoStep:Boolean;
                 // tmp:=Race.Circuit.IndexOfPosition(Race.Data[L].Data[Rider].Position);
                 // Race.Data[L].Data[t].LeanAngle:=CalcLeanAngle(Race.Circuit.Points,tmp,Speed);
 
-                if Race.Circuit.Curves[Race.Riders[t].NextCurve-1].Angle<0 then
+                if Curve.Angle<0 then
                    Race.Data[L].Data[t].LeanAngle:= -Race.Riders[t].Bike.MaxLeanAngle
                 else
                    Race.Data[L].Data[t].LeanAngle:=Race.Riders[t].Bike.MaxLeanAngle;
 
                 // TrailBraking progressively (The Release)
-                Race.Data[L].Data[t].TrailBrake(Race.Circuit.Curves[Race.Riders[t].NextCurve-1].ApexPosition);
+                Race.Data[L].Data[t].TrailBrake(Curve.ApexPosition);
               end;
 
             tpAcceleration:
               begin
-                // Un-brake
+                // Release brakes
                 Race.Data[L].Data[t].FrontBrake:=0;
 
                 Race.Data[L].Data[t].BackBrake:=0;
@@ -2209,19 +2476,24 @@ function TMainForm.DoStep:Boolean;
 
                 // Throttle depends on Lean angle
                 Race.Data[L].Data[t].Throttle:=CalculateThrottle(Race.Data[L].Data[t].LeanAngle,Race.Riders[t].Bike.MaxLeanAngle);
-                Race.Data[L].Data[t].RPM:=Race.Riders[t].Bike.MaxRPM;
+                //Race.Data[L].Data[t].RPM:=Race.Riders[t].Bike.MaxRPM;
 
              end;
           end;
 
-          if Race.Data[L].Data[t].Position>Race.Circuit.Curves[Race.Riders[t].NextCurve-1].ApexPosition then
-          begin
-            // Next Curve
-            Inc(Race.Riders[t].NextCurve);
+          { TODO: Check is speed is too much at this point (slidout, lowside crash)
+          if CheckSlidOut(Race.Data[L].Data[t].Speed,
+                          Race.Circuit.Radius[Race.Circuit.IndexOfPosition(Race.Data[L].Data[t].Position)],
+                          TotalMass,
+                          TireTemp,
+                          DryOrWet,
+                          Race.Riders[t].Bike) then
 
-            if Race.Riders[t].NextCurve>Length(Race.Circuit.Curves) then
-               Race.Riders[t].NextCurve:=1;
-          end;
+               Race.Riders[t].Active:=False;
+          }
+
+          if Race.Data[L].Data[t].Position>Curve.ApexPosition then
+             Race.Riders[t].GoToNextCurve(Length(Race.Circuit.Curves));
         end;
       end;
   end;
@@ -2294,7 +2566,8 @@ end;
 
 procedure TMainForm.EViewLapChange(Sender: TObject);
 begin
-  RefillCharts;
+  if not CBViewLastLap.Checked then
+     RefillCharts;
 end;
 
 procedure TMainForm.Exit1Click(Sender: TObject);

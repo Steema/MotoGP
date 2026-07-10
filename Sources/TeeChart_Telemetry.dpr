@@ -5,7 +5,9 @@ uses
   Unit_Main in 'Unit_Main.pas' {MainForm},
   TeeRacing in 'TeeRacing.pas',
   TeeTorqueCurve in 'TeeTorqueCurve.pas' {FormTorqueCurve},
-  TeeRacingAbout in 'TeeRacingAbout.pas' {AboutForm};
+  TeeRacingAbout in 'TeeRacingAbout.pas' {AboutForm},
+  TeeCountryFlags in 'TeeCountryFlags.pas' {FormFlags},
+  TeeTire in 'TeeTire.pas';
 
 {$R *.res}
 
@@ -17,5 +19,6 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TMainForm, MainForm);
+  Application.CreateForm(TFormFlags, FormFlags);
   Application.Run;
 end.

@@ -24,7 +24,6 @@ object MainForm: TMainForm
     Height = 41
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 1104
     object CurrentLap: TLabel
       Left = 771
       Top = 13
@@ -180,8 +179,6 @@ object MainForm: TMainForm
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitWidth = 1104
-    ExplicitHeight = 650
     object Splitter1: TSplitter
       Left = 321
       Top = 0
@@ -206,7 +203,6 @@ object MainForm: TMainForm
       ActivePage = TabCircuits
       Align = alLeft
       TabOrder = 0
-      ExplicitHeight = 650
       object TabCircuits: TTabSheet
         Caption = 'Circuit'
         object Splitter3: TSplitter
@@ -227,7 +223,6 @@ object MainForm: TMainForm
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitTop = 0
           object Circuit: TChart
             Left = 0
             Top = 41
@@ -288,7 +283,6 @@ object MainForm: TMainForm
             OnAfterDraw = CircuitAfterDraw
             Align = alClient
             TabOrder = 0
-            ExplicitLeft = -2
             DefaultCanvas = 'TGDIPlusCanvas'
             ColorPaletteIndex = 13
           end
@@ -336,8 +330,6 @@ object MainForm: TMainForm
           ActivePage = TabFrontView
           Align = alClient
           TabOrder = 1
-          ExplicitTop = 308
-          ExplicitHeight = 312
           object TabFrontView: TTabSheet
             Caption = 'Front View'
             ImageIndex = 1
@@ -417,8 +409,6 @@ object MainForm: TMainForm
               OnAfterDraw = FrontViewAfterDraw
               Align = alClient
               TabOrder = 0
-              ExplicitLeft = 2
-              ExplicitTop = 138
               DefaultCanvas = 'TGDIPlusCanvas'
               ColorPaletteIndex = 13
             end
@@ -511,14 +501,14 @@ object MainForm: TMainForm
                 Frame.MiddleBrush.BackColor = clYellow
                 Frame.OuterBrush.BackColor = clGreen
                 Frame.OuterBrush.Gradient.EndColor = clGreen
-                Value = 41.192500000000000000
+                Value = 49.350000000000000000
                 InternalMarkers = {
                   02000000545046300E544E756D657269634D61726B65720008506F736974696F
                   6E0708707043656E7465720B53686170652E436F6C6F7204DBDBC80010536861
                   70652E466F6E742E436F6C6F7204282828001153686170652E466F6E742E4865
                   6967687402D00F53686170652E466F6E742E4E616D65060A44532D4469676974
                   616C1353686170652E4672616D652E56697369626C65081453686170652E5368
-                  61646F772E56697369626C65080A53686170652E546578740602343113536861
+                  61646F772E56697369626C65080A53686170652E546578740602343913536861
                   70652E54657874416C69676E6D656E74070E746152696768744A757374696679
                   1153686170652E5472616E73706172656E74090000545046300E544E756D6572
                   69634D61726B65720008506F736974696F6E070A70705269676874546F700F53
@@ -573,7 +563,7 @@ object MainForm: TMainForm
                 RotationAngle = 160
                 ShapeStyle = gsPolygon
                 TotalAngle = 140.000000000000000000
-                Value = 13.867062823846940000
+                Value = -67.717556329444050000
               end
               object FuelGauge: TLinearGauge
                 Legend.Visible = False
@@ -645,7 +635,7 @@ object MainForm: TMainForm
                 Ticks.Style = psRectangle
                 Ticks.VertSize = 10
                 Ticks.GaugeStyle = gpTick
-                Value = 49.000000000000000000
+                Value = 36.000000000000000000
                 ValueArea.Transparent = True
               end
             end
@@ -657,7 +647,6 @@ object MainForm: TMainForm
               Align = alBottom
               TabOrder = 2
               Visible = False
-              ExplicitTop = 241
               object TBLean: TTrackBar
                 Left = 9
                 Top = 6
@@ -686,14 +675,28 @@ object MainForm: TMainForm
                 Height = 15
                 Caption = 'Bike:'
               end
+              object FrontTire: TPaintBox
+                Left = 205
+                Top = 3
+                Width = 32
+                Height = 32
+                OnPaint = FrontTirePaint
+              end
+              object BackTire: TPaintBox
+                Left = 248
+                Top = 3
+                Width = 32
+                Height = 32
+                OnPaint = BackTirePaint
+              end
               object CBSelectedBike: TComboBox
-                Left = 41
-                Top = 7
+                Left = 40
+                Top = 6
                 Width = 145
                 Height = 23
                 Style = csDropDownList
                 TabOrder = 0
-                OnClick = CBSelectedBikeClick
+                OnChange = CBSelectedBikeChange
               end
             end
           end
@@ -777,7 +780,6 @@ object MainForm: TMainForm
           ParentBackground = False
           ParentColor = False
           TabOrder = 0
-          ExplicitLeft = 1
           _Headers = (
             1
             'TColumnHeaderBand'
@@ -813,7 +815,6 @@ object MainForm: TMainForm
           ParentBackground = False
           ParentColor = False
           TabOrder = 0
-          ExplicitHeight = 620
           _Headers = (
             1
             'TColumnHeaderBand'
@@ -834,7 +835,6 @@ object MainForm: TMainForm
       Align = alClient
       TabOrder = 1
       OnChange = PageControl1Change
-      ExplicitHeight = 680
       object TabLap: TTabSheet
         Caption = 'Current Lap'
         object LapChart: TChart
@@ -913,8 +913,6 @@ object MainForm: TMainForm
           OnAfterDraw = LapChartAfterDraw
           Align = alClient
           TabOrder = 0
-          ExplicitLeft = 122
-          ExplicitTop = 39
           DefaultCanvas = 'TGDIPlusCanvas'
           ColorPaletteIndex = 13
           object CurveSeries: TPointSeries
@@ -956,11 +954,9 @@ object MainForm: TMainForm
           Width = 121
           Height = 766
           Align = alLeft
-          ItemHeight = 17
+          ItemHeight = 15
           TabOrder = 1
           OnClickCheck = SeriesListClickCheck
-          ExplicitTop = 0
-          ExplicitHeight = 620
         end
         object Panel1: TPanel
           Left = 0
@@ -969,8 +965,6 @@ object MainForm: TMainForm
           Height = 41
           Align = alTop
           TabOrder = 2
-          ExplicitLeft = -2
-          ExplicitTop = -6
           object Label2: TLabel
             Left = 11
             Top = 11
@@ -1096,8 +1090,6 @@ object MainForm: TMainForm
           OnGetAxisLabel = AllLapsGetAxisLabel
           Align = alClient
           TabOrder = 0
-          ExplicitWidth = 441
-          ExplicitHeight = 620
           DefaultCanvas = 'TGDIPlusCanvas'
           ColorPaletteIndex = 13
           object TowerLapRider: TTowerSeries
@@ -1129,8 +1121,6 @@ object MainForm: TMainForm
           ParentBackground = False
           ParentColor = False
           TabOrder = 0
-          ExplicitWidth = 441
-          ExplicitHeight = 620
           _Headers = (
             1
             'TColumnHeaderBand'
@@ -1150,8 +1140,6 @@ object MainForm: TMainForm
           ActivePage = TabSheet4
           Align = alClient
           TabOrder = 0
-          ExplicitLeft = 1
-          ExplicitTop = 1
           object TabSheet4: TTabSheet
             Caption = 'Parameters'
             object BikeGrid: TTeeGrid
@@ -1166,7 +1154,6 @@ object MainForm: TMainForm
               ParentBackground = False
               ParentColor = False
               TabOrder = 0
-              ExplicitLeft = 2
               _Headers = (
                 1
                 'TColumnHeaderBand'
@@ -1189,8 +1176,6 @@ object MainForm: TMainForm
               ParentBackground = False
               ParentColor = False
               TabOrder = 0
-              ExplicitWidth = 312
-              ExplicitHeight = 590
               _Headers = (
                 1
                 'TColumnHeaderBand'
@@ -1228,8 +1213,6 @@ object MainForm: TMainForm
           ParentBackground = False
           ParentColor = False
           TabOrder = 0
-          ExplicitWidth = 441
-          ExplicitHeight = 620
           _Headers = (
             1
             'TColumnHeaderBand'
@@ -1265,8 +1248,6 @@ object MainForm: TMainForm
           ParentBackground = False
           ParentColor = False
           TabOrder = 0
-          ExplicitWidth = 441
-          ExplicitHeight = 181
           _Headers = (
             1
             'TColumnHeaderBand'
@@ -1285,8 +1266,6 @@ object MainForm: TMainForm
           ParentBackground = False
           ParentColor = False
           TabOrder = 1
-          ExplicitTop = 184
-          ExplicitWidth = 441
           _Headers = (
             1
             'TColumnHeaderBand'
@@ -1309,8 +1288,6 @@ object MainForm: TMainForm
           ParentBackground = False
           ParentColor = False
           TabOrder = 0
-          ExplicitWidth = 313
-          ExplicitHeight = 620
           _Headers = (
             1
             'TColumnHeaderBand'
@@ -1327,8 +1304,6 @@ object MainForm: TMainForm
       Height = 837
       Align = alRight
       TabOrder = 2
-      ExplicitLeft = 776
-      ExplicitHeight = 650
       object PageControl3: TPageControl
         Left = 1
         Top = 1
@@ -1337,7 +1312,6 @@ object MainForm: TMainForm
         ActivePage = TabRace
         Align = alClient
         TabOrder = 0
-        ExplicitHeight = 648
         object TabRace: TTabSheet
           Caption = 'Race'
           object Splitter4: TSplitter
@@ -1362,8 +1336,7 @@ object MainForm: TMainForm
             ParentBackground = False
             ParentColor = False
             TabOrder = 0
-            ExplicitLeft = -2
-            ExplicitHeight = 226
+            ExplicitLeft = 1
             _Headers = (
               1
               'TColumnHeaderBand'
@@ -1378,7 +1351,6 @@ object MainForm: TMainForm
             Height = 41
             Align = alBottom
             TabOrder = 1
-            ExplicitTop = 196
             object BRandomPole: TButton
               Left = 9
               Top = 6
@@ -1406,7 +1378,6 @@ object MainForm: TMainForm
             ActivePage = TabLapTimes
             Align = alBottom
             TabOrder = 2
-            ExplicitTop = 240
             object TabLapTimes: TTabSheet
               Caption = 'Lap Times'
               object LapTimesGrid: TTeeGrid
@@ -1508,7 +1479,6 @@ object MainForm: TMainForm
             OnAfterDraw = PoleChartAfterDraw
             Align = alClient
             TabOrder = 0
-            ExplicitHeight = 618
             DefaultCanvas = 'TGDIPlusCanvas'
             ColorPaletteIndex = 13
           end
