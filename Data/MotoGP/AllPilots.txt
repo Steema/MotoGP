@@ -1,4 +1,4 @@
-Code,Name,Surname,City,Country,Birth,Weight,Height
+﻿Code,Name,Surname,City,Country,Birth,Weight,Height
 NABE,Norick,Abe,Tòquio,Japan,07/09/1975,65,173
 PA37,Pedro,Acosta,Mazarrón,Spain,25/05/2004,62,171
 GAGO,Giacomo,Agostini,Brescia,Italy,16/06/1942,65,172
@@ -32,7 +32,7 @@ BB33,Brad,Binder,Potchefstroom,South Africa,11/08/1995,63,170
 DBIN,Darryn,Binder,Potchefstroom,South Africa,21/01/1998,68,175
 SBRA,Stefan,Bradl,Augsburg,Germany,29/11/1989,63,170
 DBRA,Dieter,Braun,Ulm,Germany,02/02/1943,65,173
-SBYR,Shane,Byrne,Londres,UK,10/12/1976,69,172
+SBYR,Shane,Byrne,Londres,United Kingdom,10/12/1976,69,172
 ACAN,Arón,Canet,Corbera,Spain,30/09/1999,63,175
 LCAP,Loris,Capirossi,Bolonya,Italy,04/04/1973,59,165
 ACAR,Álvaro,Carpe,Múrcia,Spain,10/06/2007,55,168
@@ -43,14 +43,14 @@ CCHE,Carlos,Checa,Sant Fruitós de Bages,Spain,15/10/1972,73,172
 PCHI,Pierfrancesco,Chili,Bolonya,Italy,20/06/1964,68,173
 SCOR,Sandro,Cortese,Ochsenhausen,Germany,06/01/1990,62,169
 ACRI,Álex,Crivillé,Seva,Spain,04/03/1970,64,169
-CCRU,Cal,Crutchlow,Coventry,UK,29/10/1985,66,170
+CCRU,Cal,Crutchlow,Coventry,United Kingdom,29/10/1985,66,170
 LDAL,Lorenzo,Dalla Porta,Prato,Italy,22/06/1997,61,168
 DDER,Didier,de Radiguès,Lovaina,Belgium,27/03/1958,61,170
 FD49,Fabio,Di Giannantonio,Roma,Italy,10/10/1998,68,175
 MDOO,Mick,Doohan,Brisbane,Australia,04/06/1965,68,175
 ADOV,Andrea,Dovizioso,Forlimpopoli,Italy,23/03/1986,67,167
 MDUH,Michael,Duhamel,Mont-real,Canada,26/05/1968,68,170
-CEDW,Colin,Edwards,Conroe,USA,27/02/1974,75,178
+CEDW,Colin,Edwards,Conroe,United States of America,27/02/1974,75,178
 TELI,Toni,Elías,Manresa,Spain,26/03/1983,63,162
 AESP,Aleix,Espargaró,Granollers,Spain,30/07/1989,65,180
 PESP,Pol,Espargaró,Granollers,Spain,10/06/1991,63,171
@@ -59,7 +59,7 @@ RFEN,Romano,Fenati,Ascoli Piceno,Italy,15/01/1996,61,170
 AFER,Adrián,Fernández,Madrid,Spain,31/01/2004,59,171
 AGFE,Augusto,Fernández,Madrid,Spain,23/09/1997,72,181
 RF25,Raúl,Fernández,Madrid,Spain,23/10/2000,68,177
-CFOG,Carl,Fogarty,Blackburn,UK,01/07/1965,66,173
+CFOG,Carl,Fogarty,Blackburn,United Kingdom,01/07/1965,66,173
 DFOG,Dennis,Foggia,Roma,Italy,07/01/2001,62,170
 JFOL,Jonas,Folger,Mühldorf,Germany,13/08/1993,65,180
 TFUR,Taiyo,Furusato,Kanoya,Japan,12/07/2005,57,172
@@ -67,35 +67,35 @@ SGAR,Sergio,García,Borriana,Spain,22/03/2003,63,171
 WGAR,Wayne,Gardner,Wollongong,Australia,11/10/1959,65,170
 SGIB,Sete,Gibernau,Barcelona,Spain,15/12/1972,71,177
 MGON,Manuel,González,Madrid,Spain,04/08/2002,64,172
-RGOU,Rodney,Gould,Banbury,UK,10/03/1943,62,170
+RGOU,Rodney,Gould,Banbury,United Kingdom,10/03/1943,62,170
 IGUE,Izan,Guevara,Palma,Spain,28/06/2004,63,174
 SGUI,Sylvain,Guintoli,Montélimar,France,24/06/1982,68,179
 WHAA,Werner,Haas,Augsburg,Germany,30/05/1927,60,165
 NHAG,Noriyuki,Haga,Nagoya,Japan,02/03/1975,66,168
-MHAI,Mike,Hailwood,Great Milton,UK,02/04/1940,74,180
-RHAS,Ron,Haslam,Langley Mill,UK,22/06/1956,66,173
-NHAY,Nicky,Hayden,Owensboro,USA,30/07/1981,69,173
+MHAI,Mike,Hailwood,Great Milton,United Kingdom,02/04/1940,74,180
+RHAS,Ron,Haslam,Langley Mill,United Kingdom,22/06/1956,66,173
+NHAY,Nicky,Hayden,Owensboro,United States of America,30/07/1981,69,173
 DHOL,Daniel,Holgado,Sant Vicent del Raspeig,Spain,27/04/2005,58,168
 RHOL,Rupert,Hollaus,Traisen,Austria,04/09/1931,58,166
-JHOP,John,Hopkins,Ramona,USA,22/05/1983,68,170
-BIVY,Bill,Ivy,Maidstone,UK,27/08/1942,54,160
+JHOP,John,Hopkins,Ramona,United States of America,22/05/1983,68,170
+BIVY,Bill,Ivy,Maidstone,United Kingdom,27/08/1942,54,160
 OJAC,Olivier,Jacque,Evreux,France,29/08/1974,63,168
 MKAL,Mika,Kallio,Valkeakoski,Finland,07/11/1982,60,168
 DKAT,Daijiro,Kato,Saitama,Japan,04/07/1976,51,162
 JKEL,Joel,Kelso,Nambour,Australia,12/06/2003,57,168
-DKEN,Danny,Kent,Tetbury,UK,25/11/1993,64,174
-JKOC,John,Kocinski,Little Rock,USA,20/03/1968,62,168
+DKEN,Danny,Kent,Tetbury,United Kingdom,25/11/1993,64,174
+JKOC,John,Kocinski,Little Rock,United States of America,20/03/1968,62,168
 RLAC,Regis,Laconi,Saint-Dizier,France,08/07/1975,70,176
-ELAW,Eddie,Lawson,Upland,USA,11/03/1958,68,173
+ELAW,Eddie,Lawson,Upland,United States of America,11/03/1958,68,173
 ELAZ,Eugenio,Lazzarini,Urbino,Italy,26/03/1945,52,158
 ILEC,Iker,Lecuona,València,Spain,06/01/2000,70,179
 ALOP,Alonso,López,Madrid,Spain,21/12/2001,64,175
 JLOR,Jorge,Lorenzo,Palma,Spain,04/05/1987,65,171
-ALOW,Alex,Lowes,Lincoln,UK,14/09/1990,68,170
-SLOW,Sam,Lowes,Lincoln,UK,14/09/1990,67,170
+ALOW,Alex,Lowes,Lincoln,United Kingdom,14/09/1990,68,170
+SLOW,Sam,Lowes,Lincoln,United Kingdom,14/09/1990,67,170
 LLUN,Luca,Lunetta,Roma,Italy,27/05/2006,58,172
 TLUT,Thomas,Lüthi,Linden,Switzerland,06/09/1986,65,172
-NMAC,Niall,Mackenzie,Stirling,UK,19/07/1961,61,167
+NMAC,Niall,Mackenzie,Stirling,United Kingdom,19/07/1961,61,167
 AMAN,Anton,Mang,Inzell,Germany,29/09/1949,68,174
 LM10,Luca,Marini,Urbino,Italy,10/08/1997,69,184
 MM93,Marc,Márquez,Cervera,Spain,17/02/1993,65,169
@@ -103,7 +103,7 @@ AM73,Álex,Márquez,Cervera,Spain,23/04/1996,65,177
 JM89,Jorge,Martín,Madrid,Spain,29/01/1998,70,168
 JMAS,Jaume,Masià,Algemesí,Spain,31/10/2000,57,166
 GMAC,Garry,McCoy,Sydney,Australia,18/04/1972,60,164
-JMCW,Jeremy,McWilliams,Belfast,UK,04/04/1964,66,171
+JMCW,Jeremy,McWilliams,Belfast,United Kingdom,04/04/1964,66,171
 MMEL,Marco,Melandri,Ravenna,Italy,07/08/1982,64,166
 JM43,Jack,Miller,Townsville,Australia,18/01/1995,64,173
 JM36,Joan,Mir,Palma,Spain,01/09/1997,69,181
@@ -114,7 +114,7 @@ TNAK,Takaaki,Nakagami,Chiba,Japan,09/02/1992,70,175
 SNAK,Shinya,Nakano,Chiba,Japan,10/10/1977,61,167
 JNAV,Jorge,Navarro,La Pobla de Vallbona,Spain,03/02/1996,62,172
 ANIE,Ángel,Nieto,Zamora,Spain,25/01/1947,52,157
-SOGD,Scott,Ogden,Doncaster,UK,16/10/2003,58,173
+SOGD,Scott,Ogden,Doncaster,United Kingdom,16/10/2003,58,173
 AO79,Ai,Ogura,Kiyose,Japan,26/01/2001,62,168
 MOLI,Miguel,Oliveira,Almada,Portugal,04/01/1995,64,170
 DONC,Deniz,Öncü,Alanya,Turkey,26/07/2003,61,168
@@ -133,16 +133,16 @@ RDEP,Randy,de Puniet,Andrésy,France,14/02/1981,64,169
 FQ20,Fabio,Quartararo,Niça,France,20/04/1999,68,177
 MQUI,Máximo,Quiles,Múrcia,Spain,19/03/2008,53,166
 TRAB,Tito,Rabat,Barcelona,Spain,25/05/1989,64,178
-WRAI,Wayne,Rainey,Downey,USA,23/10/1960,68,173
+WRAI,Wayne,Rainey,Downey,United States of America,23/10/1960,68,173
 MRAM,Marcos,Ramírez,Conil de la Frontera,Spain,16/12/1997,62,172
 TR7,Toprak,Razgatlıoğlu,Alanya,Turkey,16/10/1996,68,182
-PREA,Phil,Read,Luton,UK,01/01/1939,66,172
-SRED,Scott,Redding,Quedgeley,UK,04/01/1993,74,185
-JRED,Jim,Redman,Londres,UK,08/11/1931,65,173
+PREA,Phil,Read,Luton,United Kingdom,01/01/1939,66,172
+SRED,Scott,Redding,Quedgeley,United Kingdom,04/01/1993,74,185
+JRED,Jim,Redman,Londres,United Kingdom,08/11/1931,65,173
 AR42,Alex,Rins,Barcelona,Spain,08/12/1995,72,176
-JROB,Joe,Roberts,Los Angeles,USA,16/06/1997,68,180
-KROB,Kenny,Roberts,Modesto,USA,31/12/1951,62,165
-KROJ,Kenny,Roberts Jr.,Mountain View,USA,25/07/1973,68,170
+JROB,Joe,Roberts,Los Angeles,United States of America,16/06/1997,68,180
+KROB,Kenny,Roberts,Modesto,United States of America,31/12/1951,62,165
+KROJ,Kenny,Roberts Jr.,Mountain View,United States of America,25/07/1973,68,170
 RROC,Raymond,Roche,Ollioules,France,21/02/1957,67,172
 VROS,Valentino,Rossi,Urbino,Italy,16/02/1979,69,181
 MROU,Michel,Rougerie,París,France,21/04/1950,69,178
@@ -150,17 +150,17 @@ JRUE,José Antonio,Rueda,Sevilla,Spain,29/10/2005,56,166
 BRUF,Bruno,Ruffo,Verona,Italy,09/12/1920,60,167
 JRUG,Jean-Philippe,Ruggia,Toló,France,01/10/1965,64,170
 JSAA,Jarno,Saarinen,Turku,Finland,11/12/1945,62,169
-FSAL,Filip,Salač,Mladá Boleslav,Txequia,12/12/2001,68,178
-CSAN,Cecil,Sandford,Ilford,UK,21/02/1928,60,168
+FSAL,Filip,Salač,Mladá Boleslav,Czechia,12/12/2001,68,178
+CSAN,Cecil,Sandford,Ilford,United Kingdom,21/02/1928,60,168
 CSAR,Christian,Sarron,Clarmont-Ferrand,France,27/03/1955,62,174
 ASAS,Ayumu,Sasaki,Yokosuka,Japan,04/10/2000,55,167
-KSCH,Kevin,Schwantz,Houston,USA,19/06/1964,71,180
-BSHE,Barry,Sheene,Londres,UK,11/09/1950,60,171
-DSIM,Dave,Simmonds,Londres,UK,25/10/1939,61,167
+KSCH,Kevin,Schwantz,Houston,United States of America,19/06/1964,71,180
+BSHE,Barry,Sheene,Londres,United Kingdom,11/09/1950,60,171
+DSIM,Dave,Simmonds,Londres,United Kingdom,25/10/1939,61,167
 MSIM,Marco,Simoncelli,Cattolica,Italy,20/01/1987,76,183
-BSMI,Bradley,Smith,Oxford,UK,28/11/1990,64,175
-FSPE,Freddie,Spencer,Shreveport,USA,20/12/1961,68,178
-BSPI,Ben,Spies,Memphis,USA,11/07/1984,71,180
+BSMI,Bradley,Smith,Oxford,United Kingdom,28/11/1990,64,175
+FSPE,Freddie,Spencer,Shreveport,United States of America,20/12/1961,68,178
+BSPI,Ben,Spies,Memphis,United States of America,11/07/1984,71,180
 CSTO,Casey,Stoner,Southport,Australia,16/10/1985,58,171
 MTAM,Makoto,Tamada,Matsuyama,Japan,04/11/1976,64,170
 LTAV,Luigi,Taveri,Horgen,Switzerland,19/09/1929,54,162
