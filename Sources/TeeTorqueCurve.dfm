@@ -76,6 +76,7 @@ object FormTorqueCurve: TFormTorqueCurve
     DefaultCanvas = 'TGDIPlusCanvas'
     ColorPaletteIndex = 13
     object Series1: TLineSeries
+      Brush.BackColor = clDefault
       Pointer.InflateMargins = True
       Pointer.Style = psRectangle
       XValues.Name = 'X'

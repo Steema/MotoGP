@@ -9,7 +9,7 @@ Round,Circuit Name,Date,Sprint Laps,Race Laps,Sprint Winner Number,Race Winner N
 8,Balaton Park Circuit,07/06/2026,11,22,93,93
 9,Brno Circuit,21/06/2026,11,22,63,93
 10,TT Circuit Assen,28/06/2026,13,26,25,79
-11,Sachsenring,12/07/2026,15,30,,
+11,Sachsenring,12/07/2026,15,30,93,93
 12,Silverstone Circuit,09/08/2026,10,20,,
 13,MotorLand Aragon,30/08/2026,11,22,,
 14,Misano World Circuit Marco Simoncelli,13/09/2026,13,27,,

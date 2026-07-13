@@ -1,10 +1,10 @@
-﻿"Circuit","City","Country","svg","Length","FinishOffset","AMSL","Bounds","QualiRecord","QDate","QTime","RaceRecord","RDate","RTime"
+﻿"Circuit","City","Country","svg","Length","StartOffset","AMSL","Bounds","QualiRecord","QDate","QTime","RaceRecord","RDate","RTime"
 "Chang International Circuit","Buriram","Thailand","",4554,,155,14.9695 103.0785 14.9585 103.0975,MB72,2022-10-01,1:29.671,JM89,2023-10-29,1:30.896
 "Autódromo Internacional Ayrton Senna","Goiânia","Brazil","",4200,,740,-16.6345 -49.1935 -16.6455 -49.1765,
 "Circuit of The Americas","Austin","United States of America","austin-1",5513,,165,30.1410 -97.6465 30.1265 -97.6255,MV12,2024-04-13,2:00.864,MV12,2024-04-14,2:02.575
 "Circuito de Jerez-Ángel Nieto","Jerez de la Frontera","Spain","jerez-2",4423,,55,36.7135 -6.0405 36.7035 -6.0235,MM93,2024-04-27,1:46.773,FB63,2024-04-28,1:37.449
 "Bugatti Circuit","Le Mans","France","",4185,,80,47.9615 0.2035 47.9455 0.2295,JM89,2024-05-11,1:29.919,EB23,2024-05-12,1:31.107
-"Circuit de Barcelona-Catalunya","Montmeló","Spain","catalunya-6",4657,120,130,41.5795 2.2475 41.5605 2.2715,AESP,2024-05-25,1:38.190,PA37,2024-05-26,1:39.664
+"Circuit de Barcelona-Catalunya","Montmeló","Spain","catalunya-6",4657,126,130,41.5795 2.2475 41.5605 2.2715,AESP,2024-05-25,1:38.190,PA37,2024-05-26,1:39.664
 "Mugello Circuit","Scarperia e San Piero","Italy","mugello-1",5245,,292,43.9855 11.3610 43.9995 11.3815,JM89,2024-06-01,1:44.504,FB63,2024-06-02,1:45.770
 "Balaton Park Circuit","Balatonfőkajár","Hungary","",4075,,115,46.9935 18.2345 46.9825 18.2525,MM93,2025-08-23,1:36.518,MM93,2025-08-24,1:37.699
 "Automotodrom Brno","Brno","Czechia","",5403,,450,49.2135 16.4320 49.1985 16.4635,AO79,2026-06-20,1:51.735,MM93,2025-08-17,1:53.691

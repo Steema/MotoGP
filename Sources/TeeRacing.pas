@@ -119,11 +119,12 @@ type
     PrimaryRatio : Single; // 1.65
     FinalDrive : Single; // 3.28  =   46/14  Rear/Front Sprocket Teeth
 
-    MaxGear : Integer; // 7
     GearRatios : TGearRatios;
 
     Front : TBikeFrontBack;
     Back : TBikeFrontBack;
+
+    TotalBrakeForce : Single; // Sum of Front and Back BrakeForce in Nm
 
     TransmissionEfficiency: Single; // = 95; // %
 
@@ -142,16 +143,13 @@ type
 
     FrontArea : Single; // 0.5 m²
 
-    //MaxBrakeDeceleration : Single; // 15 .. 18 m/s²
+    // Sum of Front + Back breakes: MaxBrakeDeceleration : Single; // 15 .. 18 m/s²
 
     MaxLeanAngle : Single; // Degrees 64°
 
     HasHoleshotDevice : Boolean;
 
     function FuelLiquid : Single; // in cubic centimeters
-
-    class function DefaultGearRatios:TGearRatios; static;
-    class function DefaultTorqueCurve:TTorqueCurve; static;
   end;
 
   TPilot=record
@@ -211,6 +209,8 @@ type
 
     LeanAngle : Single; // 0..65° degree (or crash, or Lowside)
 
+    procedure FullBrake;
+    procedure FullSpeed;
     procedure Init(const AStartPosition:Single);
 
     procedure Step(const TimeFactor:Single; // 0.1 = 10 times per second
@@ -255,6 +255,8 @@ type
     LapsTime : TArray<Integer>;  // When the rider crosses each lap finish, indexed to TRace.Data
 
     procedure GoToNextCurve(const ATotalCurves:Integer);
+    procedure LapFinished(const AStep:Integer; const ATime:Int64);
+    function LastLapTime:Int64;
     procedure Start(const TotalLaps:Integer);
   end;
 
@@ -292,7 +294,6 @@ var
 
 type
   TBrakeDecision = record
-    NeedsToBrake: Boolean;
     DistanceToBrakePoint: Single;  // Meters to start braking
     BrakingDistanceNeeded: Single; // Meters needed to brake until corner's entry position
   end;
@@ -406,6 +407,31 @@ begin
      Inc(NextCurve);
 end;
 
+function TRider.LastLapTime:Int64;
+begin
+  result:=LapsTime[Laps];
+end;
+
+procedure TRider.LapFinished(const AStep:Integer; const ATime:Int64);
+var NumLap : Integer; // Current finished lap for a rider (starting at 1)
+begin
+  NumLap:=1+Laps;
+
+  LapsTime[NumLap-1]:=AStep;
+
+  Ellapsed[NumLap-1]:=ATime;
+
+  if NumLap=1 then
+     BestLap:=1
+  else
+  if ATime<Ellapsed[BestLap] then
+     BestLap:=NumLap;
+
+  Inc(Laps);
+
+  NextCurve:=1; // Start circuit again
+end;
+
 procedure TRider.Start(const TotalLaps:Integer);
 var t : Integer;
 begin
@@ -482,11 +508,36 @@ end;
 
 { TRiderData }
 
+procedure TRiderData.FullBrake;
+begin
+  if Throttle>0 then
+  begin
+    Throttle:=0;  // Set Engine Brake Force
+
+    // Brake Bite %
+    FrontBrake:=90;
+    BackBrake:=30;
+
+    // Put Bike Upright
+    LeanAngle:=0;
+  end;
+end;
+
+procedure TRiderData.FullSpeed;
+begin
+  Throttle:=100;
+
+  // No brakes, release handles
+  FrontBrake:=0;
+  BackBrake:=0;
+
+  // Bike upright
+  LeanAngle:=0;
+end;
+
 procedure TRiderData.Init(const AStartPosition:Single);
 begin
   Throttle:=100; // Full Throttle
-
-  RPM:=14000; // Bike.MaxRPM?  // Throttle max
 
   Clutch:=True;  // Ready to start
 
@@ -497,7 +548,7 @@ begin
   FrontBrake:=0;
   BackBrake:=0;
 
-  Position:=AStartPosition; // Finish line - pole grid position in meters
+  Position:=AStartPosition; // Finish line + pole grid position of this pilot, in meters
 end;
 
 const
@@ -617,7 +668,7 @@ begin
     begin
       RPM:=CalcRPM;
 
-      if (RPM>=Bike.GearUpRPM) and (Gear<Bike.MaxGear) then
+      if (RPM>=Bike.GearUpRPM) and (Gear<High(Bike.GearRatios)) then
       begin
         Inc(Gear);
         RPM:=CalcRPM;
@@ -717,12 +768,12 @@ end;
 
 procedure TRiderData.TrailBrake(const ApexPosition: Single);
 begin
-  FrontBrake:=FrontBrake-(ApexPosition-Position)*0.01;  // TODO: Calc dynamic target distance based on speed
+  FrontBrake:=FrontBrake-(ApexPosition-Position);  // TODO: Calc dynamic target distance based on speed
 
   if FrontBrake < 0 then
      FrontBrake := 0;
 
-  BackBrake:=BackBrake-(ApexPosition-Position)*0.01;
+  BackBrake:=BackBrake-(ApexPosition-Position);
 
   if BackBrake < 0 then
      BackBrake := 0;
@@ -730,35 +781,10 @@ end;
 
 { TBike }
 
-class function TBike.DefaultTorqueCurve:TTorqueCurve;
-begin
-  SetLength(result,6);
-
-  result[0].RPM:= 5000; result[0].Nm:= 70;
-  result[1].RPM:= 8000; result[1].Nm:= 95;
-  result[2].RPM:=11000; result[2].Nm:=115;
-  result[3].RPM:=14000; result[3].Nm:=110;
-  result[4].RPM:=17000; result[4].Nm:=100;
-  result[5].RPM:=18000; result[5].Nm:= 90;
-end;
-
-class function TBike.DefaultGearRatios:TGearRatios;
-begin
-  SetLength(result,7);  // 6 Gears + Neutral
-
-  result[0]:=0;  // Neutral
-  result[1]:=2.6;
-  result[2]:=2.1;
-  result[3]:=1.75;
-  result[4]:=1.5;
-  result[5]:=1.32;
-  result[6]:=1.18;
-end;
-
 procedure InitDefaultPilot;
 begin
   DefaultPilot.Name:='Mr. Dummy';
-  DefaultPilot.Height:=1.69; // cm
+  DefaultPilot.Height:=169; // cm
   DefaultPilot.Weight:=64;  // kg
 
   DefaultPilot.RaceLeather:=5.0; // kg
@@ -884,15 +910,6 @@ function EvaluateBrakingPoint(const ABikePosition, ABikeSpeedMPS: Single;
 var
   BrakingTriggerPosition: Single;
 begin
-  // If the bike is already going slower than the corner target speed, no need to brake yet
-  if ABikeSpeedMPS <= ACorner.EntrySpeed/3.6 then
-  begin
-    Result.NeedsToBrake := False;
-    Result.DistanceToBrakePoint := ACorner.Position - ABikePosition;
-    Result.BrakingDistanceNeeded := 0.0;
-    Exit;
-  end;
-
   // 1. Calculate how many meters are required to slow down to the target speed
   // Formula: d = (V_actual² - V_target²) / (2 * a)
   Result.BrakingDistanceNeeded := (Sqr(ABikeSpeedMPS) - Sqr(ACorner.EntrySpeed/3.6)) / (2.0 * AMaxDecelerationMPS2);
@@ -902,17 +919,11 @@ begin
 
   // 3. Compare with current bike position
   if ABikePosition >= BrakingTriggerPosition then
-  begin
-    // The bike has reached or passed the limit! Must brake immediately.
-    Result.NeedsToBrake := True;
-    Result.DistanceToBrakePoint := 0;
-  end
+     // The bike has reached or passed the limit! Must brake immediately.
+     Result.DistanceToBrakePoint := 0
   else
-  begin
-    // Still safe, returning how many meters are left before the braking zone
-    Result.NeedsToBrake := False;
-    Result.DistanceToBrakePoint := BrakingTriggerPosition - ABikePosition;
-  end;
+     // Still safe, returning how many meters are left before the braking zone
+     Result.DistanceToBrakePoint := BrakingTriggerPosition - ABikePosition;
 end;
 
 { TBike }
@@ -975,7 +986,7 @@ begin
   SetLength(Data[0].Data,Length(Riders));
 
   for t:=0 to High(Riders) do
-      Data[0].Data[t].Init(-Riders[t].Pole*PoleDistance);
+      Data[0].Data[t].Init(Circuit.PolePosition-((Riders[t].Pole-1)*PoleDistance));
 end;
 
 // Returns True is the bike has a LowSide

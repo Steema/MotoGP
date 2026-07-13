@@ -1,7 +1,7 @@
 object MainForm: TMainForm
   Left = 0
   Top = 0
-  ActiveControl = LapTimesGrid
+  ActiveControl = PoleGrid
   Caption = 'MotoGP Telemetry Simulator - TeeChart'
   ClientHeight = 878
   ClientWidth = 1330
@@ -24,6 +24,7 @@ object MainForm: TMainForm
     Height = 41
     Align = alTop
     TabOrder = 0
+    ExplicitTop = -5
     object CurrentLap: TLabel
       Left = 771
       Top = 13
@@ -55,7 +56,7 @@ object MainForm: TMainForm
       OnClick = BStartClick
     end
     object BPause: TButton
-      Left = 170
+      Left = 152
       Top = 10
       Width = 75
       Height = 25
@@ -65,7 +66,7 @@ object MainForm: TMainForm
       OnClick = BPauseClick
     end
     object BStop: TButton
-      Left = 264
+      Left = 233
       Top = 10
       Width = 75
       Height = 25
@@ -75,7 +76,7 @@ object MainForm: TMainForm
       OnClick = BStopClick
     end
     object Semaphor: TChart
-      Left = 101
+      Left = 85
       Top = 13
       Width = 61
       Height = 22
@@ -136,7 +137,7 @@ object MainForm: TMainForm
       ColorPaletteIndex = 13
     end
     object CBSeasons: TComboBox
-      Left = 369
+      Left = 387
       Top = 12
       Width = 80
       Height = 23
@@ -169,6 +170,15 @@ object MainForm: TMainForm
       Items.Strings = (
         'Sprint'
         'Full Race')
+    end
+    object CBCategory: TComboBox
+      Left = 316
+      Top = 12
+      Width = 65
+      Height = 23
+      Style = csDropDownList
+      TabOrder = 7
+      OnChange = CBCategoryChange
     end
   end
   object PanelFull: TPanel
@@ -207,7 +217,7 @@ object MainForm: TMainForm
         Caption = 'Circuit'
         object Splitter3: TSplitter
           Left = 0
-          Top = 418
+          Top = 289
           Width = 313
           Height = 3
           Cursor = crVSplit
@@ -219,7 +229,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 113
           Width = 313
-          Height = 305
+          Height = 176
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
@@ -227,7 +237,7 @@ object MainForm: TMainForm
             Left = 0
             Top = 41
             Width = 313
-            Height = 264
+            Height = 135
             BackWall.Brush.Gradient.Direction = gdBottomTop
             BackWall.Brush.Gradient.EndColor = clWhite
             BackWall.Brush.Gradient.StartColor = 15395562
@@ -283,6 +293,8 @@ object MainForm: TMainForm
             OnAfterDraw = CircuitAfterDraw
             Align = alClient
             TabOrder = 0
+            ExplicitLeft = 1
+            ExplicitHeight = 264
             DefaultCanvas = 'TGDIPlusCanvas'
             ColorPaletteIndex = 13
           end
@@ -324,20 +336,22 @@ object MainForm: TMainForm
         end
         object PageControl4: TPageControl
           Left = 0
-          Top = 421
+          Top = 292
           Width = 313
-          Height = 386
+          Height = 515
           ActivePage = TabFrontView
           Align = alClient
           TabOrder = 1
+          ExplicitTop = 421
+          ExplicitHeight = 386
           object TabFrontView: TTabSheet
             Caption = 'Front View'
             ImageIndex = 1
             object FrontView: TChart
               Left = 0
-              Top = 137
+              Top = 260
               Width = 305
-              Height = 137
+              Height = 143
               BackWall.Brush.Gradient.Direction = gdBottomTop
               BackWall.Brush.Gradient.EndColor = clWhite
               BackWall.Brush.Gradient.StartColor = 15395562
@@ -409,6 +423,8 @@ object MainForm: TMainForm
               OnAfterDraw = FrontViewAfterDraw
               Align = alClient
               TabOrder = 0
+              ExplicitTop = 137
+              ExplicitHeight = 137
               DefaultCanvas = 'TGDIPlusCanvas'
               ColorPaletteIndex = 13
             end
@@ -641,12 +657,13 @@ object MainForm: TMainForm
             end
             object DebugLean: TPanel
               Left = 0
-              Top = 315
+              Top = 444
               Width = 305
               Height = 41
               Align = alBottom
               TabOrder = 2
               Visible = False
+              ExplicitTop = 315
               object TBLean: TTrackBar
                 Left = 9
                 Top = 6
@@ -662,12 +679,13 @@ object MainForm: TMainForm
             end
             object Panel2: TPanel
               Left = 0
-              Top = 274
+              Top = 403
               Width = 305
               Height = 41
               Align = alBottom
               TabOrder = 3
               ExplicitLeft = 2
+              ExplicitTop = 274
               object Label4: TLabel
                 Left = 9
                 Top = 10
@@ -680,6 +698,7 @@ object MainForm: TMainForm
                 Top = 3
                 Width = 32
                 Height = 32
+                Cursor = crHandPoint
                 OnPaint = FrontTirePaint
               end
               object BackTire: TPaintBox
@@ -687,6 +706,7 @@ object MainForm: TMainForm
                 Top = 3
                 Width = 32
                 Height = 32
+                Cursor = crHandPoint
                 OnPaint = BackTirePaint
               end
               object CBSelectedBike: TComboBox
@@ -698,6 +718,41 @@ object MainForm: TMainForm
                 TabOrder = 0
                 OnChange = CBSelectedBikeChange
               end
+            end
+            object TireStatus: TTeeGrid
+              Left = 0
+              Top = 137
+              Width = 305
+              Height = 123
+              Cells.Format.Font.Name = 'Segoe UI'
+              Cells.Format.Font.Size = 9.000000000000000000
+              Columns = <>
+              Header.Format.Font.Name = 'Segoe UI'
+              Header.Format.Font.Size = 9.000000000000000000
+              Rows.Format.Font.Name = 'Segoe UI'
+              Rows.Format.Font.Size = 9.000000000000000000
+              Rows.Hover.Format.Font.Name = 'Segoe UI'
+              Rows.Hover.Format.Font.Size = 9.000000000000000000
+              Selected.Format.Font.Name = 'Segoe UI'
+              Selected.Format.Font.Size = 9.000000000000000000
+              Selected.UnFocused.Format.Font.Name = 'Segoe UI'
+              Selected.UnFocused.Format.Font.Size = 9.000000000000000000
+              Align = alTop
+              ParentFont = True
+              UseDockManager = False
+              ParentBackground = False
+              ParentColor = False
+              TabOrder = 4
+              ExplicitLeft = 2
+              ExplicitTop = 143
+              _Headers = (
+                1
+                'TColumnHeaderBand'
+                <
+                  item
+                    Format.Font.Name = 'Segoe UI'
+                    Format.Font.Size = 9.000000000000000000
+                  end>)
             end
           end
         end
@@ -835,8 +890,9 @@ object MainForm: TMainForm
       Align = alClient
       TabOrder = 1
       OnChange = PageControl1Change
+      ExplicitLeft = 323
       object TabLap: TTabSheet
-        Caption = 'Current Lap'
+        Caption = 'Telemetry'
         object LapChart: TChart
           Left = 121
           Top = 41
@@ -1110,17 +1166,48 @@ object MainForm: TMainForm
       object TabChampionShip: TTabSheet
         Caption = 'ChampionShip'
         ImageIndex = 2
+        object Splitter6: TSplitter
+          Left = 0
+          Top = 554
+          Width = 667
+          Height = 3
+          Cursor = crVSplit
+          Align = alBottom
+          ExplicitTop = 0
+          ExplicitWidth = 557
+        end
         object ChampionGrid: TTeeGrid
           Left = 0
           Top = 0
           Width = 667
-          Height = 807
+          Height = 554
           Columns = <>
           Align = alClient
           UseDockManager = False
           ParentBackground = False
           ParentColor = False
           TabOrder = 0
+          ExplicitHeight = 807
+          _Headers = (
+            1
+            'TColumnHeaderBand'
+            <
+              item
+              end>)
+        end
+        object LeaderBoard: TTeeGrid
+          Left = 0
+          Top = 557
+          Width = 667
+          Height = 250
+          Columns = <>
+          Align = alBottom
+          UseDockManager = False
+          ParentBackground = False
+          ParentColor = False
+          TabOrder = 1
+          ExplicitLeft = -1
+          ExplicitTop = 560
           _Headers = (
             1
             'TColumnHeaderBand'
@@ -1140,13 +1227,24 @@ object MainForm: TMainForm
           ActivePage = TabSheet4
           Align = alClient
           TabOrder = 0
+          ExplicitLeft = 1
           object TabSheet4: TTabSheet
             Caption = 'Parameters'
+            object Splitter2: TSplitter
+              Left = 0
+              Top = 453
+              Width = 659
+              Height = 3
+              Cursor = crVSplit
+              Align = alBottom
+              ExplicitTop = 0
+              ExplicitWidth = 456
+            end
             object BikeGrid: TTeeGrid
               Left = 0
               Top = 0
               Width = 659
-              Height = 777
+              Height = 453
               Columns = <>
               OnSelect = BikeGridSelect
               Align = alClient
@@ -1154,12 +1252,59 @@ object MainForm: TMainForm
               ParentBackground = False
               ParentColor = False
               TabOrder = 0
+              ExplicitHeight = 777
               _Headers = (
                 1
                 'TColumnHeaderBand'
                 <
                   item
                   end>)
+            end
+            object PanelBikeParams: TPanel
+              Left = 0
+              Top = 456
+              Width = 659
+              Height = 321
+              Align = alBottom
+              BevelOuter = bvNone
+              TabOrder = 1
+              ExplicitLeft = -2
+              ExplicitTop = 462
+              object GearRatios: TTeeGrid
+                Left = 0
+                Top = 0
+                Width = 153
+                Height = 321
+                Cells.Format.Font.Name = 'Segoe UI'
+                Cells.Format.Font.Size = 9.000000000000000000
+                Columns = <>
+                Header.Format.Font.Name = 'Segoe UI'
+                Header.Format.Font.Size = 9.000000000000000000
+                Rows.Format.Font.Name = 'Segoe UI'
+                Rows.Format.Font.Size = 9.000000000000000000
+                Rows.Hover.Format.Font.Name = 'Segoe UI'
+                Rows.Hover.Format.Font.Size = 9.000000000000000000
+                Selected.Format.Font.Name = 'Segoe UI'
+                Selected.Format.Font.Size = 9.000000000000000000
+                Selected.UnFocused.Format.Font.Name = 'Segoe UI'
+                Selected.UnFocused.Format.Font.Size = 9.000000000000000000
+                Align = alLeft
+                ParentFont = True
+                UseDockManager = False
+                ParentBackground = False
+                ParentColor = False
+                TabOrder = 0
+                ExplicitLeft = -2
+                ExplicitTop = 6
+                _Headers = (
+                  1
+                  'TColumnHeaderBand'
+                  <
+                    item
+                      Format.Font.Name = 'Segoe UI'
+                      Format.Font.Size = 9.000000000000000000
+                    end>)
+              end
             end
           end
           object TabTires: TTabSheet
@@ -1378,6 +1523,8 @@ object MainForm: TMainForm
             ActivePage = TabLapTimes
             Align = alBottom
             TabOrder = 2
+            ExplicitLeft = -2
+            ExplicitTop = 430
             object TabLapTimes: TTabSheet
               Caption = 'Lap Times'
               object LapTimesGrid: TTeeGrid
@@ -1563,31 +1710,31 @@ object MainForm: TMainForm
       object N1: TMenuItem
         Caption = '-'
       end
-      object Render1: TMenuItem
-        Caption = '&Render'
-        object GDI1: TMenuItem
-          Caption = 'GDI+'
-          Checked = True
-          Default = True
-          RadioItem = True
-          OnClick = GDI1Click
-        end
-        object Skia1: TMenuItem
-          Caption = 'Skia'
-          RadioItem = True
-          OnClick = Skia1Click
-        end
-        object OpenGL1: TMenuItem
-          Caption = 'OpenGL'
-          RadioItem = True
-          OnClick = OpenGL1Click
-        end
-      end
       object Debug1: TMenuItem
         Caption = 'Debug'
         object Lean1: TMenuItem
           Caption = 'Lean'
           OnClick = Lean1Click
+        end
+        object Render1: TMenuItem
+          Caption = '&Render'
+          object GDI1: TMenuItem
+            Caption = 'GDI+'
+            Checked = True
+            Default = True
+            RadioItem = True
+            OnClick = GDI1Click
+          end
+          object Skia1: TMenuItem
+            Caption = 'Skia'
+            RadioItem = True
+            OnClick = Skia1Click
+          end
+          object OpenGL1: TMenuItem
+            Caption = 'OpenGL'
+            RadioItem = True
+            OnClick = OpenGL1Click
+          end
         end
       end
     end

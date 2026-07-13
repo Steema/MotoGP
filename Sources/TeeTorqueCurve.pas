@@ -48,9 +48,9 @@ begin
   Series1.Pointer.Style:=psCircle;
   Series1.Pointer.Size:=14;
 
+  // TODO: More accurate bounds
   Chart1.Axes.Left.SetMinMax(0,150);
   Chart1.Axes.Bottom.SetMinMax(0,20000);
-
 end;
 
 procedure TFormTorqueCurve.FormCreate(Sender: TObject);
