@@ -39,7 +39,6 @@
 #Linux64/
 
 # Delphi compiler-generated binaries (safe to delete)
-*.exe
 *.dll
 *.bpl
 *.bpi
@@ -80,3 +79,8 @@ __recovery/
 
 # Boss dependency manager vendor folder https://github.com/HashLoad/boss
 modules/
+Sources/Win32/Debug/*.exe
+Sources/Win32/Release/*.exe
+Sources/Win64/Debug/*.exe
+Sources/Win64/Release/*.exe
+CreateFlagsResource/
