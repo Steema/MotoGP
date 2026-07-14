@@ -1,4 +1,4 @@
-Round,Circuit Name,Date,Sprint Laps,Race Laps,Sprint Winner Number,Race Winner Number
+Round,Circuit Name,Date,Sprint Laps,Race Laps,Sprint,Race
 1,Chang International Circuit,01/03/2026,13,26,37,72
 2,Autodromo Internacional Ayrton Senna (Goiania),22/03/2026,12,25,93,72
 3,Circuit of the Americas,29/03/2026,10,20,12,72

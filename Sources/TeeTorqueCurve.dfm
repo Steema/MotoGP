@@ -69,10 +69,6 @@ object FormTorqueCurve: TFormTorqueCurve
     View3D = False
     Align = alClient
     TabOrder = 0
-    ExplicitLeft = 120
-    ExplicitTop = 112
-    ExplicitWidth = 400
-    ExplicitHeight = 250
     DefaultCanvas = 'TGDIPlusCanvas'
     ColorPaletteIndex = 13
     object Series1: TLineSeries

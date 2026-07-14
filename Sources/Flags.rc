@@ -1,3 +1,4 @@
+ALL_FLAGS RCDATA "Flags\All_Flags.txt"
 AD RCDATA "Flags\ad.png"
 AE RCDATA "Flags\ae.png"
 AF RCDATA "Flags\af.png"

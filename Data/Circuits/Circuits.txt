@@ -1,23 +1,23 @@
-﻿"Circuit","City","Country","svg","Length","StartOffset","AMSL","Bounds","QualiRecord","QDate","QTime","RaceRecord","RDate","RTime"
-"Chang International Circuit","Buriram","Thailand","",4554,,155,14.9695 103.0785 14.9585 103.0975,MB72,2022-10-01,1:29.671,JM89,2023-10-29,1:30.896
-"Autódromo Internacional Ayrton Senna","Goiânia","Brazil","",4200,,740,-16.6345 -49.1935 -16.6455 -49.1765,
-"Circuit of The Americas","Austin","United States of America","austin-1",5513,,165,30.1410 -97.6465 30.1265 -97.6255,MV12,2024-04-13,2:00.864,MV12,2024-04-14,2:02.575
-"Circuito de Jerez-Ángel Nieto","Jerez de la Frontera","Spain","jerez-2",4423,,55,36.7135 -6.0405 36.7035 -6.0235,MM93,2024-04-27,1:46.773,FB63,2024-04-28,1:37.449
-"Bugatti Circuit","Le Mans","France","",4185,,80,47.9615 0.2035 47.9455 0.2295,JM89,2024-05-11,1:29.919,EB23,2024-05-12,1:31.107
-"Circuit de Barcelona-Catalunya","Montmeló","Spain","catalunya-6",4657,126,130,41.5795 2.2475 41.5605 2.2715,AESP,2024-05-25,1:38.190,PA37,2024-05-26,1:39.664
-"Mugello Circuit","Scarperia e San Piero","Italy","mugello-1",5245,,292,43.9855 11.3610 43.9995 11.3815,JM89,2024-06-01,1:44.504,FB63,2024-06-02,1:45.770
-"Balaton Park Circuit","Balatonfőkajár","Hungary","",4075,,115,46.9935 18.2345 46.9825 18.2525,MM93,2025-08-23,1:36.518,MM93,2025-08-24,1:37.699
-"Automotodrom Brno","Brno","Czechia","",5403,,450,49.2135 16.4320 49.1985 16.4635,AO79,2026-06-20,1:51.735,MM93,2025-08-17,1:53.691
-"TT Circuit Assen","Assen","Netherlands","",4542,,12,52.9695 6.5125 52.9555 6.5335,FB63,2024-06-29,1:30.540,FB63,2024-06-30,1:31.866
-"Sachsenring","Hohenstein-Ernstthal","Germany","",3671,,360,50.7965 12.6805 50.7875 12.6975,JM89,2024-07-06,1:19.423,JM89,2024-07-07,1:20.667
-"Silverstone Circuit","Silverstone","United Kingdom","silverstone-1",5900,,133,52.0865 -1.0335 52.0680 -0.9985,AESP,2023-08-05,1:57.974,AM73,2023-08-06,1:59.346
-"MotorLand Aragón","Alcañiz","Spain","",5078,,350,41.0845 -0.2185 41.0725 -0.1915,MM93,2024-08-31,1:46.766,MM93,2024-09-01,1:48.186
-"Misano World Circuit Marco Simoncelli","Misano Adriatico","Italy","",4226,,15,43.9665 12.6735 43.9575 12.6905,FB63,2024-09-07,1:30.304,EB23,2024-09-08,1:31.507
-"Red Bull Ring","Spielberg","Austria","",4318,,677,47.2285 14.7505 47.2155 14.7695,FB63,2024-08-17,1:27.748,FB63,2024-08-18,1:28.139
-"Mobility Resort Motegi","Motegi","Japan","",4801,,135,36.5395 140.2185 36.5235 140.2370,JM89,2023-09-30,1:43.198,JM43,2022-09-25,1:45.198
-"Pertamina Mandalika International Circuit","Lombok","Indonesia","",4310,,5,-8.8895 116.2915 -8.9005 116.3095,JM89,2024-09-28,1:29.088,EB23,2024-09-29,1:30.539
-"Phillip Island Grand Prix Circuit","Phillip Island","Australia","",4448,,30,-38.4975 145.2215 -38.5085 145.2445,JM89,2023-10-21,1:27.246,MM93,2024-10-20,1:27.900
-"Petronas Sepang International Circuit","Sepang","Malaysia","sepang-1",5543,,18,2.7685 101.7245 2.7505 101.7475,FB63,2024-11-02,1:56.337,JM89,2024-11-03,1:59.203
-"Lusail International Circuit","Lusail","Qatar","",5380,,12,25.5010 51.4420 25.4795 51.4625,FB63,2024-03-09,1:50.754,PA37,2024-03-10,1:52.657
-"Autódromo Internacional do Algarve","Portimão","Portugal","portimao-1",4592,,110,37.2345 -8.6365 37.2215 -8.6190,EB23,2024-03-23,1:37.706,EB23,2024-03-24,1:38.685
-"Circuito de Ricardo Tormo","Cheste","Spain","valencia-1",4005,,60,39.4895 -0.6385 39.4795 -0.6215,FB63,2023-11-25,1:28.931,EB23,2022-11-06,1:29.896
+﻿"Circuit","City","Country","svg","Length","FinishIndex","StartOffset","AMSL","Bounds","QualiRecord","QDate","QTime","RaceRecord","RDate","RTime"
+"Chang International Circuit","Buriram","Thailand","",4554,,,155,14.9695 103.0785 14.9585 103.0975,MB72,2022-10-01,1:29.671,JM89,2023-10-29,1:30.896
+"Autódromo Internacional Ayrton Senna","Goiânia","Brazil","",4200,,,740,-16.6345 -49.1935 -16.6455 -49.1765,
+"Circuit of The Americas","Austin","United States of America","austin-1",5513,,,165,30.1410 -97.6465 30.1265 -97.6255,MV12,2024-04-13,2:00.864,MV12,2024-04-14,2:02.575
+"Circuito de Jerez-Ángel Nieto","Jerez de la Frontera","Spain","jerez-2",4423,,,55,36.7135 -6.0405 36.7035 -6.0235,MM93,2024-04-27,1:46.773,FB63,2024-04-28,1:37.449
+"Bugatti Circuit","Le Mans","France","",4185,,,80,47.9615 0.2035 47.9455 0.2295,JM89,2024-05-11,1:29.919,EB23,2024-05-12,1:31.107
+"Circuit de Barcelona-Catalunya","Montmeló","Spain","catalunya-6",4657,,126,130,41.5795 2.2475 41.5605 2.2715,AESP,2024-05-25,1:38.190,PA37,2024-05-26,1:39.664
+"Mugello Circuit","Scarperia e San Piero","Italy","mugello-1",5245,,,292,43.9855 11.3610 43.9995 11.3815,JM89,2024-06-01,1:44.504,FB63,2024-06-02,1:45.770
+"Balaton Park Circuit","Balatonfőkajár","Hungary","",4075,,,115,46.9935 18.2345 46.9825 18.2525,MM93,2025-08-23,1:36.518,MM93,2025-08-24,1:37.699
+"Automotodrom Brno","Brno","Czechia","",5403,,,450,49.2135 16.4320 49.1985 16.4635,AO79,2026-06-20,1:51.735,MM93,2025-08-17,1:53.691
+"TT Circuit Assen","Assen","Netherlands","",4542,,,12,52.9695 6.5125 52.9555 6.5335,FB63,2024-06-29,1:30.540,FB63,2024-06-30,1:31.866
+"Sachsenring","Hohenstein-Ernstthal","Germany","",3671,,,360,50.7965 12.6805 50.7875 12.6975,JM89,2024-07-06,1:19.423,JM89,2024-07-07,1:20.667
+"Silverstone Circuit","Silverstone","United Kingdom","silverstone",5900,,,133,52.0865 -1.0335 52.0680 -0.9985,AESP,2023-08-05,1:57.974,AM73,2023-08-06,1:59.346
+"MotorLand Aragón","Alcañiz","Spain","",5078,,,350,41.0845 -0.2185 41.0725 -0.1915,MM93,2024-08-31,1:46.766,MM93,2024-09-01,1:48.186
+"Misano World Circuit Marco Simoncelli","Misano Adriatico","Italy","",4226,,,15,43.9665 12.6735 43.9575 12.6905,FB63,2024-09-07,1:30.304,EB23,2024-09-08,1:31.507
+"Red Bull Ring","Spielberg","Austria","",4318,,,677,47.2285 14.7505 47.2155 14.7695,FB63,2024-08-17,1:27.748,FB63,2024-08-18,1:28.139
+"Mobility Resort Motegi","Motegi","Japan","",4801,,,135,36.5395 140.2185 36.5235 140.2370,JM89,2023-09-30,1:43.198,JM43,2022-09-25,1:45.198
+"Pertamina Mandalika International Circuit","Lombok","Indonesia","",4310,,,5,-8.8895 116.2915 -8.9005 116.3095,JM89,2024-09-28,1:29.088,EB23,2024-09-29,1:30.539
+"Phillip Island Grand Prix Circuit","Phillip Island","Australia","",4448,,,30,-38.4975 145.2215 -38.5085 145.2445,JM89,2023-10-21,1:27.246,MM93,2024-10-20,1:27.900
+"Petronas Sepang International Circuit","Sepang","Malaysia","sepang",5543,,,18,2.7685 101.7245 2.7505 101.7475,FB63,2024-11-02,1:56.337,JM89,2024-11-03,1:59.203
+"Lusail International Circuit","Lusail","Qatar","",5380,,,12,25.5010 51.4420 25.4795 51.4625,FB63,2024-03-09,1:50.754,PA37,2024-03-10,1:52.657
+"Autódromo Internacional do Algarve","Portimão","Portugal","portimao-1",4592,,,110,37.2345 -8.6365 37.2215 -8.6190,EB23,2024-03-23,1:37.706,EB23,2024-03-24,1:38.685
+"Circuito de Ricardo Tormo","Cheste","Spain","valencia-1",4005,,,60,39.4895 -0.6385 39.4795 -0.6215,FB63,2023-11-25,1:28.931,EB23,2022-11-06,1:29.896

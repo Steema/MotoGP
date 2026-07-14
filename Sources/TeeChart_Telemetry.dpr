@@ -1,13 +1,14 @@
 program TeeChart_Telemetry;
 
 uses
-  Vcl.Forms,
+  Forms,
   Unit_Main in 'Unit_Main.pas' {MainForm},
   TeeRacing in 'TeeRacing.pas',
   TeeTorqueCurve in 'TeeTorqueCurve.pas' {FormTorqueCurve},
   TeeRacingAbout in 'TeeRacingAbout.pas' {AboutForm},
-  TeeCountryFlags in 'TeeCountryFlags.pas' {FormFlags},
-  TeeTire in 'TeeTire.pas';
+  TeeTire in 'TeeTire.pas',
+  TeeUtils in 'TeeUtils.pas',
+  TeeCircuit in 'TeeCircuit.pas' {FormCircuit};
 
 {$R *.res}
 
@@ -19,6 +20,5 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TMainForm, MainForm);
-  Application.CreateForm(TFormFlags, FormFlags);
   Application.Run;
 end.

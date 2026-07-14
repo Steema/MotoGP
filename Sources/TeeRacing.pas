@@ -12,7 +12,7 @@ uses
   Windows, SysUtils, Types, TeCanvas;
 
 const
-  RealTimeFactor = 0.1; // 5 times per second (no realtime)
+  RealTimeFactor = 0.1; // 10 times per second (no realtime)
 
 type
   TWeatherStyle=(wsDry, wsWet, wsRain);
@@ -37,11 +37,18 @@ type
   TCurve=record
     Position : Single; // Entry position of this curve, (in meters from start, might not be from Finish line)
     Name : String;
-    Angle : Single;  // -180..0..+180  (left or right curve)
+
+    EntryAngle,
+    ExitAngle : Single;  // -180..0..+180  (left or right curve)
+
     EntrySpeed : Single; // km/h safe entry speed, with Dry Track and not super-hot asphalt
 
-    ApexPosition : Single; // Position of Apex in meters
+    BeforeApex : Single; // Distance from Position to Apex in meters
+    AfterApex  : Single; // Distance from Apex to curve exit in meter
+
     Slope : Single; // In degrees, from last curve
+
+    function ApexPosition:Single;
   end;
 
   TTire=record
@@ -69,6 +76,8 @@ type
 
     TotalLength : Single; // Total length of circuit
 
+    FinishIndex : Integer; // Index in Points that corresponds to the Finish line
+
     PolePosition : Single; // Offset Meters only to draw pilots at the Circuit path
     PolePositionIndex : Integer; // Index of Pole position point in circuit path
 
@@ -78,6 +87,7 @@ type
     function PointPosition(const APosition:Single):TPoint;
 
     procedure CalculateRadius;
+    procedure FindCurves;
   end;
 
   TBikeFrontBack=record
@@ -269,6 +279,7 @@ type
     TotalLaps : Integer; // Race laps
 
     RiderEndsLap : TProc<Integer,Integer>; // Rider,Lap
+    RiderPass : TProc<Integer,Integer>; // Rider1,Rider2
 
     Fastest : Integer; // Index of Rider that has the Fastest Lap in this Race
     FastestTime : Int64; // Time of the best lap of Fastest rider
@@ -281,11 +292,18 @@ type
 
     PoleDistance : Single; // Distance in meters between each rider at starting grid
 
+    // Current pole during race (keeps changing when pilots pass other pilots)
+    PoleIndex : TArray<Integer>;
+
     Data : TAllRaceData;
 
     Riders : Array of TRider;
 
     procedure Init;
+    procedure ShufflePole(const ACount:Integer);
+    procedure Step;
+    function StepRiders(const L:Integer):Boolean;
+    function TryPasses(var AllRiders:TAllRidersData):Boolean;
   end;
 
 var
@@ -323,6 +341,9 @@ function CalculateThrottle(const ALeanAngle,MaxAngle:Single):Single;
 
 function CalcLeanAngle(const APoints: TPointFloatArray; Current: Integer; const Speed:Single): Single;
 
+function DuplicateArray(const AData:Array of Integer):TArray<Integer>;
+function PathLength(const APoints:TPointFloatArray):Single;
+
 implementation
 
 uses
@@ -337,8 +358,29 @@ uses
    Traction controls
 }
 
+// Returns distance between two points
+function Distance(const P1, P2: TPointFloat): Single;
+begin
+  Result := Sqrt(Sqr(P2.X - P1.X) + Sqr(P2.Y - P1.Y));
+end;
+
+// Returns the angle (0 to 360) that form two points
+function AngleVector(const P1, P2: TPointFloat): Single;
+var AngRad: Single;
+begin
+  AngRad := ArcTan2(P2.Y - P1.Y, P2.X - P1.X);
+  Result := RadToDeg(AngRad);
+
+  if Result < 0 then
+     Result := Result + 360;
+end;
+
 
 { TCircuit }
+
+procedure TCircuit.FindCurves;
+begin
+end;
 
 procedure TCircuit.CalculateRadius;
 var
@@ -359,24 +401,38 @@ begin
   for t := 0 to N - 1 do
   begin
     // 1. Obtain 3 points (current, previous and next)
-    A := Points[(t - 1 + N) mod N];
-    B := Points[t];
-    C := Points[(t + 1) mod N];
+    A := Points[t];
+    B := Points[(t+1) mod N];
+    C := Points[(t+2) mod N];
 
     // 2. Calc triangle side lengths
-    a_len := Sqrt(Sqr(B.X - A.X) + Sqr(B.Y - A.Y)); // A-B
-    b_len := Sqrt(Sqr(C.X - B.X) + Sqr(C.Y - B.Y)); // B-C
-    c_len := Sqrt(Sqr(A.X - C.X) + Sqr(A.Y - C.Y)); // C-A
+    a_len := Distance(A,B); // A-B
+    b_len := Distance(B,C); // B-C
+    c_len := Distance(C,A); // C-A
 
     // 3. Calc Area*2 (cross-product)
     Area2 := Abs((B.X - A.X) * (C.Y - A.Y) - (B.Y - A.Y) * (C.X - A.X));
 
     // 4. Calc radious, if Area is close to zero, it means we are on a straight line
-    if Area2 < 0.00001 then
+    if Area2 < 0.5 then
        Radius[t] := 0
     else
        // R = (a * b * c) / (4 * Area)
        Radius[t] := (a_len * b_len * c_len) / (2.0 * Area2);
+  end;
+end;
+
+function PathLength(const APoints:TPointFloatArray):Single;
+var t, L : Integer;
+begin
+  result:=0;
+
+  L:=Length(APoints);
+
+  if L>1 then
+  begin
+    for t:=0 to L-2 do
+        result:=result+Distance(APoints[t],APoints[t+1]);
   end;
 end;
 
@@ -385,7 +441,10 @@ var L : Integer;
 begin
   L:=Length(Points);
 
-  result:=Round(APosition*(1+L)/TotalLength) mod L;
+  if L=0 then
+     result:=-1
+  else
+     result:=(FinishIndex + Round(APosition*(1+L)/TotalLength)) mod L;
 end;
 
 function TCircuit.PointPosition(const APosition:Single):TPoint;
@@ -654,45 +713,36 @@ begin
 
   LeanAngle:=Prev.LeanAngle;
 
-  //if RPM>=Bike.IdleRPM then
+  if Prev.Clutch then
   begin
-    if Prev.Clutch then
-    begin
-      Clutch:=Prev.Speed<10; // Tricky, keep Clutch until speed is >10m/sec
+    Clutch:=Prev.Speed<10; // Tricky, keep Clutch until speed is >10m/sec
 
-      // TODO: Clutch from 0 to 100% during start, first 1.5 seconds
+    // TODO: Clutch from 0 to 100% during start, first 1.5 seconds
 
-      RPM:=Bike.GearUpRPM;
-    end
-    else
-    begin
-      RPM:=CalcRPM;
-
-      if (RPM>=Bike.GearUpRPM) and (Gear<High(Bike.GearRatios)) then
-      begin
-        Inc(Gear);
-        RPM:=CalcRPM;
-      end
-      else
-      if (RPM<=Bike.GearDownRPM) and (Gear>1) then
-      begin
-        if Prev.Speed>1 then
-        begin
-          Dec(Gear);
-          RPM:=CalcRPM;
-        end;
-      end;
-    end;
-
-    MotorTorque:=TorqueAtRPM(Bike.Torque,RPM);
-    ThrustTorque:=(MotorTorque * Bike.PrimaryRatio * Bike.GearRatios[Gear] * Bike.FinalDrive * 0.01 * Bike.TransmissionEfficiency)/(0.5*Bike.Back.Tire.Diameter*0.01);
+    RPM:=Bike.GearUpRPM;
   end
-  {
   else
   begin
-    MotorTorque:=0;
-    ThrustTorque:=0;
-  end};
+    RPM:=CalcRPM;
+
+    if (RPM>=Bike.GearUpRPM) and (Gear<High(Bike.GearRatios)) then
+    begin
+      Inc(Gear);
+      RPM:=CalcRPM;
+    end
+    else
+    if (RPM<=Bike.GearDownRPM) and (Gear>1) then
+    begin
+      if Prev.Speed>1 then
+      begin
+        Dec(Gear);
+        RPM:=CalcRPM;
+      end;
+    end;
+  end;
+
+  MotorTorque:=TorqueAtRPM(Bike.Torque,RPM);
+  ThrustTorque:=(MotorTorque * Bike.PrimaryRatio * Bike.GearRatios[Gear] * Bike.FinalDrive * 0.01 * Bike.TransmissionEfficiency)/(0.5*Bike.Back.Tire.Diameter*0.01);
 
   Pilot.SweatLoss:=Pilot.SweatLoss+TimeFactor*SweatRate;
 
@@ -978,7 +1028,7 @@ end;
 procedure TRace.Init;
 var t : Integer;
 begin
-  PoleDistance:=3; // 3 meters
+  PoleDistance:=4; // 4 meters since 2026-Sachsenring
   Fastest:=-1;
   FastestTime:=0;
 
@@ -1048,6 +1098,219 @@ begin
     if NeedsLeanAngle > Bike.MaxLeanAngle then
        Result := True;
   end;
+end;
+
+procedure Shuffle(var Items:TArray<Integer>);
+var t : Integer;
+begin
+  Randomize;
+
+  for t:=High(Items) downto 1 do
+      SwapInteger(Items[t],Items[Random(t+1)])
+end;
+
+function DuplicateArray(const AData:Array of Integer):TArray<Integer>;
+var t, L : Integer;
+begin
+  L:=Length(AData);
+
+  SetLength(result,L);
+
+  for t:=0 to L-1 do
+      result[t]:=AData[t];
+end;
+
+// Randomly choose and sort riders
+procedure TRace.ShufflePole(const ACount: Integer);
+var t : Integer;
+begin
+  SetLength(PoleIndex,ACount);
+
+  for t:=0 to High(PoleIndex) do
+      PoleIndex[t]:=t;
+
+  Shuffle(PoleIndex);
+end;
+
+procedure TRace.Step;
+var tmp : Int64;
+    L : Integer;
+begin
+  tmp:=Round(1000*RealTimeFactor);
+
+  L:=Length(Data);
+  SetLength(Data,L+1);
+
+  Inc(Ellapsed,tmp);
+
+  Data[L].Time:=Data[L-1].Time+tmp;
+
+  SetLength(Data[L].Data,Length(Riders));
+end;
+
+// Any rider passed others?
+function TRace.TryPasses(var AllRiders:TAllRidersData):Boolean;
+var t,
+    Num,
+    tmp, tmpI : Integer;
+begin
+  result:=False;
+
+  t:=1;
+
+  while t<Length(PoleIndex) do
+  begin
+    Num:=PoleIndex[t];
+
+    if Riders[Num].Active then
+    begin
+      tmp:=t;
+
+      while AllRiders[PoleIndex[tmp]].Position>AllRiders[PoleIndex[tmp-1]].Position do
+      begin
+        result:=True;
+
+        RiderPass(tmp,tmp-1);
+
+        // Swap array
+        tmpI:=PoleIndex[tmp];
+        PoleIndex[tmp]:=PoleIndex[tmp-1];
+        PoleIndex[tmp-1]:=tmpI;
+
+        tmp:=tmp-1;
+
+        if tmp<2 then
+           break;
+      end;
+    end;
+
+    Inc(t);
+  end;
+end;
+
+function TRace.StepRiders(const L:Integer):Boolean;
+var t : Integer;
+    Delta : Single;
+    LapTime : Int64;
+    Brake : TBrakeDecision;
+    CurrentPhase : TTurnPhase;
+    TriggerBrakeDist  : Single;
+    Curve : ^TCurve;
+begin
+  result:=False;
+
+  Delta:=(Data[L].Time-Data[L-1].Time)*0.001;
+
+  // for each Pilot
+  for t:=0 to High(Riders) do
+    if Riders[t].Active then
+    begin
+      Data[L].Data[t].Step(Delta, Riders[t].Bike, Riders[t].Pilot, Data[L-1].Data[t]);
+
+      // Finished lap?
+      if Data[L].Data[t].Position>Circuit.TotalLength then
+      begin
+        Data[L].Data[t].Position:=Data[L].Data[t].Position-Circuit.TotalLength; // New lap
+
+        if Riders[t].Laps=0 then
+           LapTime:=Data[L].Time-Data[0].Time
+        else
+           LapTime:=Data[L].Time-Data[Riders[t].LastLapTime].Time;
+
+        Riders[t].LapFinished(L,LapTime);
+
+        RiderEndsLap(t,Riders[t].Laps);
+
+        if Riders[t].Laps>=TotalLaps then
+           Riders[t].Active:=False; // Rider Race Finished
+      end;
+
+      result:=Riders[t].Active;
+
+      if result then
+      begin
+        Curve:=@Circuit.Curves[Riders[t].NextCurve-1];
+
+        // If the bike is already going slower than the corner target speed, no need to brake yet
+        if Data[L].Data[t].Speed*3.6 <= Curve.EntrySpeed then
+        begin
+          Brake.DistanceToBrakePoint := Curve.Position - Data[L].Data[t].Position;
+          Brake.BrakingDistanceNeeded := 0.0;
+        end
+        else
+          Brake:=EvaluateBrakingPoint(Data[L].Data[t].Position, Data[L].Data[t].Speed,
+                                      Curve^,
+                                      Riders[t].Bike.TotalBrakeForce);
+
+
+        TriggerBrakeDist:= Curve.Position - Brake.BrakingDistanceNeeded;
+
+        CurrentPhase := DetermineTrackPhase(Data[L].Data[t].Position, Curve^, TriggerBrakeDist);
+
+        case CurrentPhase of
+
+          tpApproach:
+              if Data[L].Data[t].Throttle<100 then
+                 Data[L].Data[t].FullSpeed;
+
+          tpBraking:
+              Data[L].Data[t].FullBrake;
+
+          tpCornering:
+            begin
+              // TODO: Accurate LeanAngle
+              // tmp:=Race.Circuit.IndexOfPosition(Race.Data[L].Data[Rider].Position);
+              // Race.Data[L].Data[t].LeanAngle:=CalcLeanAngle(Race.Circuit.Points,tmp,Speed);
+
+              if Data[L].Data[t].LeanAngle=0 then
+              begin
+                if Curve.EntryAngle<0 then
+                   Data[L].Data[t].LeanAngle:= -Riders[t].Bike.MaxLeanAngle
+                else
+                   Data[L].Data[t].LeanAngle:=  Riders[t].Bike.MaxLeanAngle;
+              end;
+
+              // TrailBraking progressively (The Release)
+              Data[L].Data[t].TrailBrake(Curve.ApexPosition);
+            end;
+
+          tpAcceleration:
+            begin
+              // Release brakes
+              Data[L].Data[t].FrontBrake:=0;
+              Data[L].Data[t].BackBrake:=0;
+
+              // Bike up progressive
+              Data[L].Data[t].StandUp;
+
+              // Throttle depends on Lean angle and (TODO) : Position from Apex to end of Curve, gradual Throttle increase
+              Data[L].Data[t].Throttle:=CalculateThrottle(Data[L].Data[t].LeanAngle,Riders[t].Bike.MaxLeanAngle);
+
+              Riders[t].GoToNextCurve(Length(Circuit.Curves));
+           end;
+        end;
+
+        {
+        // TODO: Check is speed is too much at this point (to slidout, lowside crash)
+        if CheckSlidOut(Data[L].Data[t].Speed,
+                        Circuit.Radius[Circuit.IndexOfPosition(Data[L].Data[t].Position)],
+                        TotalMass,
+                        TireTemp,
+                        DryOrWet,
+                        Riders[t].Bike) then
+
+             Riders[t].Active:=False;
+        }
+
+      end;
+    end;
+end;
+
+{ TCurve }
+
+function TCurve.ApexPosition: Single;
+begin
+  result:=Position+BeforeApex;
 end;
 
 initialization

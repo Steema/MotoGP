@@ -1,3 +1,9 @@
+{
+  @davidberneda
+
+  https://github.com/Steema/MotoGP
+
+}
 unit TeeRacingAbout;
 
 interface

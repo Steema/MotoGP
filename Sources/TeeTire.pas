@@ -1,8 +1,14 @@
+{
+  @davidberneda
+
+  https://github.com/Steema/MotoGP
+
+}
 unit TeeTire;
 
 interface
 
-// IA
+// IA Generated
 
 type
   TTyreModel = class
