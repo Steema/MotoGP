@@ -2,6 +2,14 @@
 
 Disclaimer: This project is an independent, non-commercial fan-made software, showcasing the features and functionalities of [TeeChart](https://steema.com/product/vcl) and [TeeGrid](https://steema.com/product/gridvcl) component libraries. "MotoGP" and its logos are registered trademarks of [Dorna Sports S.L.](https://www.motogp.com/en/legal-notice) This software is not affiliated with, endorsed, or sponsored by Dorna Sports, MotoGP, or any of their official partners.
 
+
+
+https://github.com/user-attachments/assets/2b1d9009-105f-4075-8895-af1acda00b6b
+
+
+
+
+
 ### Pilots
 
 <img width="461" height="385" alt="image" src="https://github.com/user-attachments/assets/4eb79193-6c0b-4ce4-945a-5415b093a4df" />
