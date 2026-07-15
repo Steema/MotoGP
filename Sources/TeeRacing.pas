@@ -12,7 +12,7 @@ uses
   Windows, SysUtils, Types, TeCanvas;
 
 const
-  RealTimeFactor = 0.1; // 10 times per second (no realtime)
+  RealTimeFactor = 0.5; // 10 times per second (no realtime)
 
 type
   TWeatherStyle=(wsDry, wsWet, wsRain);
@@ -35,20 +35,22 @@ type
 
   // Curves (Corners) of a circuit path
   TCurve=record
-    Position : Single; // Entry position of this curve, (in meters from start, might not be from Finish line)
     Name : String;
 
-    EntryAngle,
-    ExitAngle : Single;  // -180..0..+180  (left or right curve)
+    Entry : Single; // Entry position of this curve, (in meters from start, might not be from Finish line)
+    EntryIndex: Integer; // Index of Position in Track
+
+    EntryAngle,   // Angle at corner entry
+    ExitAngle,    // Angle at corner exit
+    TotalAngle : Single;  // Total from entry to exit, -180..0..+180  (left or right curve)
 
     EntrySpeed : Single; // km/h safe entry speed, with Dry Track and not super-hot asphalt
 
-    BeforeApex : Single; // Distance from Position to Apex in meters
-    AfterApex  : Single; // Distance from Apex to curve exit in meter
+    BeforeApex : Single; // Distance from Entry to Apex in meters
+    AfterApex  : Single; // Distance from Apex to curve exit in meters
+    ApexPosition : Single; // Sum of Entry+BeforeApex
 
     Slope : Single; // In degrees, from last curve
-
-    function ApexPosition:Single;
   end;
 
   TTire=record
@@ -108,6 +110,10 @@ type
   TTorqueCurve=Array of TTorqueAtRPM;
 
   TBike=record
+  private
+    Internal_Torque_Calc,
+    Internal_RPM_Calc : Single; // Speed opt
+  public
     Code,
     Factory : String;
 
@@ -160,6 +166,7 @@ type
     HasHoleshotDevice : Boolean;
 
     function FuelLiquid : Single; // in cubic centimeters
+    procedure Init;
   end;
 
   TPilot=record
@@ -248,7 +255,7 @@ type
 
     Number : Integer; // 93 = MM
 
-    Pole : Integer; // Position in the race pole
+    StartPole : Integer; // Position in the race starting pole
 
     Laps : Integer;  // how many laps this pilot
 
@@ -266,7 +273,6 @@ type
 
     procedure GoToNextCurve(const ATotalCurves:Integer);
     procedure LapFinished(const AStep:Integer; const ATime:Int64);
-    function LastLapTime:Int64;
     procedure Start(const TotalLaps:Integer);
   end;
 
@@ -342,7 +348,14 @@ function CalculateThrottle(const ALeanAngle,MaxAngle:Single):Single;
 function CalcLeanAngle(const APoints: TPointFloatArray; Current: Integer; const Speed:Single): Single;
 
 function DuplicateArray(const AData:Array of Integer):TArray<Integer>;
-function PathLength(const APoints:TPointFloatArray):Single;
+
+function PathLength(const APoints:TPointFloatArray; const StartIndex:Integer=0; UpToIndex:Integer=-1):Single;
+
+// Returns distance between two points
+function Distance(const P1, P2: TPointFloat): Single;
+
+// Returns the absolute angle of a segment in radians
+function SegmentAngle(const P1, P2: TPointFloat): Single; inline;
 
 implementation
 
@@ -364,17 +377,20 @@ begin
   Result := Sqrt(Sqr(P2.X - P1.X) + Sqr(P2.Y - P1.Y));
 end;
 
+// Returns the absolute angle of a segment in radians
+function SegmentAngle(const P1, P2: TPointFloat): Single; inline;
+begin
+  Result := ArcTan2(P2.Y - P1.Y, P2.X - P1.X);
+end;
+
 // Returns the angle (0 to 360) that form two points
 function AngleVector(const P1, P2: TPointFloat): Single;
-var AngRad: Single;
 begin
-  AngRad := ArcTan2(P2.Y - P1.Y, P2.X - P1.X);
-  Result := RadToDeg(AngRad);
+  Result := RadToDeg(SegmentAngle(P1,P2));
 
   if Result < 0 then
      Result := Result + 360;
 end;
-
 
 { TCircuit }
 
@@ -422,18 +438,19 @@ begin
   end;
 end;
 
-function PathLength(const APoints:TPointFloatArray):Single;
+function PathLength(const APoints:TPointFloatArray; const StartIndex:Integer=0; UpToIndex:Integer=-1):Single;
 var t, L : Integer;
 begin
   result:=0;
 
-  L:=Length(APoints);
+  L:=UpToIndex;
+
+  if L=-1 then
+     L:=Length(APoints)-1;
 
   if L>1 then
-  begin
-    for t:=0 to L-2 do
-        result:=result+Distance(APoints[t],APoints[t+1]);
-  end;
+     for t:=StartIndex to L-1 do
+         result:=result+Distance(APoints[t],APoints[t+1]);
 end;
 
 function TCircuit.IndexOfPosition(const APosition: Single): Integer;
@@ -466,11 +483,6 @@ begin
      Inc(NextCurve);
 end;
 
-function TRider.LastLapTime:Int64;
-begin
-  result:=LapsTime[Laps];
-end;
-
 procedure TRider.LapFinished(const AStep:Integer; const ATime:Int64);
 var NumLap : Integer; // Current finished lap for a rider (starting at 1)
 begin
@@ -480,10 +492,10 @@ begin
 
   Ellapsed[NumLap-1]:=ATime;
 
-  if NumLap=1 then
+  if Laps=0 then
      BestLap:=1
   else
-  if ATime<Ellapsed[BestLap] then
+  if ATime<Ellapsed[BestLap-1] then
      BestLap:=NumLap;
 
   Inc(Laps);
@@ -666,31 +678,14 @@ end;
 
 procedure TRiderData.Step(const TimeFactor:Single; var Bike:TBike; var Pilot:TPilot; const Prev: TRiderData);
 
-{
-  // Clutch phase, calculate two rpm, the wheel and the engine
-  WheelRPM := Bike.Back.Wheel.AngularVelocity * RGear * RFinal * AltresFactors;
-
-  if WheelRPM < 2500 then
-  begin
-    EngineRPM := EngineRPM + (Throttle * 150.0) - 20.0;
-
-    if (EngineRPM < 1200) then EngineRPM := 1200;
-    if (EngineRPM > 5000) then EngineRPM := 5000;
-  end
-  else
-  begin
-    EngineRPM := RodaRPM;
-  end;
-}
-
-const
-  InchToCm = 2.54;
-
   function CalcRPM:Integer;
-  var RadPerSec : Single;
   begin
-    RadPerSec:=Prev.Speed/(Bike.Back.Wheel * InchToCm * 0.5 * 0.01);
-    result:=Round( (RadPerSec / (2 * Pi)) * 60 * Bike.GearRatios[Gear] * Bike.FinalDrive * Bike.PrimaryRatio);
+    {$IFOPT D+}
+    if (Gear<0) or (Gear>High(Bike.GearRatios)) then
+       raise Exception.Create('Internal Error, Gear is: '+IntToStr(Gear));
+    {$ENDIF}
+
+    result:=Round(Prev.Speed * Bike.Internal_RPM_Calc * Bike.GearRatios[Gear]);
   end;
 
 const G = 9.81; // Earth Gravity meters/sec2
@@ -707,7 +702,7 @@ var Thrust,  // Nm
     PilotBodyFactor, // coefficient
     RollingFriction : Single;
 begin
-  RPM:=Prev.RPM;
+//  RPM:=Prev.RPM;
 
   Gear:=Prev.Gear;
 
@@ -742,11 +737,11 @@ begin
   end;
 
   MotorTorque:=TorqueAtRPM(Bike.Torque,RPM);
-  ThrustTorque:=(MotorTorque * Bike.PrimaryRatio * Bike.GearRatios[Gear] * Bike.FinalDrive * 0.01 * Bike.TransmissionEfficiency)/(0.5*Bike.Back.Tire.Diameter*0.01);
+  ThrustTorque:=MotorTorque * Bike.GearRatios[Gear] * Bike.Internal_Torque_Calc;
 
-  Pilot.SweatLoss:=Pilot.SweatLoss+TimeFactor*SweatRate;
+  Pilot.SweatLoss:=Pilot.SweatLoss+TimeFactor*SweatRate; // grams
 
-  TotalMass:=Bike.Weight+Bike.Fuel+Pilot.TotalMass-Pilot.SweatLoss;
+  TotalMass:=Bike.Weight+Bike.Fuel+Pilot.TotalMass-(Pilot.SweatLoss*0.001);  // In kilos kg
   TotalGrip:= Bike.Back.Tire.Grip * TotalMass * G;
 
   if Prev.Speed=0 then // Start time
@@ -945,7 +940,7 @@ begin
   if BikePosition >= ACorner.ApexPosition then
      Result := tpAcceleration
   else
-  if BikePosition >= ACorner.Position then
+  if BikePosition >= ACorner.Entry then
      Result := tpCornering // Still passing curve
   else
   if BikePosition >= ABrakeTriggerPosition then
@@ -965,7 +960,7 @@ begin
   Result.BrakingDistanceNeeded := (Sqr(ABikeSpeedMPS) - Sqr(ACorner.EntrySpeed/3.6)) / (2.0 * AMaxDecelerationMPS2);
 
   // 2. Determine the exact track coordinate where braking MUST start
-  BrakingTriggerPosition := ACorner.Position - Result.BrakingDistanceNeeded;
+  BrakingTriggerPosition := ACorner.Entry - Result.BrakingDistanceNeeded;
 
   // 3. Compare with current bike position
   if ABikePosition >= BrakingTriggerPosition then
@@ -1006,8 +1001,8 @@ begin
   P2 := APoints[(Current + 1) mod L];
   P3 := APoints[(Current + 2) mod L];
 
-  Angle1 := ArcTan2(P2.Y - P1.Y, P2.X - P1.X);
-  Angle2 := ArcTan2(P3.Y - P2.Y, P3.X - P2.X);
+  Angle1 := SegmentAngle(P1,P2);
+  Angle2 := SegmentAngle(P2,P3);
 
   DeltaAngle := Angle2 - Angle1;
 
@@ -1023,6 +1018,22 @@ begin
      Result := -MaxLean;
 end;
 
+const
+  InchToCm = 2.54;
+
+procedure TBike.Init;
+const
+  Inverse_TwoPi = 1 / (2 * Pi);
+
+var Inverse_BackRadius : Single;
+begin
+  Inverse_BackRadius:=1/(Back.Wheel * InchToCm * 0.5 * 0.01);
+
+  Internal_RPM_Calc:= Inverse_BackRadius * Inverse_TwoPi * 60 * FinalDrive * PrimaryRatio;
+
+  Internal_Torque_Calc:= ( PrimaryRatio * FinalDrive * 0.01 * TransmissionEfficiency)/(0.5 * Back.Tire.Diameter*0.01);
+end;
+
 { TRace }
 
 procedure TRace.Init;
@@ -1036,7 +1047,7 @@ begin
   SetLength(Data[0].Data,Length(Riders));
 
   for t:=0 to High(Riders) do
-      Data[0].Data[t].Init(Circuit.PolePosition-((Riders[t].Pole-1)*PoleDistance));
+      Data[0].Data[t].Init(Circuit.PolePosition-((Riders[t].StartPole-1)*PoleDistance));
 end;
 
 // Returns True is the bike has a LowSide
@@ -1150,6 +1161,15 @@ end;
 
 // Any rider passed others?
 function TRace.TryPasses(var AllRiders:TAllRidersData):Boolean;
+
+
+   function AbsoluteDistance(const APole:Integer):Single;
+   var tmp : Integer;
+   begin
+     tmp:=PoleIndex[APole];
+     result:=(Riders[tmp].Laps*Circuit.TotalLength)+AllRiders[tmp].Position;
+   end;
+
 var t,
     Num,
     tmp, tmpI : Integer;
@@ -1166,7 +1186,7 @@ begin
     begin
       tmp:=t;
 
-      while AllRiders[PoleIndex[tmp]].Position>AllRiders[PoleIndex[tmp-1]].Position do
+      while AbsoluteDistance(tmp)>AbsoluteDistance(tmp-1) do
       begin
         result:=True;
 
@@ -1213,9 +1233,9 @@ begin
         Data[L].Data[t].Position:=Data[L].Data[t].Position-Circuit.TotalLength; // New lap
 
         if Riders[t].Laps=0 then
-           LapTime:=Data[L].Time-Data[0].Time
+           LapTime:=Data[L].Time
         else
-           LapTime:=Data[L].Time-Data[Riders[t].LastLapTime].Time;
+           LapTime:=Data[L].Time-Data[Riders[t].LapsTime[Riders[t].Laps-1]].Time;
 
         Riders[t].LapFinished(L,LapTime);
 
@@ -1225,16 +1245,16 @@ begin
            Riders[t].Active:=False; // Rider Race Finished
       end;
 
-      result:=Riders[t].Active;
-
-      if result then
+      if Riders[t].Active then
       begin
+        result:=True;  // At least one rider is still racing
+
         Curve:=@Circuit.Curves[Riders[t].NextCurve-1];
 
         // If the bike is already going slower than the corner target speed, no need to brake yet
         if Data[L].Data[t].Speed*3.6 <= Curve.EntrySpeed then
         begin
-          Brake.DistanceToBrakePoint := Curve.Position - Data[L].Data[t].Position;
+          Brake.DistanceToBrakePoint := Curve.Entry - Data[L].Data[t].Position;
           Brake.BrakingDistanceNeeded := 0.0;
         end
         else
@@ -1243,7 +1263,7 @@ begin
                                       Riders[t].Bike.TotalBrakeForce);
 
 
-        TriggerBrakeDist:= Curve.Position - Brake.BrakingDistanceNeeded;
+        TriggerBrakeDist:= Curve.Entry - Brake.BrakingDistanceNeeded;
 
         CurrentPhase := DetermineTrackPhase(Data[L].Data[t].Position, Curve^, TriggerBrakeDist);
 
@@ -1304,13 +1324,6 @@ begin
 
       end;
     end;
-end;
-
-{ TCurve }
-
-function TCurve.ApexPosition: Single;
-begin
-  result:=Position+BeforeApex;
 end;
 
 initialization

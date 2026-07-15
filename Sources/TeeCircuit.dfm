@@ -3,7 +3,7 @@ object FormCircuit: TFormCircuit
   Top = 0
   Caption = 'Circuit'
   ClientHeight = 601
-  ClientWidth = 624
+  ClientWidth = 1078
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -12,11 +12,20 @@ object FormCircuit: TFormCircuit
   Font.Style = []
   Position = poOwnerFormCenter
   TextHeight = 15
+  object Splitter1: TSplitter
+    Left = 675
+    Top = 0
+    Height = 536
+    Align = alRight
+    ExplicitLeft = 544
+    ExplicitTop = 272
+    ExplicitHeight = 100
+  end
   object Chart1: TChart
     Left = 0
     Top = 0
-    Width = 624
-    Height = 560
+    Width = 675
+    Height = 536
     BackWall.Brush.Gradient.Direction = gdBottomTop
     BackWall.Brush.Gradient.EndColor = clWhite
     BackWall.Brush.Gradient.StartColor = 15395562
@@ -72,6 +81,8 @@ object FormCircuit: TFormCircuit
     Align = alClient
     TabOrder = 0
     OnMouseMove = Chart1MouseMove
+    ExplicitWidth = 624
+    ExplicitHeight = 560
     DefaultCanvas = 'TGDIPlusCanvas'
     ColorPaletteIndex = 13
     object Series1: TLineSeries
@@ -96,14 +107,28 @@ object FormCircuit: TFormCircuit
       YValues.Name = 'Y'
       YValues.Order = loNone
     end
+    object Series3: TPointSeries
+      ClickableLine = False
+      Pointer.HorizSize = 5
+      Pointer.InflateMargins = True
+      Pointer.Pen.Visible = False
+      Pointer.Style = psRectangle
+      Pointer.VertSize = 5
+      XValues.Name = 'X'
+      XValues.Order = loAscending
+      YValues.Name = 'Y'
+      YValues.Order = loNone
+    end
   end
   object Panel1: TPanel
     Left = 0
-    Top = 560
-    Width = 624
-    Height = 41
+    Top = 536
+    Width = 1078
+    Height = 65
     Align = alBottom
     TabOrder = 1
+    ExplicitTop = 542
+    ExplicitWidth = 624
     object Label1: TLabel
       Left = 16
       Top = 16
@@ -112,11 +137,87 @@ object FormCircuit: TFormCircuit
       Caption = 'Label1'
     end
     object Label2: TLabel
-      Left = 128
-      Top = 16
+      Left = 16
+      Top = 37
       Width = 24
       Height = 15
       Caption = 'Info:'
     end
+    object CBRadius: TCheckBox
+      Left = 496
+      Top = 14
+      Width = 65
+      Height = 17
+      Caption = 'Radius'
+      Checked = True
+      State = cbChecked
+      TabOrder = 0
+      OnClick = CBRadiusClick
+    end
+    object CBApex: TCheckBox
+      Left = 496
+      Top = 37
+      Width = 65
+      Height = 17
+      Caption = 'Apex'
+      Checked = True
+      State = cbChecked
+      TabOrder = 1
+      OnClick = CBApexClick
+    end
+    object CBDrawCurves: TCheckBox
+      Left = 425
+      Top = 14
+      Width = 67
+      Height = 17
+      Caption = 'Curves'
+      Checked = True
+      State = cbChecked
+      TabOrder = 2
+      OnClick = CBDrawCurvesClick
+    end
+    object Button1: TButton
+      Left = 584
+      Top = 6
+      Width = 75
+      Height = 25
+      Caption = 'AUTO'
+      TabOrder = 3
+      OnClick = Button1Click
+    end
+  end
+  object CurvesGrid: TTeeGrid
+    Left = 678
+    Top = 0
+    Width = 400
+    Height = 536
+    Cells.Format.Font.Name = 'Segoe UI'
+    Cells.Format.Font.Size = 9.000000000000000000
+    Columns = <>
+    Header.Format.Font.Name = 'Segoe UI'
+    Header.Format.Font.Size = 9.000000000000000000
+    Rows.Format.Font.Name = 'Segoe UI'
+    Rows.Format.Font.Size = 9.000000000000000000
+    Rows.Hover.Format.Font.Name = 'Segoe UI'
+    Rows.Hover.Format.Font.Size = 9.000000000000000000
+    Selected.Format.Font.Name = 'Segoe UI'
+    Selected.Format.Font.Size = 9.000000000000000000
+    Selected.UnFocused.Format.Font.Name = 'Segoe UI'
+    Selected.UnFocused.Format.Font.Size = 9.000000000000000000
+    Align = alRight
+    ParentFont = True
+    UseDockManager = False
+    ParentBackground = False
+    ParentColor = False
+    TabOrder = 2
+    ExplicitLeft = 681
+    _Headers = (
+      1
+      'TColumnHeaderBand'
+      <
+        item
+          Format.Font.Name = 'Segoe UI'
+          Format.Font.Size = 9.000000000000000000
+        end>)
   end
 end
