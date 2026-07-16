@@ -148,11 +148,14 @@ type
     GearRatios: TTeeGrid;
     CBCategory: TComboBox;
     Splitter2: TSplitter;
-    LeaderBoard: TTeeGrid;
     Splitter6: TSplitter;
     SeriesRadius: TFastLineSeries;
     SpeedButton1: TSpeedButton;
     BStop: TSpeedButton;
+    Panel5: TPanel;
+    Splitter7: TSplitter;
+    ResultsGrid: TTeeGrid;
+    LeaderBoard: TTeeGrid;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -205,6 +208,7 @@ type
     procedure BackTirePaint(Sender: TObject);
     procedure CBCategoryChange(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
+    procedure ChampionGridSelect(Sender: TObject);
   private
     { Private declarations }
 
@@ -222,6 +226,7 @@ type
     TiresData,
     CircuitsData,
     Pole,
+    ResultsData,
     LapsTimeData,
     CurvesGridData : TStringsData;
 
@@ -232,9 +237,6 @@ type
     Torque : TFormTorqueCurve;
 
     SwappingRider : Boolean; // True when there is a rider pass (internal use)
-
-     // Pole at grid race start, immutable
-    StartPoleIndex : TArray<Integer>;
 
     SeriesSpeed,
     SeriesAcceleration,
@@ -253,6 +255,7 @@ type
     function CategoryPath:String;
     function CheckPilotExists(const S:String):Boolean;
     procedure ClearLapCharts;
+    procedure CreateLeaderBoard;
     procedure CreatePole;
     procedure DoPaintFlag(const ID:String; var AData: TRenderData);
     function DoStep:Boolean;
@@ -271,6 +274,7 @@ type
     function CategorySeason:String;
     procedure PaintFastest(const Sender:TColumn; var AData:TRenderData; var DefaultPaint:Boolean);
     procedure PaintFlag(const Sender:TColumn; var AData:TRenderData; var DefaultPaint:Boolean);
+    procedure PaintPoleDelta(const Sender:TColumn; var AData:TRenderData; var DefaultPaint:Boolean);
     function Season:String;
     procedure SetCurrentLap(const ACurrent:Integer);
     procedure SetDashboard;
@@ -577,6 +581,50 @@ begin
   result:=-1;
 end;
 
+procedure TMainForm.ChampionGridSelect(Sender: TObject);
+
+  procedure SplitInto(const S:String; const AColumn:Integer);
+  var tmp : TArray<String>;
+      t : Integer;
+  begin
+    tmp:=S.Split(['|']);
+
+    for t:=0 to ResultsData.Count-1 do
+        if t<=High(tmp) then
+           ResultsData[AColumn,t]:=tmp[t]
+        else
+           ResultsData[AColumn,t]:='';
+  end;
+
+begin
+  if ChampionGrid.Selected.Row=-1 then
+     ResultsGrid.Data:=nil
+  else
+  begin
+    SplitInto(RoundsData[5,ChampionGrid.Selected.Row],1);
+    SplitInto(RoundsData[6,ChampionGrid.Selected.Row],3);
+
+    ResultsGrid.Data:=ResultsData;
+
+    ResultsGrid.Columns[0].Header.Text:='#';
+    ResultsGrid.Columns[1].Header.Text:='Sprint';
+    ResultsGrid.Columns[2].Header.Text:='Points';
+    ResultsGrid.Columns[3].Header.Text:='Race';
+    ResultsGrid.Columns[4].Header.Text:='Points';
+
+    ResultsGrid.Columns[0].Width.Value:=30;
+    ResultsGrid.Columns[1].Width.Value:=60;
+    ResultsGrid.Columns[2].Width.Value:=70;
+    ResultsGrid.Columns[3].Width.Value:=60;
+    ResultsGrid.Columns[4].Width.Value:=70;
+
+    SetupPilotGrid(ResultsGrid,1,1);
+    SetupPilotGrid(ResultsGrid,3,3);
+
+    ResultsGrid.Invalidate;
+  end;
+end;
+
 function TMainForm.CheckPilotExists(const S:String):Boolean;
 begin
   result:=FindInAllPilots(S)<>-1;
@@ -585,6 +633,10 @@ begin
      raise Exception.Create('Error: Pilot with Code: '+s+' not found in All Pilots table');
 end;
 
+const
+  SprintPoints:Array of Integer=[12,9,7,6,5,4,3,2,1];
+  RacePoints:Array of Integer=[25,20,16,13,11,10,9,8,7,6,5,4,3,2,1];
+
 procedure TMainForm.CBSeasonsChange(Sender: TObject);
 
   procedure VerifyPilots;
@@ -592,6 +644,21 @@ procedure TMainForm.CBSeasonsChange(Sender: TObject);
   begin
     for t:=0 to PilotsData.Count-1 do
         CheckPilotExists(PilotsData[0,t]);
+  end;
+
+  procedure CreateResultsData;
+  var t : Integer;
+  begin
+    ResultsData:=TStringsData.Create(5,PilotsData.Count);
+
+    for t:=0 to ResultsData.Count-1 do
+        ResultsData[0,t]:=IntToStr(t+1);
+
+    for t:=0 to High(SprintPoints) do
+        ResultsData[2,t]:=IntToStr(SprintPoints[t]);
+
+    for t:=0 to High(RacePoints) do
+        ResultsData[4,t]:=IntToStr(RacePoints[t]);
   end;
 
 begin
@@ -613,11 +680,13 @@ begin
 
   if FileExists(CategorySeason+'\Rounds.txt') then
   begin
+    CreateResultsData;
+
     RoundsData:=TCSVDataImport.FromFile(CategorySeason+'\Rounds.txt');
     ChampionGrid.Data:=RoundsData;
 
-    SetupPilotGrid(ChampionGrid,5,5);
-    SetupPilotGrid(ChampionGrid,6,6);
+    ChampionGrid.Columns[5].Hide;
+    ChampionGrid.Columns[6].Hide;
 
     FillRounds;
 
@@ -629,6 +698,9 @@ begin
   else
   begin
     ChampionGrid.Data:=nil;
+    ResultsGrid.Data:=nil;
+    LeaderBoard.Data:=nil;
+
     CBRounds.Clear;
     CBRounds.Enabled:=False;
   end;
@@ -642,12 +714,24 @@ begin
   PoleGridSelect(Self);
 end;
 
+const
+  Pole_Index=0;
+  Pole_Delta=1;
+  Pole_Num=2;
+  Pole_Name=3;
+  Pole_Current=4;
+  Pole_Last=5;
+  Pole_Best=6;
+  Pole_BestLap=7;
+
+  Pilots_Bike=5;
+
 procedure TMainForm.CBSelectedBikeChange(Sender: TObject);
 var tmp : Integer;
 begin
-  tmp:=FindPilotNum(Pole[1,PoleGrid.Selected.Row]);
+  tmp:=FindPilotNum(Pole[Pole_Num,PoleGrid.Selected.Row]);
 
-  PilotsData[5,tmp]:=CBSelectedBike.Items[CBSelectedBike.ItemIndex];
+  PilotsData[Pilots_Bike,tmp]:=CBSelectedBike.Items[CBSelectedBike.ItemIndex];
 end;
 
 procedure TMainForm.CBSingleRiderClick(Sender: TObject);
@@ -674,7 +758,7 @@ begin
        begin
          tmp:=FindRiderInPole(Race.Riders[ValueIndex].Number);
 
-         LabelText:=IntToStr(Race.Riders[ValueIndex].Number)+' '+Pole[2,tmp];
+         LabelText:=IntToStr(Race.Riders[ValueIndex].Number)+' '+Pole[Pole_Name,tmp];
        end;
      end;
 end;
@@ -1078,6 +1162,11 @@ begin
             );
 end;
 
+procedure TMainForm.PaintPoleDelta(const Sender:TColumn; var AData:TRenderData; var DefaultPaint:Boolean);
+begin
+  DefaultPaint:=True;
+end;
+
 procedure TMainForm.CreatePole;
 
   procedure InitPoleGrid;
@@ -1086,16 +1175,16 @@ procedure TMainForm.CreatePole;
   begin
     for t:=0 to Pole.Count-1 do
     begin
-      Pole[0,t]:=(t+1).ToString;
+      Pole[Pole_Index,t]:=(t+1).ToString;
 
       tmp:=Race.PoleIndex[t];
 
-      Pole[1,t]:=PilotsData[1,tmp];
-      Pole[2,t]:=PilotsData[0,tmp];
-      Pole[3,t]:='0:0.0'; // Current lap time
-      Pole[4,t]:='0:0.0';// Last lap time
-      Pole[5,t]:='0:0.0'; // Best lap time
-      Pole[6,t]:='0'; // Lap with best time
+      Pole[Pole_Num,t]:=PilotsData[1,tmp];
+      Pole[Pole_Name,t]:=PilotsData[0,tmp];
+      Pole[Pole_Current,t]:='0:0.0'; // Current lap time
+      Pole[Pole_Last,t]:='0:0.0';// Last lap time
+      Pole[Pole_Best,t]:='0:0.0'; // Best lap time
+      Pole[Pole_BestLap,t]:='0'; // Lap with best time
     end;
 
     PoleGrid.Data:=Pole;
@@ -1103,18 +1192,22 @@ procedure TMainForm.CreatePole;
     if PoleGrid.Selected.Row>Pole.Count then
        PoleGrid.Selected.Row:=Pole.Count-1;
 
-    PoleGrid.Columns[0].Header.Text:='#';
-    PoleGrid.Columns[1].Header.Text:='Num';
-    PoleGrid.Columns[2].Header.Text:='Name';
-    PoleGrid.Columns[3].Header.Text:='Current'; // Current lap time
-    PoleGrid.Columns[4].Header.Text:='Last'; // Last lap time
-    PoleGrid.Columns[5].Header.Text:='Best'; // Best lap time
-    PoleGrid.Columns[6].Header.Text:='Num'; // Lap with best time
+    PoleGrid.Columns[Pole_Index].Header.Text:='#';
 
-    PoleGrid.Columns[2].Width.Value:=60;
-    PoleGrid.Columns[3].Width.Value:=90;
-    PoleGrid.Columns[4].Width.Value:=90;
-    PoleGrid.Columns[5].Width.Value:=90;
+//    PoleGrid.Columns[Pole_Delta].OnPaint:=PaintPoleDelta;
+
+    PoleGrid.Columns[Pole_Num].Header.Text:='Num';
+    PoleGrid.Columns[Pole_Name].Header.Text:='Name';
+    PoleGrid.Columns[Pole_Current].Header.Text:='Current'; // Current lap time
+    PoleGrid.Columns[Pole_Last].Header.Text:='Last'; // Last lap time
+    PoleGrid.Columns[Pole_Best].Header.Text:='Best'; // Best lap time
+    PoleGrid.Columns[Pole_BestLap].Header.Text:='Num'; // Lap with best time
+
+    PoleGrid.Columns[Pole_Num].Width.Value:=54;
+    PoleGrid.Columns[Pole_Name].Width.Value:=60;
+    PoleGrid.Columns[Pole_Current].Width.Value:=90;
+    PoleGrid.Columns[Pole_Last].Width.Value:=90;
+    PoleGrid.Columns[Pole_Best].Width.Value:=90;
   end;
 
   procedure InitRaceRiders;
@@ -1139,7 +1232,7 @@ var tmp,
 begin
   // Current rider selected
   if CBSingleRider.Checked then
-     tmp:=FindPilotNum(Pole[1,PoleGrid.Selected.Row])
+     tmp:=FindPilotNum(Pole[Pole_Num,PoleGrid.Selected.Row])
   else
      tmp:=-1;
 
@@ -1150,7 +1243,7 @@ begin
   else
      RiderQuantity:=PilotsData.Rows;
 
-  Pole:=TStringsData.Create(7,RiderQuantity);
+  Pole:=TStringsData.Create(1+Pole_BestLap,RiderQuantity);
 
   if tmp=-1 then // All pilots
      Race.ShufflePole(Pole.Count)
@@ -1160,11 +1253,11 @@ begin
     Race.PoleIndex[0]:=0;
   end;
 
-  StartPoleIndex:=DuplicateArray(Race.PoleIndex);
+  Race.StartPoleIndex:=DuplicateArray(Race.PoleIndex);
 
   InitPoleGrid;
 
-  SetupPilotGrid(PoleGrid,1,1);
+  SetupPilotGrid(PoleGrid,Pole_Num,Pole_Num);
 
   Race.Weather:=DefaultWeather;
 
@@ -1200,7 +1293,9 @@ begin
     else
        tmp:=FindPilotNum(AGrid.Data.AsString(AGrid.Columns[ANumColumn],t));
 
-    if tmp<>-1 then
+    if tmp=-1 then
+       AGrid.CellFormat.Cell[t,AColorColumn].Format:=nil
+    else
     begin
       f:=AGrid.CellFormat.Cell[t,AColorColumn].Format;
 
@@ -1212,6 +1307,8 @@ begin
       f.Brush.Show;
 
       f.Font.Color:=CalcFontColor(f.Brush.Color);
+      f.Font.Size:=9;
+      f.Font.Style:=[];
     end;
   end;
 end;
@@ -1428,6 +1525,7 @@ begin
   AllPilotsGrid.ParentFont:=True;
   CurvesGrid.ParentFont:=True;
   LeaderBoard.ParentFont:=True;
+  ResultsGrid.ParentFont:=True;
 
   {$IFNDEF USE_SKIA}
   Skia1.Enabled:=False;
@@ -1563,7 +1661,7 @@ begin
 
   if tmp<>-1 then
   begin
-    tmpTire:=PilotsData[AColumn,FindPilotNum(Pole[1,tmp])];
+    tmpTire:=PilotsData[AColumn,FindPilotNum(Pole[Pole_Num,tmp])];
 
     ACanvas.Pen.Width:=3;
     ACanvas.Ellipse(2,2,30,30);
@@ -1737,8 +1835,76 @@ begin
   SetTeeCanvas(TGLCanvas);
 end;
 
+procedure TMainForm.CreateLeaderBoard;
+var Points : Array of Integer;
+
+   procedure AddPoints(const S:String; const APoints:Array of Integer);
+   var P : Array of String;
+       t, tmp : Integer;
+   begin
+     P:=S.Split(['|']);
+
+     for t:=0 to High(P) do
+     begin
+       if P[t]='-' then  // <-- Signals not classified rider after the "-"
+          break;
+
+       tmp:=FindPilotNum(P[t]);
+
+       if tmp=-1 then
+          raise Exception.Create('Error Pilot not found: '+P[t]);
+
+       if t<Length(APoints) then
+          Inc(Points[tmp],APoints[t]);
+     end;
+   end;
+
+var t, tmpRider : Integer;
+    Leaders : TStringsData;
+begin
+  Leaders:=TStringsData.Create(9,PilotsData.Count);
+
+  SetLength(Points,PilotsData.Count);
+
+  for t:=0 to RoundsData.Count-1 do
+  begin
+    AddPoints(RoundsData[5,t],SprintPoints);
+    AddPoints(RoundsData[6,t],RacePoints);
+  end;
+
+  for t:=0 to High(Points) do
+  begin
+    Leaders[0,t]:=IntToStr(t+1);
+    Leaders[1,t]:=PilotsData[1,t];
+
+    tmpRider:=FindInAllPilots(PilotsData[0,t]);
+    Leaders[2,t]:=AllPilots[1,tmpRider]+' '+AllPilots[2,tmpRider];
+
+    Leaders[4,t]:=PilotsData[2,t];
+    Leaders[5,t]:=IntToStr(Points[t]);
+
+    if t>0 then
+       Leaders[6,t]:=IntToStr(Points[0]-Points[t]);
+  end;
+
+  LeaderBoard.Data:=Leaders;
+
+  LeaderBoard.Columns[0].Header.Text:='#';
+  LeaderBoard.Columns[1].Header.Text:='Number';
+  LeaderBoard.Columns[2].Header.Text:='Name';
+  LeaderBoard.Columns[3].Header.Text:='Flag';
+  LeaderBoard.Columns[4].Header.Text:='Team';
+  LeaderBoard.Columns[5].Header.Text:='Points';
+  LeaderBoard.Columns[6].Header.Text:='Delta';
+  LeaderBoard.Columns[7].Header.Text:='Wins';
+  LeaderBoard.Columns[8].Header.Text:='Podiums';
+
+  Leaders.SortBy(LeaderBoard.Columns[5],False,True);
+
+  SetupPilotGrid(LeaderBoard,1,1);
+end;
+
 procedure TMainForm.PageControl1Change(Sender: TObject);
-var Leaders : TStringsData;
 begin
   if PageControl1.ActivePage=TabData then
   begin
@@ -1754,24 +1920,8 @@ begin
   end
   else
   if PageControl1.ActivePage=TabChampionShip then
-  begin
-    if LeaderBoard.Data=nil then
-    begin
-      Leaders:=TStringsData.Create(9,PilotsData.Count);
-
-      LeaderBoard.Data:=Leaders;
-
-      LeaderBoard.Columns[0].Header.Text:='Pos';
-      LeaderBoard.Columns[1].Header.Text:='Number';
-      LeaderBoard.Columns[2].Header.Text:='Name';
-      LeaderBoard.Columns[3].Header.Text:='Flag';
-      LeaderBoard.Columns[4].Header.Text:='Team';
-      LeaderBoard.Columns[5].Header.Text:='Points';
-      LeaderBoard.Columns[6].Header.Text:='Delta';
-      LeaderBoard.Columns[7].Header.Text:='Wins';
-      LeaderBoard.Columns[8].Header.Text:='Podiums';
-    end;
-  end;
+     if LeaderBoard.Data=nil then
+        CreateLeaderBoard;
 end;
 
 procedure TMainForm.Pole1Click(Sender: TObject);
@@ -1798,8 +1948,8 @@ var XS,YS : Integer;
     C.LineTo(X+XS,Y);
     C.LineTo(X+XS,Y+10);
 
-    if Length(StartPoleIndex)>1 then
-       tmpIndex:=StartPoleIndex[Pilot]
+    if Length(Race.StartPoleIndex)>1 then
+       tmpIndex:=Race.StartPoleIndex[Pilot]
     else
        tmpIndex:=Pilot;
 
@@ -1925,9 +2075,9 @@ begin
     Rider:=PoleGrid.Selected.Row;
 
     // Find in All Pilots to obtain name
-    tmpRider:=FindInAllPilots(Pole[2,Rider]);
+    tmpRider:=FindInAllPilots(Pole[Pole_Name,Rider]);
 
-    LapChart.Title.Caption:=Pole[1,Rider]+' '+Pole[2,Rider]+' '+AllPilots[1,tmpRider]+' '+AllPilots[2,tmpRider];
+    LapChart.Title.Caption:=Pole[Pole_Num,Rider]+' '+Pole[Pole_Name,Rider]+' '+AllPilots[1,tmpRider]+' '+AllPilots[2,tmpRider];
     LapChart.Title.Font.Size:=14;
 
     // Now in Pole
@@ -2071,7 +2221,7 @@ begin
   end
   else
   begin
-    FrontView.Title.Caption:=Pole[1,tmp]+' '+Pole[2,tmp];
+    FrontView.Title.Caption:=Pole[Pole_Num,tmp]+' '+Pole[Pole_Name,tmp];
 
     TabLapTimes.TabVisible:=True;
 
@@ -2081,7 +2231,7 @@ begin
     LapTimesGrid.Columns[0].Header.Text:='Lap';
     LapTimesGrid.Columns[1].Header.Text:='Time';
 
-    tmpBike:=PilotsData[5,FindPilotNum(Pole[1,tmp])];
+    tmpBike:=PilotsData[5,FindPilotNum(Pole[Pole_Num,tmp])];
 
     CBSelectedBike.ItemIndex:=CBSelectedBike.Items.IndexOf(tmpBike);
 
@@ -2158,7 +2308,7 @@ function TMainForm.FindRiderInPole(const ANumber:Integer):Integer;
 var t : Integer;
 begin
   for t:=0 to Pole.Count-1 do
-      if StrToInt(Pole[1,t])=ANumber then
+      if StrToInt(Pole[Pole_Num,t])=ANumber then
       begin
         result:=t;
         Exit;
@@ -2183,10 +2333,10 @@ var t : Integer;
 begin
   for t:=1 to Pole.Count-1 do
   begin
-    Pole[3,t]:='0:0.0'; // Current lap time
-    Pole[4,t]:='0:0.0'; // Last lap time
-    Pole[5,t]:='0:0.0'; // Best lap time
-    Pole[6,t]:='0'; // Lap with best time
+    Pole[Pole_Current,t]:='0:0.0'; // Current lap time
+    Pole[Pole_Last,t]:='0:0.0'; // Last lap time
+    Pole[Pole_Best,t]:='0:0.0'; // Best lap time
+    Pole[Pole_BestLap,t]:='0'; // Lap with best time
   end;
 end;
 
@@ -2426,14 +2576,14 @@ begin
        if tmpPole=PoleGrid.Selected.Row then
           ClearLapCharts;
 
-    Pole[4,tmpPole]:=IntToTime(Race.Riders[Rider].Ellapsed[Lap-1]); // Last
+    Pole[Pole_Last,tmpPole]:=IntToTime(Race.Riders[Rider].Ellapsed[Lap-1]); // Last
 
     if Race.Riders[Rider].BestLap>0 then
     begin
       tmpBest:=Race.Riders[Rider].Ellapsed[Race.Riders[Rider].BestLap-1];
 
-      Pole[5,tmpPole]:=IntToTime(tmpBest); // Best
-      Pole[6,tmpPole]:=IntToStr(Race.Riders[Rider].BestLap); // Best
+      Pole[Pole_Best,tmpPole]:=IntToTime(tmpBest); // Best
+      Pole[Pole_BestLap,tmpPole]:=IntToStr(Race.Riders[Rider].BestLap); // Best
 
       if (Race.Fastest=-1) or (tmpBest<Race.FastestTime) then
       begin
@@ -2443,14 +2593,14 @@ begin
     end
     else
     begin
-      Pole[5,tmpPole]:='';
-      Pole[6,tmpPole]:='';
+      Pole[Pole_Best,tmpPole]:='';
+      Pole[Pole_BestLap,tmpPole]:='';
     end;
 
     if tmpPole=PoleGrid.Selected.Row then
     begin
       LapsTimeData[0,Lap-1]:=IntToStr(Lap);
-      LapsTimeData[1,Lap-1]:=Pole[4,tmpPole]; // Last
+      LapsTimeData[1,Lap-1]:=Pole[Pole_Last,tmpPole]; // Last
     end;
 
     // Rider time for Lap
@@ -2681,6 +2831,37 @@ end;
 
 function TMainForm.DoStep:Boolean;
 
+  // slow !
+  function FindPoleIndex(const AIndex:Integer):Integer;
+  var t : Integer;
+  begin
+    for t:=0 to High(Race.PoleIndex) do
+        if Race.PoleIndex[t]=AIndex then
+        begin
+          result:=t;
+          Exit;
+        end;
+
+    result:=-1; // Exception
+  end;
+
+  procedure SetPoleDeltas;
+  var t, tmp : Integer;
+  begin
+    for t:=0 to High(Race.StartPoleIndex) do
+    begin
+      tmp:=FindPoleIndex(Race.StartPoleIndex[t])-t;
+
+      if tmp=0 then
+         Pole[Pole_Delta,t]:=''
+      else
+      if tmp>0 then
+         Pole[Pole_Delta,t]:='+'+IntToStr(tmp)
+      else
+         Pole[Pole_Delta,t]:=IntToStr(tmp);
+    end;
+  end;
+
   procedure SetGapTimes(const L:Integer);
   var t,
       tmp,
@@ -2699,7 +2880,7 @@ function TMainForm.DoStep:Boolean;
     if tmpLap>0 then
        Dec(tmpTime,Race.Data[Race.Riders[tmp].LapsTime[tmpLap-1]].Time);
 
-    Pole[3,0]:=IntToTime(tmpTime); // First pilot total race time
+    Pole[Pole_Current,0]:=IntToTime(tmpTime); // First pilot total race time
 
     // From pilot 1:
     for t:=1 to Pole.Count-1 do
@@ -2711,7 +2892,7 @@ function TMainForm.DoStep:Boolean;
       else
          GapTime:=0;
 
-      Pole[3,t]:=FormatDateTime('+s.zzz',GapTime);
+      Pole[Pole_Current,t]:=FormatDateTime('+s.zzz',GapTime);
     end;
 
     PoleGrid.Invalidate;
@@ -2729,7 +2910,10 @@ begin
      PoleGrid.Invalidate;
 
   if Race.Data[L].Time mod 1000=0 then  // Refresh every second
-     SetGapTimes(L);
+  begin
+    SetPoleDeltas;
+    SetGapTimes(L);
+  end;
 
   Circuit.Invalidate;
 
