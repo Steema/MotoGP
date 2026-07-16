@@ -41,6 +41,7 @@ type
   public
     { Public declarations }
 
+    class procedure DetectCorners(var ACircuit:TCircuit; CurvatureThreshold: Single = 0.05); static;
     class function ShowCircuit(var ACircuit:TCircuit):Boolean; static;
   end;
 
@@ -61,7 +62,7 @@ begin
   while Result < -Pi do Result := Result + 2 * Pi;
 end;
 
-procedure DetectCorners(var ACircuit:TCircuit; CurvatureThreshold: Single = 0.05);
+class procedure TFormCircuit.DetectCorners(var ACircuit:TCircuit; CurvatureThreshold: Single = 0.05);
 var
   i, j, L : Integer;
   N: Integer;
