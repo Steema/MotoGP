@@ -12,21 +12,23 @@ https://github.com/user-attachments/assets/2b1d9009-105f-4075-8895-af1acda00b6b
 
 ### Pilots
 
-<img width="461" height="385" alt="image" src="https://github.com/user-attachments/assets/4eb79193-6c0b-4ce4-945a-5415b093a4df" />
+<img width="1603" height="987" alt="image" src="https://github.com/user-attachments/assets/0172edcd-bed4-4ff5-807e-faa33b3b522a" />
 
 ### Telemetry
 
-<img width="3840" height="2088" alt="image" src="https://github.com/user-attachments/assets/2c79d21b-4f70-4f9a-98c8-a8d3d959c0ce" />
+<img width="3840" height="2088" alt="image" src="https://github.com/user-attachments/assets/49f5498f-7654-4e56-abc6-33a00ec56c7b" />
 
 ### Sensors
 
 <img width="671" height="602" alt="image" src="https://github.com/user-attachments/assets/55dc02af-28e8-47a7-bbab-c012366eb348" />
 
-### Season Races
+### Season Rounds and Championship Leaderboard
 
-<img width="704" height="386" alt="image" src="https://github.com/user-attachments/assets/2d943cc3-0900-4dcf-8988-6e6a3b6890a4" />
+<img width="673" height="927" alt="image" src="https://github.com/user-attachments/assets/f7059a36-eae4-435e-8625-6edd13cafbb4" />
 
 ### Bikes
+
+<img width="1589" height="985" alt="image" src="https://github.com/user-attachments/assets/ea95e323-f7ef-4aca-9990-0c91c1e7f991" />
 
 <img width="314" height="301" alt="image" src="https://github.com/user-attachments/assets/ab52bcab-1016-4283-9031-8d2d6b85c94e" />
 
@@ -36,9 +38,9 @@ https://github.com/user-attachments/assets/2b1d9009-105f-4075-8895-af1acda00b6b
 
 <img width="497" height="386" alt="image" src="https://github.com/user-attachments/assets/a604520f-facc-4927-aaab-a6b4f198ac81" />
 
-### Circuits
+### Circuits, Records and Curves
 
-<img width="599" height="392" alt="image" src="https://github.com/user-attachments/assets/b91c9be4-2477-41a8-aa2f-0dffecca12eb" />
+<img width="1142" height="666" alt="image" src="https://github.com/user-attachments/assets/e5d05c7e-8549-4956-ba53-36050b98b689" />
 
 ### Statistics Lap by Lap
 
