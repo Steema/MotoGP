@@ -127,6 +127,7 @@ DPET,Danilo,Petrucci,Terni,Italy,24/10/1990,80,181
 TPHI,Tom,Phillis,Sydney,Australia,09/04/1934,60,168
 PPIL,Paolo,Pileri,Terni,Italy,31/07/1944,59,166
 APIQ,Ángel,Piqueras,Ayora,Spain,30/11/2006,57,170
+MPIR,Michele,Pirro,San Giovanni Rotondo,Italy,05/07/1986,70,177
 PPON,Patrick,Pons,París,France,24/12/1952,66,175
 TPRO,Tarquinio,Provini,Roveleto,Italy,29/05/1933,58,165
 RDEP,Randy,de Puniet,Andrésy,France,14/02/1981,64,169
@@ -154,6 +155,7 @@ FSAL,Filip,Salač,Mladá Boleslav,Czechia,12/12/2001,68,178
 CSAN,Cecil,Sandford,Ilford,United Kingdom,21/02/1928,60,168
 CSAR,Christian,Sarron,Clarmont-Ferrand,France,27/03/1955,62,174
 ASAS,Ayumu,Sasaki,Yokosuka,Japan,04/10/2000,55,167
+LSAV,Lorenzo,Savadori,Cesena,Italy,04/04/1993,67,177
 KSCH,Kevin,Schwantz,Houston,United States of America,19/06/1964,71,180
 BSHE,Barry,Sheene,Londres,United Kingdom,11/09/1950,60,171
 DSIM,Dave,Simmonds,Londres,United Kingdom,25/10/1939,61,167
