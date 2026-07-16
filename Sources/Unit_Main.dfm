@@ -920,7 +920,7 @@ object MainForm: TMainForm
       Top = 0
       Width = 649
       Height = 837
-      ActivePage = TabChampionShip
+      ActivePage = TabLap
       Align = alClient
       TabOrder = 1
       OnChange = PageControl1Change
@@ -1226,29 +1226,6 @@ object MainForm: TMainForm
           ExplicitTop = 0
           ExplicitWidth = 557
         end
-        object ChampionGrid: TTeeGrid
-          Left = 0
-          Top = 0
-          Width = 641
-          Height = 189
-          Columns = <>
-          Selected.FullRow = True
-          OnSelect = ChampionGridSelect
-          Align = alClient
-          UseDockManager = False
-          ParentBackground = False
-          ParentColor = False
-          TabOrder = 0
-          ExplicitLeft = 1
-          ExplicitTop = -3
-          ExplicitHeight = 293
-          _Headers = (
-            1
-            'TColumnHeaderBand'
-            <
-              item
-              end>)
-        end
         object Panel5: TPanel
           Left = 0
           Top = 192
@@ -1256,27 +1233,22 @@ object MainForm: TMainForm
           Height = 615
           Align = alBottom
           BevelOuter = bvNone
-          TabOrder = 1
-          object Splitter7: TSplitter
-            Left = 249
-            Top = 0
-            Height = 615
-            ExplicitLeft = 320
-            ExplicitTop = 120
-            ExplicitHeight = 100
-          end
-          object ResultsGrid: TTeeGrid
+          TabOrder = 0
+          object LeaderBoard: TTeeGrid
             Left = 0
             Top = 0
-            Width = 249
+            Width = 641
             Height = 615
             Columns = <>
-            Align = alLeft
+            Align = alClient
             UseDockManager = False
             ParentBackground = False
             ParentColor = False
             TabOrder = 0
-            ExplicitHeight = 335
+            ExplicitLeft = 120
+            ExplicitTop = 40
+            ExplicitWidth = 400
+            ExplicitHeight = 250
             _Headers = (
               1
               'TColumnHeaderBand'
@@ -1284,21 +1256,61 @@ object MainForm: TMainForm
                 item
                 end>)
           end
-          object LeaderBoard: TTeeGrid
+        end
+        object Panel6: TPanel
+          Left = 0
+          Top = 0
+          Width = 641
+          Height = 189
+          Align = alClient
+          BevelOuter = bvNone
+          TabOrder = 1
+          ExplicitHeight = 113
+          object Splitter7: TSplitter
+            Left = 249
+            Top = 0
+            Height = 189
+            ExplicitLeft = 320
+            ExplicitTop = 8
+            ExplicitHeight = 100
+          end
+          object ResultsGrid: TTeeGrid
+            Left = 0
+            Top = 0
+            Width = 249
+            Height = 189
+            Columns = <>
+            Align = alLeft
+            UseDockManager = False
+            ParentBackground = False
+            ParentColor = False
+            TabOrder = 0
+            ExplicitLeft = 8
+            ExplicitHeight = 113
+            _Headers = (
+              1
+              'TColumnHeaderBand'
+              <
+                item
+                end>)
+          end
+          object ChampionGrid: TTeeGrid
             Left = 252
             Top = 0
             Width = 389
-            Height = 615
+            Height = 189
             Columns = <>
+            Selected.FullRow = True
+            OnSelect = ChampionGridSelect
             Align = alClient
             UseDockManager = False
             ParentBackground = False
             ParentColor = False
             TabOrder = 1
-            ExplicitLeft = 120
-            ExplicitTop = 40
-            ExplicitWidth = 400
-            ExplicitHeight = 250
+            ExplicitLeft = -1
+            ExplicitTop = 1
+            ExplicitWidth = 392
+            ExplicitHeight = 113
             _Headers = (
               1
               'TColumnHeaderBand'

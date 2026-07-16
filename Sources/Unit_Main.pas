@@ -79,7 +79,6 @@ type
     TabChampionShip: TTabSheet;
     PanelFull: TPanel;
     Button1: TButton;
-    ChampionGrid: TTeeGrid;
     PageControl4: TPageControl;
     TabFrontView: TTabSheet;
     FrontView: TChart;
@@ -153,9 +152,11 @@ type
     SpeedButton1: TSpeedButton;
     BStop: TSpeedButton;
     Panel5: TPanel;
-    Splitter7: TSplitter;
-    ResultsGrid: TTeeGrid;
     LeaderBoard: TTeeGrid;
+    Panel6: TPanel;
+    ResultsGrid: TTeeGrid;
+    ChampionGrid: TTeeGrid;
+    Splitter7: TSplitter;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -1051,15 +1052,14 @@ begin
        tmp:=FindDataPath+'\Circuits\Curves\'+CircuitsData[3,Circuits.Selected.Row]+'.txt';
 
        if FileExists(tmp) then
-       begin
-         CurvesGridData:=TCSVDataImport.FromFile(tmp,True,',','');
-         CurvesGrid.Data:=CurvesGridData;
-       end
+          CurvesGridData:=TCSVDataImport.FromFile(tmp,True,',','')
        else
        begin
-         CurvesGrid.Data:=nil;
+         TFormCircuit.DetectCorners(Race.Circuit);
          CurvesGridData:=nil;
        end;
+
+       CurvesGrid.Data:=nil;
      end;
 
   if CurvesGridData=nil then
@@ -1307,7 +1307,10 @@ begin
       f.Brush.Show;
 
       f.Font.Color:=CalcFontColor(f.Brush.Color);
-      f.Font.Size:=9;
+
+      f.Font.Name:=AGrid.Cells.Format.Font.Name;
+      f.Font.Size:=AGrid.Cells.Format.Font.Size;
+
       f.Font.Style:=[];
     end;
   end;
@@ -1837,6 +1840,7 @@ end;
 
 procedure TMainForm.CreateLeaderBoard;
 var Points : Array of Integer;
+    Leaders : TStringsData;
 
    procedure AddPoints(const S:String; const APoints:Array of Integer);
    var P : Array of String;
@@ -1856,21 +1860,20 @@ var Points : Array of Integer;
 
        if t<Length(APoints) then
           Inc(Points[tmp],APoints[t]);
+
+       if t=0 then // Winner
+          if Leaders[7,tmp]='' then
+             Leaders[7,tmp]:='1'
+          else
+             Leaders[7,tmp]:=IntToStr(1+StrToInt(Leaders[7,tmp]));
      end;
    end;
 
 var t, tmpRider : Integer;
-    Leaders : TStringsData;
 begin
   Leaders:=TStringsData.Create(9,PilotsData.Count);
 
   SetLength(Points,PilotsData.Count);
-
-  for t:=0 to RoundsData.Count-1 do
-  begin
-    AddPoints(RoundsData[5,t],SprintPoints);
-    AddPoints(RoundsData[6,t],RacePoints);
-  end;
 
   for t:=0 to High(Points) do
   begin
@@ -1881,10 +1884,20 @@ begin
     Leaders[2,t]:=AllPilots[1,tmpRider]+' '+AllPilots[2,tmpRider];
 
     Leaders[4,t]:=PilotsData[2,t];
+  end;
+
+  for t:=0 to RoundsData.Count-1 do
+  begin
+    AddPoints(RoundsData[5,t],SprintPoints);
+    AddPoints(RoundsData[6,t],RacePoints);
+  end;
+
+  for t:=0 to High(Points) do
+  begin
     Leaders[5,t]:=IntToStr(Points[t]);
 
     if t>0 then
-       Leaders[6,t]:=IntToStr(Points[0]-Points[t]);
+       Leaders[6,t]:=IntToStr(Points[t]-Points[0]);
   end;
 
   LeaderBoard.Data:=Leaders;
@@ -1900,6 +1913,9 @@ begin
   LeaderBoard.Columns[8].Header.Text:='Podiums';
 
   Leaders.SortBy(LeaderBoard.Columns[5],False,True);
+
+  for t:=0 to Leaders.Count-1 do
+      Leaders[0,t]:=IntToStr(t+1);
 
   SetupPilotGrid(LeaderBoard,1,1);
 end;
@@ -2039,8 +2055,15 @@ procedure TMainForm.RefillCharts;
 
     SeriesThrottle.CustomVertAxis:=LapChart.CustomAxes[1];
 
+    LapChart.CustomAxes[1].MaximumOffset:=3;
+
     SeriesFrontBrake.CustomVertAxis:=LapChart.CustomAxes[2];
     SeriesBackBrake.CustomVertAxis:=LapChart.CustomAxes[2];
+
+    LapChart.Axes.Left.Title.Caption:='Speed m/s';
+
+    LapChart.CustomAxes[1].Title.Caption:='Throttle';
+    LapChart.CustomAxes[2].Title.Caption:='Brakes';
 
     // Tires Temperature and pressure
   end;
@@ -2846,19 +2869,22 @@ function TMainForm.DoStep:Boolean;
   end;
 
   procedure SetPoleDeltas;
-  var t, tmp : Integer;
+  var t,
+      tmp,
+      tmpPole : Integer;
   begin
     for t:=0 to High(Race.StartPoleIndex) do
     begin
-      tmp:=FindPoleIndex(Race.StartPoleIndex[t])-t;
+      tmpPole:=FindPoleIndex(Race.StartPoleIndex[t]);
+      tmp:=t-tmpPole;
 
       if tmp=0 then
-         Pole[Pole_Delta,t]:=''
+         Pole[Pole_Delta,tmpPole]:=''
       else
       if tmp>0 then
-         Pole[Pole_Delta,t]:='+'+IntToStr(tmp)
+         Pole[Pole_Delta,tmpPole]:='+'+IntToStr(tmp)
       else
-         Pole[Pole_Delta,t]:=IntToStr(tmp);
+         Pole[Pole_Delta,tmpPole]:=IntToStr(tmp);
     end;
   end;
 
