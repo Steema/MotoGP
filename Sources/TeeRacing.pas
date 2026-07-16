@@ -461,9 +461,11 @@ var L : Integer;
 begin
   L:=Length(Points);
 
+//  {$IFOPT D+}
   if L=0 then
      result:=-1
   else
+//  {$ENDIF}
      result:=(FinishIndex + Round(APosition*(1+L)/TotalLength)) mod L;
 end;
 
@@ -955,12 +957,15 @@ end;
 function EvaluateBrakingPoint(const ABikePosition, ABikeSpeedMPS: Single;
                               const ACorner: TCurve;
                               const AMaxDecelerationMPS2: Single): TBrakeDecision;
+const
+  Inverse_36=1/3.6;
+
 var
   BrakingTriggerPosition: Single;
 begin
   // 1. Calculate how many meters are required to slow down to the target speed
   // Formula: d = (V_actual² - V_target²) / (2 * a)
-  Result.BrakingDistanceNeeded := (Sqr(ABikeSpeedMPS) - Sqr(ACorner.EntrySpeed/3.6)) / (2.0 * AMaxDecelerationMPS2);
+  Result.BrakingDistanceNeeded := (Sqr(ABikeSpeedMPS) - Sqr(ACorner.EntrySpeed * Inverse_36)) / (2.0 * AMaxDecelerationMPS2);
 
   // 2. Determine the exact track coordinate where braking MUST start
   BrakingTriggerPosition := ACorner.Entry - Result.BrakingDistanceNeeded;
@@ -1041,6 +1046,7 @@ end;
 
 procedure TRace.Init;
 var t : Integer;
+    tmpPos : Single;
 begin
   PoleDistance:=4; // 4 meters since 2026-Sachsenring
   Fastest:=-1;
@@ -1050,7 +1056,14 @@ begin
   SetLength(Data[0].Data,Length(Riders));
 
   for t:=0 to High(Riders) do
-      Data[0].Data[t].Init(Circuit.PolePosition-((Riders[t].StartPole-1)*PoleDistance));
+  begin
+    tmpPos:=Circuit.PolePosition-((Riders[t].StartPole-1)*PoleDistance);
+
+    if tmpPos<0 then
+       tmpPos:=Circuit.TotalLength+tmpPos;
+
+    Data[0].Data[t].Init(tmpPos);
+  end;
 end;
 
 // Returns True is the bike has a LowSide

@@ -4,8 +4,8 @@
         <ProjectVersion>20.4</ProjectVersion>
         <FrameworkType>VCL</FrameworkType>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
-        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <Config Condition="'$(Config)'==''">Release</Config>
+        <Platform Condition="'$(Platform)'==''">Win64</Platform>
         <ProjectName Condition="'$(ProjectName)'==''">TeeChart_Telemetry</ProjectName>
         <TargetedPlatforms>2097155</TargetedPlatforms>
         <AppType>Application</AppType>
@@ -90,7 +90,7 @@
         <SanitizedProjectName>TeeChart_Telemetry</SanitizedProjectName>
         <VerInfo_Locale>1027</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <DCC_UnitSearchPath>c:\root\teechartvcl\sources9\vcl;c:\root\TeeBI_VCL\Sources\Grid\;c:\root\TeeBI_VCL\Sources\Grid\vcl;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>c:\root\teechartvcl\sources9\vcl;c:\root\TeeBI_VCL\Sources\Grid\;c:\root\TeeBI_VCL\Sources\Grid\vcl;C:\Root\TeeRecompile\FastMM;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_UsePackage>vclwinx;DataSnapServer;fmx;DbxCommonDriver;vclie;bindengine;IndyIPCommon;VCLRESTComponents;DBXMSSQLDriver;FireDACCommonODBC;emsclient;IndyProtocols;vclx;Skia.Package.RTL;dbxcds;vcledge;DBXFirebirdDriver;FireDACSqliteDriver;DbxClientDriver;FMXChartProTeeBI;soapmidas;dbexpress;inet;vcltouch;FireDACDBXDriver;fmxdae;TeeWorld937;CustomIPTransport;FireDACMSSQLDriver;FMXTeeDB937;IndySystem;TeeGL937;ibxbindings;FMXTee937;FMXTeeBI;vclFireDAC;FireDACCommon;DataSnapServerMidas;FireDACODBCDriver;emsserverresource;bindcompdbx;rtl;FireDACMySQLDriver;TeeTree2D37Tee9;FMXTeeLanguage937;TeeBI;DBXSqliteDriver;FMXTeeImport937;DBXSybaseASEDriver;TeeLanguage937;vclimg;DataSnapFireDAC;inetdbxpress;FireDAC;TeeImage937;xmlrtl;ibxpress;FMXTeePro937;dsnap;FireDACDb2Driver;DBXOracleDriver;DBXInformixDriver;vclib;fmxobj;bindcompvclsmp;DataSnapNativeClient;TeePro937;DatasnapConnectorsFreePascal;TeeDB937;emshosting;FireDACCommonDriver;IndyIPClient;bindcompvclwinx;emsedge;bindcompfmx;inetdb;ibmonitor;FMXTree37;FireDACASADriver;VCLTeeGrid;vclactnband;fmxFireDAC;FireDACInfxDriver;DBXMySQLDriver;VclSmp;DataSnapCommon;fmxase;DBXOdbcDriver;dbrtl;FireDACOracleDriver;Skia.Package.FMX;FireDACMSAccDriver;FMXTeeGrid;DataSnapIndy10ServerTransport;DataSnapConnectors;vcldsnap;DBXInterBaseDriver;FireDACMongoDBDriver;FireDACTDataDriver;Skia.Package.VCL;vcldb;bindcomp;inetstn;IndyCore;RESTBackendComponents;TeeUI937;FireDACADSDriver;RESTComponents;TeeImport937;IndyIPServer;vcl;dsnapxml;adortl;dsnapcon;DataSnapClient;DataSnapProviderClient;FmxTeeUI937;DBXDb2Driver;Tee937;emsclientfiredac;FireDACPgDriver;FireDACDSDriver;tethering;bindcompvcl;CloudService;DBXSybaseASADriver;soaprtl;VCLChartProTeeBI;VCLTeeBI;soapserver;FireDACIBDriver;$(DCC_UsePackage)</DCC_UsePackage>
@@ -134,6 +134,7 @@
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
+        <DCC_Define>FullDebugMode;LogMemoryLeakDetailToFile;$(DCC_Define)</DCC_Define>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
@@ -168,22 +169,18 @@
         </DelphiCompile>
         <DCCReference Include="Unit_Main.pas">
             <Form>MainForm</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="TeeRacing.pas"/>
         <DCCReference Include="TeeTorqueCurve.pas">
             <Form>FormTorqueCurve</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="TeeRacingAbout.pas">
             <Form>AboutForm</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="TeeTire.pas"/>
         <DCCReference Include="TeeUtils.pas"/>
         <DCCReference Include="TeeCircuit.pas">
             <Form>FormCircuit</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>

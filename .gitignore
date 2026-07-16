@@ -83,3 +83,4 @@ Sources/Win32/Release/*.exe
 Sources/Win64/Debug/*.exe
 Sources/Win64/Release/*.exe
 CreateFlagsResource/
+Sources/Win32/Debug/TeeChart_Telemetry_MemoryManager_EventLog.txt

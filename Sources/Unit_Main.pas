@@ -708,7 +708,9 @@ begin
 
   CreatePole;
 
+  PoleGrid.Columns[0].Width.Value:=32;
   PoleGrid.Columns[1].Width.Value:=40;
+
   PoleGrid.Invalidate;
 
   PoleGrid.Selected.Row:=0;
@@ -989,7 +991,7 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
     CircuitPath.XValues.Order:=loNone;
     CircuitPath.Clear;
 
-    for t:=0 to S.Count-1 do
+    for t:=0 to High(Race.Circuit.Points) do
         CircuitPath.AddXY(Race.Circuit.Points[t].X,Race.Circuit.Points[t].Y);
 
     CircuitPath.AddXY(Race.Circuit.Points[0].X,Race.Circuit.Points[0].Y);
@@ -1038,6 +1040,23 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
     SeriesRadius.EndUpdate;
   end;
 
+  procedure CreateDataFromCurves;
+  var t, L : Integer;
+  begin
+    L:=Length(Race.Circuit.Curves);
+
+    CurvesGridData:=TStringsData.Create(7,L);
+
+    for t:=0 to L-1 do
+    begin
+      CurvesGridData[0,t]:=IntToStr(t+1);
+      CurvesGridData[1,t]:=FloatToStr(Race.Circuit.Curves[t].Entry);
+      CurvesGridData[3,t]:=FloatToStr(Race.Circuit.Curves[t].TotalAngle); // Entry Angle?
+      CurvesGridData[4,t]:=IntToStr(100); // TODO <-- calculate Entry Speed of each curve
+      CurvesGridData[5,t]:=FloatToStr(Race.Circuit.Curves[t].BeforeApex);
+    end;
+  end;
+
 var tmp : String;
 begin
   Circuit.Invalidate;
@@ -1047,25 +1066,22 @@ begin
   CreateCircuitPath;
 
   if Circuits.Data.Count>0 then
-     if Circuits.Selected.Row>0 then
-     begin
-       tmp:=FindDataPath+'\Circuits\Curves\'+CircuitsData[3,Circuits.Selected.Row]+'.txt';
+  begin
+    tmp:=FindDataPath+'\Circuits\Curves\'+CircuitsData[3,Circuits.Selected.Row]+'.txt';
 
-       if FileExists(tmp) then
-          CurvesGridData:=TCSVDataImport.FromFile(tmp,True,',','')
-       else
-       begin
-         TFormCircuit.DetectCorners(Race.Circuit);
-         CurvesGridData:=nil;
-       end;
+    if FileExists(tmp) then
+    begin
+      CurvesGridData:=TCSVDataImport.FromFile(tmp,True,',','');
+      AddRaceCurves;
+    end
+    else
+    begin
+      TFormCircuit.DetectCorners(Race.Circuit);
+      CreateDataFromCurves;
+    end;
 
-       CurvesGrid.Data:=nil;
-     end;
-
-  if CurvesGridData=nil then
-     Race.Circuit.Curves:=nil
-  else
-     AddRaceCurves;
+    CurvesGrid.Data:=CurvesGridData;
+  end;
 
   //AddCircuitRadius;
 

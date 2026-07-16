@@ -1,6 +1,7 @@
 program TeeChart_Telemetry;
 
 uses
+//  FastMM4,
   Forms,
   Unit_Main in 'Unit_Main.pas' {MainForm},
   TeeRacing in 'TeeRacing.pas',
