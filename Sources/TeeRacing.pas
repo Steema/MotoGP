@@ -301,6 +301,9 @@ type
     // Current pole during race (keeps changing when pilots pass other pilots)
     PoleIndex : TArray<Integer>;
 
+    // Pole at grid race start, immutable
+    StartPoleIndex : TArray<Integer>;
+
     Data : TAllRaceData;
 
     Riders : Array of TRider;
@@ -1131,7 +1134,7 @@ begin
       result[t]:=AData[t];
 end;
 
-// Randomly choose and sort riders
+// Randomly choose riders
 procedure TRace.ShufflePole(const ACount: Integer);
 var t : Integer;
 begin
