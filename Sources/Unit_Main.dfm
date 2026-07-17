@@ -246,7 +246,7 @@ object MainForm: TMainForm
       Top = 0
       Width = 321
       Height = 837
-      ActivePage = TabCircuits
+      ActivePage = TabPilots
       Align = alLeft
       TabOrder = 0
       object TabCircuits: TTabSheet
@@ -864,6 +864,7 @@ object MainForm: TMainForm
           Width = 313
           Height = 807
           Columns = <>
+          OnCellEditing = PilotsCellEditing
           Align = alClient
           UseDockManager = False
           ParentBackground = False
@@ -1353,7 +1354,8 @@ object MainForm: TMainForm
               ParentBackground = False
               ParentColor = False
               TabOrder = 0
-              ExplicitWidth = 633
+              ExplicitLeft = 2
+              ExplicitTop = -3
               _Headers = (
                 1
                 'TColumnHeaderBand'

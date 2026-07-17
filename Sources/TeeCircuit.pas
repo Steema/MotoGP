@@ -173,6 +173,8 @@ begin
   Init(Circuit^);
 
   Chart1.Invalidate;
+
+  CurvesGrid.Invalidate;
 end;
 
 procedure TFormCircuit.CBApexClick(Sender: TObject);

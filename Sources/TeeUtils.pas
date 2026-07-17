@@ -9,7 +9,14 @@ unit TeeUtils;
 interface
 
 uses
-  Windows, TeCanvas;
+  Windows, Classes, SysUtils, TeCanvas, StdCtrls, Controls,
+  Tee.GridData.Strings;
+
+procedure FillCombo(const ACombo:TCustomCombo; const ASource:TStringsData; const AColumn:Integer; const ASelected:String); overload;
+procedure FillCombo(const ACombo:TCustomCombo; const Values:Array of String; const ASelected:String); overload;
+
+procedure FillItems(const Items:TStrings; const ASource:TStringsData; const AColumn:Integer); overload;
+procedure FillItems(const Items:TStrings; const Values:Array of String); overload;
 
 procedure DrawPerpendicular(const ACanvas:TTeeCanvas; const P0, P1: TPointFloat; const ALength:Single);
 
@@ -47,6 +54,57 @@ begin
     Y1 := Round(P1.Y + PY * tmpMid);
 
     ACanvas.Line(X0,Y0,X1,Y1);
+  end;
+end;
+
+function FindValue(const AItems:TStrings; const AValue:String):Integer;
+var t : Integer;
+begin
+  for t:=0 to AItems.Count-1 do
+      if SameText(AItems[t],AValue) then
+         Exit(t);
+
+  result:=-1;
+end;
+
+// Add all Values to ACombo, and try to find ASelected to set ItemIndex
+procedure FillCombo(const ACombo:TCustomCombo; const Values:Array of String; const ASelected:String);
+begin
+  FillItems(ACombo.Items,Values);
+  ACombo.ItemIndex:=FindValue(ACombo.Items,ASelected);
+end;
+
+procedure FillCombo(const ACombo:TCustomCombo; const ASource:TStringsData; const AColumn:Integer; const ASelected:String); overload;
+begin
+  FillItems(ACombo.Items,ASource,AColumn);
+  ACombo.ItemIndex:=FindValue(ACombo.Items,ASelected);
+end;
+
+procedure FillItems(const Items:TStrings; const ASource:TStringsData; const AColumn:Integer);
+var t : Integer;
+begin
+  Items.BeginUpdate;
+  try
+    Items.Clear;
+
+    for t:=0 to ASource.Count-1 do
+        Items.Add(ASource[AColumn,t]);
+  finally
+    Items.EndUpdate;
+  end;
+end;
+
+procedure FillItems(const Items:TStrings; const Values:Array of String);
+var t : Integer;
+begin
+  Items.BeginUpdate;
+  try
+    Items.Clear;
+
+    for t:=Low(Values) to High(Values) do
+        Items.Add(Values[t]);
+  finally
+    Items.EndUpdate;
   end;
 end;
 

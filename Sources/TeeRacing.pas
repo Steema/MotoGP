@@ -15,55 +15,57 @@ const
   RealTimeFactor = 0.5; // 10 times per second (no realtime)
 
 type
+  Float=Single; // Single or Double or Extended
+
   TWeatherStyle=(wsDry, wsWet, wsRain);
 
   TWeather=record
   public
-    AirTemperature : Single; // C
-    TrackTemperature : Single; // C
-    Humidity : Single; // %
+    AirTemperature : Float; // C
+    TrackTemperature : Float; // C
+    Humidity : Float; // %
     Style : TWeatherStyle; // wsDry
 
-    Wind : Single; // km/h
-    WindDirection : Single; // 0..360 Degree 0=North, 90=East, 180=South, 270=West
+    Wind : Float; // km/h
+    WindDirection : Float; // 0..360 Degree 0=North, 90=East, 180=South, 270=West
 
-    AirDensity: Single; // Pending to calculate = 1.225; //  kg/m3
+    AirDensity: Float; // Pending to calculate = 1.225; //  kg/m3
 
     procedure Init;
-    procedure CalculateAirDensity(const AElevationMeters: Single);
+    procedure CalculateAirDensity(const AElevationMeters: Float);
   end;
 
   // Curves (Corners) of a circuit path
   TCurve=record
     Name : String;
 
-    Entry : Single; // Entry position of this curve, (in meters from start, might not be from Finish line)
+    Entry : Float; // Entry position of this curve, (in meters from start, might not be from Finish line)
     EntryIndex: Integer; // Index of Position in Track
 
     EntryAngle,   // Angle at corner entry
     ExitAngle,    // Angle at corner exit
-    TotalAngle : Single;  // Total from entry to exit, -180..0..+180  (left or right curve)
+    TotalAngle : Float;  // Total from entry to exit, -180..0..+180  (left or right curve)
 
-    EntrySpeed : Single; // km/h safe entry speed, with Dry Track and not super-hot asphalt
+    EntrySpeed : Float; // km/h safe entry speed, with Dry Track and not super-hot asphalt
 
-    BeforeApex : Single; // Distance from Entry to Apex in meters
-    AfterApex  : Single; // Distance from Apex to curve exit in meters
-    ApexPosition : Single; // Sum of Entry+BeforeApex
+    BeforeApex : Float; // Distance from Entry to Apex in meters
+    AfterApex  : Float; // Distance from Apex to curve exit in meters
+    ApexPosition : Float; // Sum of Entry+BeforeApex
 
-    Slope : Single; // In degrees, from last curve
+    Slope : Float; // In degrees, from last curve
   end;
 
   TTire=record
-    Grip : Single;  // Dry: 1.5 .. 1.8  // Wet/Rain: 0.9 .. 1.1
-    SlipRatio : Single; // % slip
-    Diameter : Single; // cm
-    Drop : Single; // degradation
-    Friction : Single; // coefficient, resistance
+    Grip : Float;  // Dry: 1.5 .. 1.8  // Wet/Rain: 0.9 .. 1.1
+    SlipRatio : Float; // % slip
+    Diameter : Float; // cm
+    Drop : Float; // degradation
+    Friction : Float; // coefficient, resistance
   end;
 
   TAsphalt=record  // Tarmac, Track Surface
   public
-    Abrasiveness : Single; // Micro / Macro  0.5 mm ... 2.0 mm
+    Abrasiveness : Float; // Micro / Macro  0.5 mm ... 2.0 mm
   end;
 
   //TPointFloatArray=Array of TPointFloat;
@@ -74,19 +76,19 @@ type
 
     Points : TPointFloatArray; // Closed path of XY points
 
-    Radius : Array of Single; // Radius in meters at each point of the circuit
+    Radius : Array of Float; // Radius in meters at each point of the circuit
 
-    TotalLength : Single; // Total length of circuit
+    TotalLength : Float; // Total length of circuit
 
     FinishIndex : Integer; // Index in Points that corresponds to the Finish line
 
-    PolePosition : Single; // Offset Meters only to draw pilots at the Circuit path
+    PolePosition : Float; // Offset Meters only to draw pilots at the Circuit path
     PolePositionIndex : Integer; // Index of Pole position point in circuit path
 
-    Elevation : Single; // Sea level meters
+    Elevation : Float; // Sea level meters
 
-    function IndexOfPosition(const APosition:Single):Integer; // Index of Points, rounded to near APosition
-    function PointPosition(const APosition:Single):TPoint;
+    function IndexOfPosition(const APosition:Float):Integer; // Index of Points, rounded to near APosition
+    function PointPosition(const APosition:Float):TPoint;
 
     procedure CalculateRadius;
     procedure FindCurves;
@@ -94,17 +96,17 @@ type
 
   TBikeFrontBack=record
   public
-    Wheel : Single; // Inches diameter
+    Wheel : Float; // Inches diameter
     Tire : TTire;
-    BrakeForce : Single; // m/s²   3 .. 19.0 front,   3 .. 12.5 back
+    BrakeForce : Float; // m/s²   3 .. 19.0 front,   3 .. 12.5 back
   end;
 
-  TGearRatios=Array of Single; // Ratio for every Gear, 0=Neutral
+  TGearRatios=Array of Float; // Ratio for every Gear, 0=Neutral
 
   TTorqueAtRPM=record
   public
     RPM : Integer;
-    Nm : Single;
+    Nm : Float;
   end;
 
   TTorqueCurve=Array of TTorqueAtRPM;
@@ -112,17 +114,17 @@ type
   TBike=record
   private
     Internal_Torque_Calc,
-    Internal_RPM_Calc : Single; // Speed opt
+    Internal_RPM_Calc : Float; // Speed opt
   public
     Code,
     Factory : String;
 
-    Weight : Single; // kg
+    Weight : Float; // kg
 
-    Fuel : Single; // kg
+    Fuel : Float; // kg
 
-    Horses : Single; // CV
-    Watts : Single; // Watts
+    Horses : Float; // CV
+    Watts : Float; // Watts
 
     MaxRPM : Integer; // 18000
     IdleRPM : Integer; // 4000
@@ -130,42 +132,42 @@ type
     GearDownRPM : Integer; // 11000
 
     Torque : TTorqueCurve;
-    MaxTorqueNm : Single; //  Nm  (maximum at peak of curve)
+    MaxTorqueNm : Float; //  Nm  (maximum at peak of curve)
 
-    PrimaryRatio : Single; // 1.65
-    FinalDrive : Single; // 3.28  =   46/14  Rear/Front Sprocket Teeth
+    PrimaryRatio : Float; // 1.65
+    FinalDrive : Float; // 3.28  =   46/14  Rear/Front Sprocket Teeth
 
     GearRatios : TGearRatios;
 
     Front : TBikeFrontBack;
     Back : TBikeFrontBack;
 
-    TotalBrakeForce : Single; // Sum of Front and Back BrakeForce in Nm
+    TotalBrakeForce : Float; // Sum of Front and Back BrakeForce in Nm
 
-    TransmissionEfficiency: Single; // = 95; // %
+    TransmissionEfficiency: Float; // = 95; // %
 
     Wheelbase : Integer; // mm  distance between axes   1420..1460
     // CenterOfMassHeight : Integer; // mm distance from track to center of gravity
 
-    EngineLayout : String; // V4 V2 I4 I2 Single
+    EngineLayout : String; // V4 V2 I4 I2 Float
 
-    WeightDistributionFront : Single; // %    ie: 52% Front (48% Back)
+    WeightDistributionFront : Float; // %    ie: 52% Front (48% Back)
 
-    CdAeroDynamic : Single; // 0.3 .. 0.7 coefficient
+    CdAeroDynamic : Float; // 0.3 .. 0.7 coefficient
 
-    AerodynamicDownforce : Single; // DragCoefficient
+    AerodynamicDownforce : Float; // DragCoefficient
 
-    // WheelieWingEfficiency : Single;
+    // WheelieWingEfficiency : Float;
 
-    FrontArea : Single; // 0.5 m²
+    FrontArea : Float; // 0.5 m²
 
-    // Sum of Front + Back breakes: MaxBrakeDeceleration : Single; // 15 .. 18 m/s²
+    // Sum of Front + Back breakes: MaxBrakeDeceleration : Float; // 15 .. 18 m/s²
 
-    MaxLeanAngle : Single; // Degrees 64°
+    MaxLeanAngle : Float; // Degrees 64°
 
     HasHoleshotDevice : Boolean;
 
-    function FuelLiquid : Single; // in cubic centimeters
+    function FuelLiquid : Float; // in cubic centimeters
     procedure Init;
   end;
 
@@ -173,7 +175,7 @@ type
     Name : String; // Marc Màrquez
 
     Height,  // cm
-    Weight : Single; // kg
+    Weight : Float; // kg
 
     // Weights:
     RaceLeather,
@@ -183,11 +185,11 @@ type
     KneeSliders,
     ElbowSliders,
     BackProtector,
-    Airbag : Single;
+    Airbag : Float;
 
-    TotalMass : Single; // Read-only, calculated
+    TotalMass : Float; // Read-only, calculated
 
-    SweatLoss : Single; // Grams, Starts at Zero
+    SweatLoss : Float; // Grams, Starts at Zero
 
     // Parameters:
     // Braking : 0..100%  (brakes very soon or too late?)
@@ -199,8 +201,8 @@ type
 
   TTireData=record
   public
-    Temperature : Single; // degree °C
-    Pressure : Single;
+    Temperature : Float; // degree °C
+    Pressure : Float;
   end;
 
   // Instant data
@@ -212,31 +214,31 @@ type
 
     Speed,    // meters/sec   0..140  (0..400 km/h)
     Acceleration,  // -20 .. 20  m/s² (in G: -2 .. 1.2 "g")
-    Position : Single;  // meters from race start
+    Position : Float;  // meters from race start
 
     Gear : Integer; // 0..7
 
-    Throttle : Single; // 0..100% gas
+    Throttle : Float; // 0..100% gas
 
     // FrontTire : TTireData
     // BackTire : TTireData
 
-    FrontBrake : Single; // 0..100 %
-    BackBrake : Single;  // 0..100 %
+    FrontBrake : Float; // 0..100 %
+    BackBrake : Float;  // 0..100 %
 
-    LeanAngle : Single; // 0..65° degree (or crash, or Lowside)
+    LeanAngle : Float; // 0..65° degree (or crash, or Lowside)
 
     procedure FullBrake;
     procedure FullSpeed;
-    procedure Init(const AStartPosition:Single);
+    procedure Init(const AStartPosition:Float);
 
-    procedure Step(const TimeFactor:Single; // 0.1 = 10 times per second
+    procedure Step(const TimeFactor:Float; // 0.1 = 10 times per second
                    var Bike:TBike;
                    var Pilot:TPilot;
                    const Prev:TRiderData);
 
     procedure StandUp;
-    procedure TrailBrake(const ApexPosition:Single);
+    procedure TrailBrake(const ApexPosition:Float);
   end;
 
   TAllRidersData=TArray<TRiderData>;
@@ -296,7 +298,7 @@ type
 
     Weather : TWeather;
 
-    PoleDistance : Single; // Distance in meters between each rider at starting grid
+    PoleDistance : Float; // Distance in meters between each rider at starting grid
 
     // Current pole during race (keeps changing when pilots pass other pilots)
     PoleIndex : TArray<Integer>;
@@ -321,44 +323,44 @@ var
 
 type
   TBrakeDecision = record
-    DistanceToBrakePoint: Single;  // Meters to start braking
-    BrakingDistanceNeeded: Single; // Meters needed to brake until corner's entry position
+    DistanceToBrakePoint: Float;  // Meters to start braking
+    BrakingDistanceNeeded: Float; // Meters needed to brake until corner's entry position
   end;
 
-function EvaluateBrakingPoint(const ABikePosition, ABikeSpeedMPS: Single;
+function EvaluateBrakingPoint(const ABikePosition, ABikeSpeedMPS: Float;
                               const ACorner: TCurve;
-                              const AMaxDecelerationMPS2: Single): TBrakeDecision;
+                              const AMaxDecelerationMPS2: Float): TBrakeDecision;
 
 // Returns True is the bike has a LowSide
 function CheckSlidOut(
-  const Speed: Single; // En m/s
-  const Radius: Single;     // En metres
-  const TotalMass: Single;    // Moto + Pilot kg (ex: 250.0)
-  const TireTemp: Single; // Connectat amb el mòdul anterior (°C)
-  const DryOrWet: Single;
+  const Speed: Float; // En m/s
+  const Radius: Float;     // En metres
+  const TotalMass: Float;    // Moto + Pilot kg (ex: 250.0)
+  const TireTemp: Float; // Connectat amb el mòdul anterior (°C)
+  const DryOrWet: Float;
   const Bike:TBike): Boolean;  // Multiplier Factor (1.0 = Dry, 0.5 = Wet)
 
 type
   TTurnPhase = (tpApproach, tpBraking, tpCornering, tpAcceleration);
 
-function DetermineTrackPhase(const BikePosition:Single;
+function DetermineTrackPhase(const BikePosition:Float;
                              const ACorner:TCurve;
-                             const ABrakeTriggerPosition:Single): TTurnPhase;
+                             const ABrakeTriggerPosition:Float): TTurnPhase;
 
 // Percent of Throttle depending on Lean Angle in degrees
-function CalculateThrottle(const ALeanAngle,MaxAngle:Single):Single;
+function CalculateThrottle(const ALeanAngle,MaxAngle:Float):Float;
 
-function CalcLeanAngle(const APoints: TPointFloatArray; Current: Integer; const Speed:Single): Single;
+function CalcLeanAngle(const APoints: TPointFloatArray; Current: Integer; const Speed:Float): Float;
 
 function DuplicateArray(const AData:Array of Integer):TArray<Integer>;
 
-function PathLength(const APoints:TPointFloatArray; const StartIndex:Integer=0; UpToIndex:Integer=-1):Single;
+function PathLength(const APoints:TPointFloatArray; const StartIndex:Integer=0; UpToIndex:Integer=-1):Float;
 
 // Returns distance between two points
-function Distance(const P1, P2: TPointFloat): Single;
+function Distance(const P1, P2: TPointFloat): Float;
 
 // Returns the absolute angle of a segment in radians
-function SegmentAngle(const P1, P2: TPointFloat): Single; inline;
+function SegmentAngle(const P1, P2: TPointFloat): Float; inline;
 
 implementation
 
@@ -375,19 +377,19 @@ uses
 }
 
 // Returns distance between two points
-function Distance(const P1, P2: TPointFloat): Single;
+function Distance(const P1, P2: TPointFloat): Float;
 begin
   Result := Sqrt(Sqr(P2.X - P1.X) + Sqr(P2.Y - P1.Y));
 end;
 
 // Returns the absolute angle of a segment in radians
-function SegmentAngle(const P1, P2: TPointFloat): Single; inline;
+function SegmentAngle(const P1, P2: TPointFloat): Float; inline;
 begin
   Result := ArcTan2(P2.Y - P1.Y, P2.X - P1.X);
 end;
 
 // Returns the angle (0 to 360) that form two points
-function AngleVector(const P1, P2: TPointFloat): Single;
+function AngleVector(const P1, P2: TPointFloat): Float;
 begin
   Result := RadToDeg(SegmentAngle(P1,P2));
 
@@ -405,8 +407,8 @@ procedure TCircuit.CalculateRadius;
 var
   t, N: Integer;
   A, B, C: TPointFloat;
-  a_len, b_len, c_len: Single;
-  Area2: Single;
+  a_len, b_len, c_len: Float;
+  Area2: Float;
 begin
   N := Length(Points);
   SetLength(Radius, N);
@@ -441,7 +443,7 @@ begin
   end;
 end;
 
-function PathLength(const APoints:TPointFloatArray; const StartIndex:Integer=0; UpToIndex:Integer=-1):Single;
+function PathLength(const APoints:TPointFloatArray; const StartIndex:Integer=0; UpToIndex:Integer=-1):Float;
 var t, L : Integer;
 begin
   result:=0;
@@ -456,7 +458,7 @@ begin
          result:=result+Distance(APoints[t],APoints[t+1]);
 end;
 
-function TCircuit.IndexOfPosition(const APosition: Single): Integer;
+function TCircuit.IndexOfPosition(const APosition: Float): Integer;
 var L : Integer;
 begin
   L:=Length(Points);
@@ -469,7 +471,7 @@ begin
      result:=(FinishIndex + Round(APosition*(1+L)/TotalLength)) mod L;
 end;
 
-function TCircuit.PointPosition(const APosition:Single):TPoint;
+function TCircuit.PointPosition(const APosition:Float):TPoint;
 var tmpPos : Integer;
 begin
   tmpPos:=IndexOfPosition(APosition);
@@ -533,12 +535,12 @@ begin
   Pilot.SweatLoss:=0;
 end;
 
-function TorqueAtRPM(const Curve:TTorqueCurve; const RPM: Integer): Single;
+function TorqueAtRPM(const Curve:TTorqueCurve; const RPM: Integer): Float;
 var
   t: Integer;
   Len: Integer;
   P1, P2: TTorqueAtRPM;
-  Fraction: Single;
+  Fraction: Float;
 begin
   Len := Length(Curve);
 
@@ -611,7 +613,7 @@ begin
   LeanAngle:=0;
 end;
 
-procedure TRiderData.Init(const AStartPosition:Single);
+procedure TRiderData.Init(const AStartPosition:Float);
 begin
   Throttle:=100; // Full Throttle
 
@@ -636,12 +638,12 @@ const
 // LitersPerHour := (GramsPerSecond * 3600.0) / (FUEL_DENSITY_RACING * 1000.0);
 
 // Returns Grams per Second
-function CalculateInstantFuelConsumption(const TorqueNm: Single;
+function CalculateInstantFuelConsumption(const TorqueNm: Float;
                                          const EngineRPM: Integer;
-                                         const ThrottlePercent: Single): Single;
+                                         const ThrottlePercent: Float): Float;
 var
-  vPowerKW: Single;
-  vCurrentBSFC: Single;
+  vPowerKW: Float;
+  vCurrentBSFC: Float;
 begin
   // Adjust BSFC based on throttle. Engines are less efficient at partial throttle
   // If throttle is closed but RPM is high (engine braking), consumption is near zero.
@@ -667,7 +669,7 @@ begin
 end;
 
 procedure TRiderData.StandUp;
-var Step : Single;
+var Step : Float;
 begin
   if LeanAngle>0 then
   begin
@@ -681,7 +683,7 @@ begin
   end;
 end;
 
-procedure TRiderData.Step(const TimeFactor:Single; var Bike:TBike; var Pilot:TPilot; const Prev: TRiderData);
+procedure TRiderData.Step(const TimeFactor:Float; var Bike:TBike; var Pilot:TPilot; const Prev: TRiderData);
 
   function CalcRPM:Integer;
   begin
@@ -705,7 +707,7 @@ var Thrust,  // Nm
     AirResistance,
     MotorTorque, // Nm
     PilotBodyFactor, // coefficient
-    RollingFriction : Single;
+    RollingFriction : Float;
 begin
 //  RPM:=Prev.RPM;
 
@@ -816,7 +818,7 @@ begin
   end;
 end;
 
-procedure TRiderData.TrailBrake(const ApexPosition: Single);
+procedure TRiderData.TrailBrake(const ApexPosition: Float);
 begin
   FrontBrake:=FrontBrake-(ApexPosition-Position);  // TODO: Calc dynamic target distance based on speed
 
@@ -874,7 +876,7 @@ end;
 /// <param name="AHumidityPercent">Relative humidity as a percentage (0 to 100)</param>
 /// <param name="ATemperatureCelsius">Air temperature in degrees Celsius (°C)</param>
 /// <returns>Air density in kg/m³</returns>
-function DoCalculateAirDensity(const AElevationMeters, AHumidityPercent, ATemperatureCelsius: Single): Single;
+function DoCalculateAirDensity(const AElevationMeters, AHumidityPercent, ATemperatureCelsius: Float): Float;
 const
   // International Standard Atmosphere (ISA) Constants
   P0 = 101325.0;          // Standard sea-level atmospheric pressure in Pascals (Pa)
@@ -886,13 +888,13 @@ const
   M_AIR = 0.0289644;      // Molar mass of dry air (kg/mol)
   R_UNIVERSAL = 8.31447;  // Universal gas constant (J/mol·K)
 var
-  vTemperatureKelvin: Single;
-  vTotalPressure: Single;
-  vSaturationPressure: Single;
-  vVaporPressure: Single;
-  vDryAirPressure: Single;
-  vDryAirDensity: Single;
-  vWaterVaporDensity: Single;
+  vTemperatureKelvin: Float;
+  vTotalPressure: Float;
+  vSaturationPressure: Float;
+  vVaporPressure: Float;
+  vDryAirPressure: Float;
+  vDryAirDensity: Float;
+  vWaterVaporDensity: Float;
 begin
   // 1. Convert temperature to Kelvin
   vTemperatureKelvin := ATemperatureCelsius + 273.15;
@@ -920,7 +922,7 @@ end;
 
 { TWeather }
 
-procedure TWeather.CalculateAirDensity(const AElevationMeters: Single);
+procedure TWeather.CalculateAirDensity(const AElevationMeters: Float);
 begin
   AirDensity:=DoCalculateAirDensity(AElevationMeters,Humidity,AirTemperature);
 end;
@@ -939,7 +941,7 @@ begin
   AirDensity:=1.225; // kg/m3
 end;
 
-function DetermineTrackPhase(const BikePosition:Single; const ACorner:TCurve; const ABrakeTriggerPosition:Single): TTurnPhase;
+function DetermineTrackPhase(const BikePosition:Float; const ACorner:TCurve; const ABrakeTriggerPosition:Float): TTurnPhase;
 begin
   // On or past Apex?
   if BikePosition >= ACorner.ApexPosition then
@@ -954,14 +956,14 @@ begin
      Result := tpApproach; // Full speed
 end;
 
-function EvaluateBrakingPoint(const ABikePosition, ABikeSpeedMPS: Single;
+function EvaluateBrakingPoint(const ABikePosition, ABikeSpeedMPS: Float;
                               const ACorner: TCurve;
-                              const AMaxDecelerationMPS2: Single): TBrakeDecision;
+                              const AMaxDecelerationMPS2: Float): TBrakeDecision;
 const
   Inverse_36=1/3.6;
 
 var
-  BrakingTriggerPosition: Single;
+  BrakingTriggerPosition: Float;
 begin
   // 1. Calculate how many meters are required to slow down to the target speed
   // Formula: d = (V_actual² - V_target²) / (2 * a)
@@ -981,13 +983,13 @@ end;
 
 { TBike }
 
-function TBike.FuelLiquid: Single; // cm³
+function TBike.FuelLiquid: Float; // cm³
 begin
   result:=Fuel/FUEL_DENSITY_RACING; // From Grams to Cubic Centimeters
 end;
 
 // Percent of Throttle depending on Lean Angle in degrees
-function CalculateThrottle(const ALeanAngle,MaxAngle:Single):Single;
+function CalculateThrottle(const ALeanAngle,MaxAngle:Float):Float;
 begin
   Result := 100.0 * (1.0 - (ALeanAngle / MaxAngle));
 
@@ -996,12 +998,12 @@ begin
      Result := 10.0;
 end;
 
-function CalcLeanAngle(const APoints: TPointFloatArray; Current: Integer; const Speed:Single): Single;
+function CalcLeanAngle(const APoints: TPointFloatArray; Current: Integer; const Speed:Float): Float;
 const MaxLean=64;
 var
   P1, P2, P3: TPointFloat;
   L : Integer;
-  Angle1, Angle2, DeltaAngle: Single;
+  Angle1, Angle2, DeltaAngle: Float;
 begin
   L:=Length(APoints);
 
@@ -1033,7 +1035,7 @@ procedure TBike.Init;
 const
   Inverse_TwoPi = 1 / (2 * Pi);
 
-var Inverse_BackRadius : Single;
+var Inverse_BackRadius : Float;
 begin
   Inverse_BackRadius:=1/(Back.Wheel * InchToCm * 0.5 * 0.01);
 
@@ -1046,7 +1048,7 @@ end;
 
 procedure TRace.Init;
 var t : Integer;
-    tmpPos : Single;
+    tmpPos : Float;
 begin
   PoleDistance:=4; // 4 meters since 2026-Sachsenring
   Fastest:=-1;
@@ -1068,20 +1070,20 @@ end;
 
 // Returns True is the bike has a LowSide
 function CheckSlidOut(
-  const Speed: Single; // En m/s
-  const Radius: Single;     // En metres
-  const TotalMass: Single;    // Moto + Pilot kg (ex: 250.0)
-  const TireTemp: Single; // Connectat amb el mòdul anterior (°C)
-  const DryOrWet: Single;
+  const Speed: Float; // En m/s
+  const Radius: Float;     // En metres
+  const TotalMass: Float;    // Moto + Pilot kg (ex: 250.0)
+  const TireTemp: Float; // Connectat amb el mòdul anterior (°C)
+  const DryOrWet: Float;
   const Bike:TBike): Boolean;  // Multiplier Factor (1.0 = Dry, 0.5 = Wet)
 const
   G = 9.81; // Gravetat (m/s²)
 var
-  Centrifugal: Single;
-  Vertical: Single;
+  Centrifugal: Float;
+  Vertical: Float;
   MuActual: Double;
-  MaxAdherence: Single;
-  NeedsLeanAngle: Single;
+  MaxAdherence: Float;
+  NeedsLeanAngle: Float;
 const
   ANGLE_LIMIT_MOTO = 64.0; // Límit físic d'inclinació en MotoGP (graus)
 begin
@@ -1179,7 +1181,7 @@ end;
 function TRace.TryPasses(var AllRiders:TAllRidersData):Boolean;
 
 
-   function AbsoluteDistance(const APole:Integer):Single;
+   function AbsoluteDistance(const APole:Integer):Float;
    var tmp : Integer;
    begin
      tmp:=PoleIndex[APole];
@@ -1226,11 +1228,11 @@ end;
 
 function TRace.StepRiders(const L:Integer):Boolean;
 var t : Integer;
-    Delta : Single;
+    Delta : Float;
     LapTime : Int64;
     Brake : TBrakeDecision;
     CurrentPhase : TTurnPhase;
-    TriggerBrakeDist  : Single;
+    TriggerBrakeDist  : Float;
     Curve : ^TCurve;
 begin
   result:=False;

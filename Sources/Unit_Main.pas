@@ -210,6 +210,8 @@ type
     procedure CBCategoryChange(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure ChampionGridSelect(Sender: TObject);
+    procedure PilotsCellEditing(const Sender: TObject; const AEditor: TControl;
+      const AColumn: TColumn; const ARow: Integer);
   private
     { Private declarations }
 
@@ -251,6 +253,7 @@ type
     TeeCommander1 : TTeeCommander;
     {$ENDIF}
 
+    procedure AddResultsPoints;
     procedure AddRiderData(const APos:Integer; const Rider:Integer);
     procedure ApplyTheme(const ABack,AFont:Graphics.TColor);
     function CategoryPath:String;
@@ -586,15 +589,41 @@ procedure TMainForm.ChampionGridSelect(Sender: TObject);
 
   procedure SplitInto(const S:String; const AColumn:Integer);
   var tmp : TArray<String>;
-      t : Integer;
+      t, L, GridPos : Integer;
+      OutStart : Boolean;
   begin
+    for t:=0 to ResultsData.Count-1 do
+    begin
+      ResultsData[AColumn,t]:='';
+      ResultsData[AColumn+1,t]:='';
+    end;
+
     tmp:=S.Split(['|']);
 
-    for t:=0 to ResultsData.Count-1 do
-        if t<=High(tmp) then
-           ResultsData[AColumn,t]:=tmp[t]
-        else
-           ResultsData[AColumn,t]:='';
+    L:=Length(tmp);
+
+    OutStart:=False;
+
+    t:=0;
+
+    GridPos:=0;
+
+    while t<L do
+    begin
+      if tmp[t]='-' then
+         OutStart:=True
+      else
+      begin
+        ResultsData[AColumn,GridPos]:=tmp[t];
+
+        if OutStart then
+           ResultsData[AColumn+1,GridPos]:='OUT';
+
+        Inc(GridPos);
+      end;
+
+      Inc(t);
+    end;
   end;
 
 begin
@@ -604,6 +633,8 @@ begin
   begin
     SplitInto(RoundsData[5,ChampionGrid.Selected.Row],1);
     SplitInto(RoundsData[6,ChampionGrid.Selected.Row],3);
+
+    AddResultsPoints;
 
     ResultsGrid.Data:=ResultsData;
 
@@ -638,6 +669,16 @@ const
   SprintPoints:Array of Integer=[12,9,7,6,5,4,3,2,1];
   RacePoints:Array of Integer=[25,20,16,13,11,10,9,8,7,6,5,4,3,2,1];
 
+procedure TMainForm.AddResultsPoints;
+var t : Integer;
+begin
+  for t:=0 to High(SprintPoints) do
+      ResultsData[2,t]:=IntToStr(SprintPoints[t]);
+
+  for t:=0 to High(RacePoints) do
+      ResultsData[4,t]:=IntToStr(RacePoints[t]);
+end;
+
 procedure TMainForm.CBSeasonsChange(Sender: TObject);
 
   procedure VerifyPilots;
@@ -655,11 +696,7 @@ procedure TMainForm.CBSeasonsChange(Sender: TObject);
     for t:=0 to ResultsData.Count-1 do
         ResultsData[0,t]:=IntToStr(t+1);
 
-    for t:=0 to High(SprintPoints) do
-        ResultsData[2,t]:=IntToStr(SprintPoints[t]);
-
-    for t:=0 to High(RacePoints) do
-        ResultsData[4,t]:=IntToStr(RacePoints[t]);
+    AddResultsPoints;
   end;
 
 begin
@@ -678,6 +715,8 @@ begin
      Pilots.Columns['Color'].Hide;
 
   Pilots.Columns[1].Header.Text:='#';
+
+  Pilots.Columns['Bike'].EditorClass:=TComboBox;
 
   if FileExists(CategorySeason+'\Rounds.txt') then
   begin
@@ -876,6 +915,9 @@ var
   end;
 
 begin
+  if CircuitPath.Count=0 then
+     Exit;
+
   C:=Circuit.Canvas;
 
   DrawFinishLine;
@@ -957,19 +999,31 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
     CursorLap.Value:=Race.Circuit.PolePosition;
   end;
 
-  function LoadCircuitPath(const ID:String):String;
+  procedure FinishLoadCircuit;
+  var t : Integer;
   begin
-    if ID='' then
-       result:=''
-    else
-       result:=TFile.ReadAllText(FindDataPath+'\Circuits\Paths\'+ID+'.svg');
+    Race.Circuit.TotalLength:=PathLength(Race.Circuit.Points);
+
+    // Add points to FastLine series
+    CircuitPath.BeginUpdate;
+    CircuitPath.XValues.Order:=loNone;
+    CircuitPath.Clear;
+
+    for t:=0 to High(Race.Circuit.Points) do
+        CircuitPath.AddXY(Race.Circuit.Points[t].X,Race.Circuit.Points[t].Y);
+
+    CircuitPath.AddXY(Race.Circuit.Points[0].X,Race.Circuit.Points[0].Y);
+
+    CircuitPath.EndUpdate;
+
+    Race.Circuit.CalculateRadius;
   end;
 
   procedure LoadCSVPath(const AFile:String{; const APath:TTeeBasePath});
   var S: TStringsData;
       t : Integer;
   begin
-    S:=TCSVDataImport.FromFile(FindDataPath+'\Circuits\Paths\'+AFile);
+    S:=TCSVDataImport.FromFile(AFile);
 
     SetLength(Race.Circuit.Points,S.Count);
 
@@ -985,44 +1039,39 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
 
     S.Free;
 
-    Race.Circuit.TotalLength:=PathLength(Race.Circuit.Points);
-
-    CircuitPath.BeginUpdate;
-    CircuitPath.XValues.Order:=loNone;
-    CircuitPath.Clear;
-
-    for t:=0 to High(Race.Circuit.Points) do
-        CircuitPath.AddXY(Race.Circuit.Points[t].X,Race.Circuit.Points[t].Y);
-
-    CircuitPath.AddXY(Race.Circuit.Points[0].X,Race.Circuit.Points[0].Y);
-
-    CircuitPath.EndUpdate;
-
-    {
-    CircuitPath.MoveTo(Race.Circuit.Points[0].X,Race.Circuit.Points[0].Y);
-
-    for t:=1 to S.Count-1 do
-        CircuitPath.LineTo(Race.Circuit.Points[t].X,Race.Circuit.Points[t].Y);
-
-    CircuitPath.Close;
-    }
+    FinishLoadCircuit;
   end;
 
   procedure CreateCircuitPath;
   var PathFile : String;
-  begin
-    //CircuitPath:=LapChart.Canvas.CreatePath;
 
-    PathFile:=CircuitsData[Circuits.Columns['svg'].Index,Circuits.Selected.Row];
+      function CalcFile(const AExtension:String):String;
+      begin
+        result:=TPath.Combine(FindDataPath+'\Circuits\Paths',TPath.ChangeExtension(PathFile,AExtension));
+      end;
+
+  var tmpPath : TTeeBasePath;
+  begin
+    PathFile:=CircuitsData[Circuits.Columns['Track'].Index,Circuits.Selected.Row];
 
     if PathFile<>'' then
     begin
-      //TSVGParser.ParsePath(CircuitPath,LoadCircuitPath(PathFile));
-      //Race.Circuit.Points:=CircuitPath.Flatten(0.1);
+      // Priority: CSV
+      if FileExists(CalcFile('csv')) then
+         LoadCSVPath(CalcFile('csv'))
+      else
+      if FileExists(CalcFile('svg')) then
+      begin
+        tmpPath:=LapChart.Canvas.CreatePath;
+        try
+          TSVGParser.ParsePath(tmpPath,TFile.ReadAllText(CalcFile('svg')));
+          Race.Circuit.Points:=tmpPath.Flatten(0.1);
+        finally
+          tmpPath.Free;
+        end;
+      end;
 
-      LoadCSVPath(TPath.ChangeExtension(PathFile,'csv'){,CircuitPath});
-
-      Race.Circuit.CalculateRadius;
+      FinishLoadCircuit;
     end;
   end;
 
@@ -1061,13 +1110,13 @@ var tmp : String;
 begin
   Circuit.Invalidate;
 
-//  TrySetGISBounds;
+  TrySetGISBounds;
 
   CreateCircuitPath;
 
   if Circuits.Data.Count>0 then
   begin
-    tmp:=FindDataPath+'\Circuits\Curves\'+CircuitsData[3,Circuits.Selected.Row]+'.txt';
+    tmp:=TPath.Combine(FindDataPath+'\Circuits\Curves',CircuitsData[3,Circuits.Selected.Row]+'.txt');
 
     if FileExists(tmp) then
     begin
@@ -1081,6 +1130,13 @@ begin
     end;
 
     CurvesGrid.Data:=CurvesGridData;
+
+    CurvesGrid.Columns[0].Header.Text:='Curve';
+    CurvesGrid.Columns[1].Header.Text:='Entry Position';
+    CurvesGrid.Columns[2].Header.Text:='Name';
+    CurvesGrid.Columns[3].Header.Text:='Total Angle';
+    CurvesGrid.Columns[4].Header.Text:='Entry Speed';
+    CurvesGrid.Columns[5].Header.Text:='To Apex';
   end;
 
   //AddCircuitRadius;
@@ -1181,6 +1237,14 @@ end;
 procedure TMainForm.PaintPoleDelta(const Sender:TColumn; var AData:TRenderData; var DefaultPaint:Boolean);
 begin
   DefaultPaint:=True;
+end;
+
+procedure TMainForm.PilotsCellEditing(const Sender: TObject;
+  const AEditor: TControl; const AColumn: TColumn; const ARow: Integer);
+begin
+  if AEditor is TComboBox then
+     if AColumn=Pilots.Columns['Bike'] then
+        FillCombo(TComboBox(AEditor),BikeData,0,PilotsData[Pilots_Bike,ARow]);
 end;
 
 procedure TMainForm.CreatePole;
@@ -1371,6 +1435,8 @@ var tmp : TArray<String>;
     Old : Char;
     S : String;
 begin
+  Exit; // !! Conflict between track axes bounds, and real GIS bounds
+
   if GIS<>nil then
   begin
     S:=(CircuitsData[8,Circuits.Selected.Row]);
@@ -1506,20 +1572,6 @@ end;
 
 procedure TMainForm.FormShow(Sender: TObject);
 
-  procedure FillBikes(const Items:TStrings);
-  var t : Integer;
-  begin
-    Items.BeginUpdate;
-    try
-      Items.Clear;
-
-      for t:=0 to BikeData.Count-1 do
-          Items.Add(BikeData[0,t]);
-    finally
-      Items.EndUpdate;
-    end;
-  end;
-
   procedure AddFlags(const AGrid:TTeeGrid; const ACountry:Integer; const AStrings:TStringsData);
   var C : TColumn;
   begin
@@ -1570,7 +1622,7 @@ begin
   BikeGrid.Columns['GearsRatio'].Hide;
   BikeGrid.Columns['TorqueCurve'].Hide;
 
-  FillBikes(CBSelectedBike.Items);
+  FillItems(CBSelectedBike.Items,BikeData,0);
   CBSelectedBike.ItemIndex:=0;
 
   CircuitPath:=TFastLineSeries.Create(Self);
@@ -1601,7 +1653,7 @@ begin
   GIS:=TGISRaster.Create(Self);
   Circuit.AddSeries(GIS);
 
-//  TrySetGISBounds;
+  TrySetGISBounds;
 
   // Enable zoooming in-out with the mouse wheel
   Circuit.Panning.MouseWheel:=pmwNone;
@@ -1858,7 +1910,15 @@ procedure TMainForm.CreateLeaderBoard;
 var Points : Array of Integer;
     Leaders : TStringsData;
 
-   procedure AddPoints(const S:String; const APoints:Array of Integer);
+   procedure IncWins(const AWinsColumn,ARow:Integer);
+   begin
+     if Leaders[AWinsColumn,ARow]='' then
+        Leaders[AWinsColumn,ARow]:='1'
+     else
+        Leaders[AWinsColumn,ARow]:=IntToStr(1+StrToInt(Leaders[AWinsColumn,ARow]));
+   end;
+
+   procedure AddPoints(const AWinsColumn:Integer; const S:String; const APoints:Array of Integer);
    var P : Array of String;
        t, tmp : Integer;
    begin
@@ -1878,16 +1938,19 @@ var Points : Array of Integer;
           Inc(Points[tmp],APoints[t]);
 
        if t=0 then // Winner
-          if Leaders[7,tmp]='' then
-             Leaders[7,tmp]:='1'
-          else
-             Leaders[7,tmp]:=IntToStr(1+StrToInt(Leaders[7,tmp]));
+       begin
+         IncWins(AWinsColumn,tmp);
+         IncWins(9,tmp); // Total
+       end;
+
+       if t<3 then // Podium 0,1,2
+          IncWins(10,tmp);
      end;
    end;
 
 var t, tmpRider : Integer;
 begin
-  Leaders:=TStringsData.Create(9,PilotsData.Count);
+  Leaders:=TStringsData.Create(11,PilotsData.Count);
 
   SetLength(Points,PilotsData.Count);
 
@@ -1904,8 +1967,8 @@ begin
 
   for t:=0 to RoundsData.Count-1 do
   begin
-    AddPoints(RoundsData[5,t],SprintPoints);
-    AddPoints(RoundsData[6,t],RacePoints);
+    AddPoints(7,RoundsData[5,t],SprintPoints);
+    AddPoints(8,RoundsData[6,t],RacePoints);
   end;
 
   for t:=0 to High(Points) do
@@ -1925,8 +1988,10 @@ begin
   LeaderBoard.Columns[4].Header.Text:='Team';
   LeaderBoard.Columns[5].Header.Text:='Points';
   LeaderBoard.Columns[6].Header.Text:='Delta';
-  LeaderBoard.Columns[7].Header.Text:='Wins';
-  LeaderBoard.Columns[8].Header.Text:='Podiums';
+  LeaderBoard.Columns[7].Header.Text:='Sprint Wins';
+  LeaderBoard.Columns[8].Header.Text:='Race Wins';
+  LeaderBoard.Columns[9].Header.Text:='Total Wins';
+  LeaderBoard.Columns[10].Header.Text:='Podiums';
 
   Leaders.SortBy(LeaderBoard.Columns[5],False,True);
 
