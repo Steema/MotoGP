@@ -157,6 +157,10 @@ type
     ResultsGrid: TTeeGrid;
     ChampionGrid: TTeeGrid;
     Splitter7: TSplitter;
+    PageControl7: TPageControl;
+    TabSheet2: TTabSheet;
+    TabLeaderChart: TTabSheet;
+    LeaderChart: TChart;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -212,6 +216,7 @@ type
     procedure ChampionGridSelect(Sender: TObject);
     procedure PilotsCellEditing(const Sender: TObject; const AEditor: TControl;
       const AColumn: TColumn; const ARow: Integer);
+    procedure PageControl7Change(Sender: TObject);
   private
     { Private declarations }
 
@@ -253,6 +258,7 @@ type
     TeeCommander1 : TTeeCommander;
     {$ENDIF}
 
+    procedure AddFlags(const AGrid:TTeeGrid; const ACountry:Integer; const AStrings:TStringsData);
     procedure AddResultsPoints;
     procedure AddRiderData(const APos:Integer; const Rider:Integer);
     procedure ApplyTheme(const ABack,AFont:Graphics.TColor);
@@ -260,14 +266,13 @@ type
     function CheckPilotExists(const S:String):Boolean;
     procedure ClearLapCharts;
     procedure CreateLeaderBoard;
+    procedure CreateLeaderChart;
     procedure CreatePole;
     procedure DoPaintFlag(const ID:String; var AData: TRenderData);
     function DoStep:Boolean;
     procedure DrawTireIcon(const ACanvas:TCanvas; const AColumn:Integer);
     function FindInAllPilots(const S:String):Integer;
     procedure FillCategories;
-    procedure FillFolders(const APath:String; const ACombo:TComboBox);
-    procedure FillRounds;
     procedure FillSeasons;
     function FindBike(const ABike:String):TBike;
     function FindPilotNum(const ANum:String):Integer; // index inside PilotsData
@@ -394,11 +399,10 @@ begin
   GearRatios.Columns[0].Header.Text:='Gear';
   GearRatios.Columns[1].Header.Text:='Ratio';
 
+  FillSequential(tmpGears,0);
+
   for t:=0 to High(tmpBike.GearRatios) do
-  begin
-    tmpGears[0,t]:=IntToStr(t+1);
-    tmpGears[1,t]:=FormatFloat('0.###',tmpBike.GearRatios[t]);
-  end;
+      tmpGears[1,t]:=FormatFloat('0.###',tmpBike.GearRatios[t]);
 end;
 
 procedure TMainForm.BPauseClick(Sender: TObject);
@@ -545,25 +549,11 @@ begin
 end;
 
 procedure TMainForm.CBRoundsChange(Sender: TObject);
-
-  function FindCircuit(const S:String):Integer;
-  var t : Integer;
-  begin
-    for t:=0 to CircuitsData.Count-1 do
-        if CircuitsData[0,t]=S then
-        begin
-          result:=t;
-          Exit;
-        end;
-
-    result:=-1;
-  end;
-
 var tmp : Integer;
 begin
   tmp:=CBRounds.ItemIndex;
 
-  Circuits.Selected.Row:=FindCircuit(RoundsData[1,tmp]);
+  Circuits.Selected.Row:=CircuitsData.IndexOf(RoundsData[1,tmp],0);
 
   CreatePole;
 
@@ -571,18 +561,8 @@ begin
 end;
 
 function TMainForm.FindInAllPilots(const S:String):Integer;
-var t : Integer;
 begin
-  for t:=0 to AllPilots.Count-1 do
-  begin
-    if AllPilots[0,t]=S then
-    begin
-      result:=t;
-      Exit;
-    end;
-  end;
-
-  result:=-1;
+  result:=AllPilots.IndexOf(S,0);
 end;
 
 procedure TMainForm.ChampionGridSelect(Sender: TObject);
@@ -689,14 +669,28 @@ procedure TMainForm.CBSeasonsChange(Sender: TObject);
   end;
 
   procedure CreateResultsData;
-  var t : Integer;
   begin
     ResultsData:=TStringsData.Create(5,PilotsData.Count);
-
-    for t:=0 to ResultsData.Count-1 do
-        ResultsData[0,t]:=IntToStr(t+1);
+    FillSequential(ResultsData,0);
 
     AddResultsPoints;
+  end;
+
+  procedure AddCountryColumn;
+  var t, tmp : Integer;
+  begin
+    RoundsData.Resize(RoundsData.Columns+1,RoundsData.Rows);
+    RoundsData.Headers[RoundsData.Columns-1]:='Country';
+
+    for t:=0 to RoundsData.Count-1 do
+    begin
+      tmp:=CircuitsData.IndexOf(RoundsData[1,t],0);
+
+      if tmp=-1 then
+         raise Exception.Create('Error cannot find circuit: '+RoundsData[1,t]);
+
+      RoundsData[RoundsData.Columns-1,t]:=CircuitsData[2,tmp];
+    end;
   end;
 
 begin
@@ -723,12 +717,17 @@ begin
     CreateResultsData;
 
     RoundsData:=TCSVDataImport.FromFile(CategorySeason+'\Rounds.txt');
+
+    AddCountryColumn;
+
     ChampionGrid.Data:=RoundsData;
 
     ChampionGrid.Columns[5].Hide;
     ChampionGrid.Columns[6].Hide;
 
-    FillRounds;
+    AddFlags(ChampionGrid,ChampionGrid.Columns.Count-1,RoundsData);
+
+    FillItems(CBRounds.Items,RoundsData,1);
 
     CBRounds.Enabled:=True;
 
@@ -1000,7 +999,6 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
   end;
 
   procedure FinishLoadCircuit;
-  var t : Integer;
   begin
     Race.Circuit.TotalLength:=PathLength(Race.Circuit.Points);
 
@@ -1009,8 +1007,7 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
     CircuitPath.XValues.Order:=loNone;
     CircuitPath.Clear;
 
-    for t:=0 to High(Race.Circuit.Points) do
-        CircuitPath.AddXY(Race.Circuit.Points[t].X,Race.Circuit.Points[t].Y);
+    CircuitPath.AddArray(Race.Circuit.Points);
 
     CircuitPath.AddXY(Race.Circuit.Points[0].X,Race.Circuit.Points[0].Y);
 
@@ -1096,9 +1093,10 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
 
     CurvesGridData:=TStringsData.Create(7,L);
 
+    FillSequential(CurvesGridData,0);
+
     for t:=0 to L-1 do
     begin
-      CurvesGridData[0,t]:=IntToStr(t+1);
       CurvesGridData[1,t]:=FloatToStr(Race.Circuit.Curves[t].Entry);
       CurvesGridData[3,t]:=FloatToStr(Race.Circuit.Curves[t].TotalAngle); // Entry Angle?
       CurvesGridData[4,t]:=IntToStr(100); // TODO <-- calculate Entry Speed of each curve
@@ -1349,16 +1347,8 @@ begin
 end;
 
 function TMainForm.FindPilotNum(const ANum:String):Integer; // index inside PilotsData
-var t : Integer;
 begin
-  for t:=0 to PilotsData.Count-1 do
-      if PilotsData[1,t]=ANum then
-      begin
-        result:=t;
-        Exit;
-      end;
-
-  result:=-1; // error !
+  result:=PilotsData.IndexOf(ANum,1);
 end;
 
 // Cell colors from pilor color
@@ -1471,37 +1461,14 @@ begin
   result:=CategoryPath+'\Seasons\'+Season;
 end;
 
-procedure TMainForm.FillRounds;
-var t : Integer;
-begin
-  CBRounds.Clear;
-
-  for t:=0 to RoundsData.Count-1 do
-      CBRounds.Items.Add(RoundsData[1,t]);
-end;
-
-procedure TMainForm.FillFolders(const APath:String; const ACombo:TComboBox);
-var S, tmp : String;
-begin
-  ACombo.Clear;
-
-  for S in TDirectory.GetDirectories(APath) do
-  begin
-    tmp:=ExtractFileName(S);
-
-    if Copy(tmp,1,1)<>'_' then
-       ACombo.Items.Add(tmp);
-  end;
-end;
-
 procedure TMainForm.FillCategories;
 begin
-  FillFolders(FindDataPath+'\Category',CBCategory);
+  FillFolders(FindDataPath+'\Category',CBCategory.Items);
 end;
 
 procedure TMainForm.FillSeasons;
 begin
-  FillFolders(CategoryPath+'\Seasons',CBSeasons);
+  FillFolders(CategoryPath+'\Seasons',CBSeasons.Items);
 end;
 
 // Check AllPilots Code field is not duplicated, and has 3 or 4 characters
@@ -1570,19 +1537,18 @@ begin
   DefaultPaint:=False;
 end;
 
+procedure TMainForm.AddFlags(const AGrid:TTeeGrid; const ACountry:Integer; const AStrings:TStringsData);
+var C : TColumn;
+begin
+  C:=AGrid.Columns.Add;
+  C.Header.Text:='Flag';
+  C.Width.Value:=60;
+  C.Tag:=ACountry;
+  C.TagObject:=AStrings;
+  C.OnPaint:=PaintFlag;
+end;
+
 procedure TMainForm.FormShow(Sender: TObject);
-
-  procedure AddFlags(const AGrid:TTeeGrid; const ACountry:Integer; const AStrings:TStringsData);
-  var C : TColumn;
-  begin
-    C:=AGrid.Columns.Add;
-    C.Header.Text:='Flag';
-    C.Width.Value:=60;
-    C.Tag:=ACountry;
-    C.TagObject:=AStrings;
-    C.OnPaint:=PaintFlag;
-  end;
-
 begin
   LapChart.Axes.FastCalc:=True;
   AllLaps.Axes.FastCalc:=True;
@@ -1954,9 +1920,10 @@ begin
 
   SetLength(Points,PilotsData.Count);
 
+  FillSequential(Leaders,0);
+
   for t:=0 to High(Points) do
   begin
-    Leaders[0,t]:=IntToStr(t+1);
     Leaders[1,t]:=PilotsData[1,t];
 
     tmpRider:=FindInAllPilots(PilotsData[0,t]);
@@ -1995,8 +1962,7 @@ begin
 
   Leaders.SortBy(LeaderBoard.Columns[5],False,True);
 
-  for t:=0 to Leaders.Count-1 do
-      Leaders[0,t]:=IntToStr(t+1);
+  FillSequential(Leaders,0);
 
   SetupPilotGrid(LeaderBoard,1,1);
 end;
@@ -2019,6 +1985,85 @@ begin
   if PageControl1.ActivePage=TabChampionShip then
      if LeaderBoard.Data=nil then
         CreateLeaderBoard;
+end;
+
+procedure TMainForm.CreateLeaderChart;
+
+  function FindItem(const S:String; const AItems:TArray<String>):Integer;
+  var t : Integer;
+  begin
+    for t:=0 to High(AItems) do
+        if AItems[t]=S then
+        begin
+          result:=t;
+          Exit;
+        end;
+
+    result:=-1;
+  end;
+
+  function CalcPoints(const ARiderNum:String; const ARound:Integer):Integer;
+
+    function Calc(const AColumn:Integer; const APoints:TArray<Integer>):Integer;
+    var tmp : Integer;
+    begin
+      tmp:=FindItem(ARiderNum,RoundsData[AColumn,ARound].Split(['|']));
+
+      if (tmp>-1) and (tmp<Length(APoints)) then
+         result:=APoints[tmp]
+      else
+         result:=0;
+    end;
+
+  begin
+    result:=Calc(5,SprintPoints)+Calc(6,RacePoints);
+  end;
+
+const
+  MaxRiders=5;
+
+var t,tt : Integer;
+    S : TLineSeries;
+    Total, RoundTotal : Integer;
+    NumRider : String;
+begin
+  LeaderChart.FreeAllSeries;
+
+  LeaderChart.Title.Caption:=CBCategory.Text+' '+CBSeasons.Text;
+  LeaderChart.Title.Font.Size:=18;
+
+  for t:=0 to MaxRiders-1 do
+  begin
+    S:=TLineSeries.Create(Self);
+    S.ParentChart:=LeaderChart;
+
+    NumRider:=LeaderBoard.Data.AsString(LeaderBoard.Columns[1],t);
+
+    S.Title:=NumRider+' '+LeaderBoard.Data.AsString(LeaderBoard.Columns[2],t);
+    S.Pointer.Visible:=True;
+
+//    S.Color:=
+
+    Total:=0;
+
+    for tt:=0 to RoundsData.Count-1 do
+    begin
+      if RoundsData[5,t]<>'' then
+      begin
+        RoundTotal:=CalcPoints(NumRider,tt);
+
+        Inc(Total,RoundTotal);
+
+        S.Add(Total,RoundsData[0,tt]+#13#10+RoundsData[7,tt]);
+      end;
+    end;
+  end;
+end;
+
+procedure TMainForm.PageControl7Change(Sender: TObject);
+begin
+  if PageControl7.ActivePage=TabLeaderChart then
+     CreateLeaderChart;
 end;
 
 procedure TMainForm.Pole1Click(Sender: TObject);
@@ -2287,10 +2332,10 @@ procedure TMainForm.PoleGridSelect(Sender: TObject);
     begin
       L:=Length(Race.Riders[ARider].Ellapsed);
 
+      FillSequential(LapsTimeData,0);
+
       for t:=0 to LapsTimeData.Rows-1 do
       begin
-        LapsTimeData[0,t]:=IntToStr(t+1);
-
         if t<L then
            tmpTime:=Race.Riders[ARider].Ellapsed[t]
         else
@@ -2409,16 +2454,8 @@ begin
 end;
 
 function TMainForm.FindRiderInPole(const ANumber:Integer):Integer;
-var t : Integer;
 begin
-  for t:=0 to Pole.Count-1 do
-      if StrToInt(Pole[Pole_Num,t])=ANumber then
-      begin
-        result:=t;
-        Exit;
-      end;
-
-  result:=-1;
+  result:=Pole.IndexOf(IntToStr(ANumber),Pole_Num);
 end;
 
 procedure TMainForm.LapChartAfterDraw(Sender: TObject);
@@ -2844,6 +2881,7 @@ begin
   ThemeChart(Dashboard,ABack,AFont);
   ThemeChart(FrontView,ABack,AFont);
   ThemeChart(AllLaps,ABack,AFont);
+  ThemeChart(LeaderChart,ABack,AFont);
 
   if Torque<>nil then
      ThemeChart(Torque.Chart1,ABack,AFont);

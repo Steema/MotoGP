@@ -3,7 +3,7 @@ object FormCircuit: TFormCircuit
   Top = 0
   Caption = 'Circuit'
   ClientHeight = 601
-  ClientWidth = 1078
+  ClientWidth = 1297
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -11,9 +11,10 @@ object FormCircuit: TFormCircuit
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poOwnerFormCenter
+  OnShow = FormShow
   TextHeight = 15
   object Splitter1: TSplitter
-    Left = 675
+    Left = 696
     Top = 0
     Height = 536
     Align = alRight
@@ -24,7 +25,7 @@ object FormCircuit: TFormCircuit
   object Chart1: TChart
     Left = 0
     Top = 0
-    Width = 675
+    Width = 696
     Height = 536
     BackWall.Brush.Gradient.Direction = gdBottomTop
     BackWall.Brush.Gradient.EndColor = clWhite
@@ -81,6 +82,7 @@ object FormCircuit: TFormCircuit
     Align = alClient
     TabOrder = 0
     OnMouseMove = Chart1MouseMove
+    ExplicitWidth = 675
     DefaultCanvas = 'TGDIPlusCanvas'
     ColorPaletteIndex = 13
     object Series1: TLineSeries
@@ -121,10 +123,11 @@ object FormCircuit: TFormCircuit
   object Panel1: TPanel
     Left = 0
     Top = 536
-    Width = 1078
+    Width = 1297
     Height = 65
     Align = alBottom
     TabOrder = 1
+    ExplicitWidth = 1078
     object Label1: TLabel
       Left = 16
       Top = 16
@@ -183,9 +186,9 @@ object FormCircuit: TFormCircuit
     end
   end
   object CurvesGrid: TTeeGrid
-    Left = 678
+    Left = 699
     Top = 0
-    Width = 400
+    Width = 598
     Height = 536
     Cells.Format.Font.Name = 'Segoe UI'
     Cells.Format.Font.Size = 9.000000000000000000
@@ -206,6 +209,7 @@ object FormCircuit: TFormCircuit
     ParentBackground = False
     ParentColor = False
     TabOrder = 2
+    ExplicitLeft = 480
     _Headers = (
       1
       'TColumnHeaderBand'

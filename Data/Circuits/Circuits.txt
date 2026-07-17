@@ -20,4 +20,4 @@
 "Petronas Sepang International Circuit","Sepang","Malaysia","Sepang",5543,,,18,2.7685 101.7245 2.7505 101.7475,FB63,2024-11-02,1:56.337,JM89,2024-11-03,1:59.203
 "Lusail International Circuit","Lusail","Qatar","",5380,,,12,25.5010 51.4420 25.4795 51.4625,FB63,2024-03-09,1:50.754,PA37,2024-03-10,1:52.657
 "Autódromo Internacional do Algarve","Portimão","Portugal","portimao-1",4592,,,110,37.2345 -8.6365 37.2215 -8.6190,EB23,2024-03-23,1:37.706,EB23,2024-03-24,1:38.685
-"Circuito de Ricardo Tormo","Cheste","Spain","valencia-1",4005,,,60,39.4895 -0.6385 39.4795 -0.6215,FB63,2023-11-25,1:28.931,EB23,2022-11-06,1:29.896
+"Circuit Ricardo Tormo","Cheste","Spain","valencia-1",4005,,,60,39.4895 -0.6385 39.4795 -0.6215,FB63,2023-11-25,1:28.931,EB23,2022-11-06,1:29.896

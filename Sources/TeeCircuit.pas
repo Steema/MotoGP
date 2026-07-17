@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics,
   Controls, Forms, Dialogs, TeEngine, Series,
   ExtCtrls, TeeProcs, Chart, TeeRacing, TeeTools, StdCtrls, Control,
-  Grid, Tee.GridData.Rtti;
+  Grid, Tee.GridData.Rtti, Tee.Grid.Columns;
 
 type
   TFormCircuit = class(TForm)
@@ -30,6 +30,7 @@ type
     procedure CBApexClick(Sender: TObject);
     procedure CBDrawCurvesClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { Private declarations }
 
@@ -63,6 +64,21 @@ begin
 end;
 
 class procedure TFormCircuit.DetectCorners(var ACircuit:TCircuit; CurvatureThreshold: Single = 0.002);
+const
+  G = 9.81; // m/s2
+  Friction = 0.8; // Dry asphalt, good tires
+  MetersSecToKMH = 3.6;  // Convert from meters per second, to kilometers per hour
+
+  function GetCurveNames:TArray<String>;
+  var t, L : Integer;
+  begin
+    L:=Length(ACircuit.Curves);
+    SetLength(result,L);
+
+    for t:=0 to L-1 do
+        result[t]:=ACircuit.Curves[t].Name;
+  end;
+
 var
   i, j, L : Integer;
   N: Integer;
@@ -74,7 +90,10 @@ var
   MaxCurvature: Single;
   EntryAng, ExitAng, ApexAng : Single;
   Track : ^TPointFloatArray;
+  CurveNames : Array of String;
 begin
+  CurveNames:=GetCurveNames;
+
   ACircuit.Curves:=nil;
 
   N := Length(ACircuit.Points);
@@ -139,6 +158,9 @@ begin
 
         SetLength(ACircuit.Curves,L+1);
 
+        if L<Length(CurveNames) then
+           ACircuit.Curves[L].Name:=CurveNames[L];
+
         ACircuit.Curves[L].EntryIndex := CornerStart;
 
         ACircuit.Curves[L].Entry:=PathLength(ACircuit.Points,0,CornerStart);
@@ -158,10 +180,19 @@ begin
         ACircuit.Curves[L].ExitAngle :=  Abs(RadToDeg(GetAngleDifference(ExitAng, ApexAng)));
         ACircuit.Curves[L].TotalAngle := -RadToDeg(GetAngleDifference(ExitAng, EntryAng));
 
+        ACircuit.Curves[L].EntrySpeed := MetersSecToKMH * Sqrt(Friction * G * ACircuit.Radius[ACircuit.Curves[L].EntryIndex+1]);
+
         Inc(L);
       end;
     end;
   end;
+end;
+
+procedure TFormCircuit.FormShow(Sender: TObject);
+var t : Integer;
+begin
+  for t:=1 to CurvesGrid.Columns.Count-1 do
+      CurvesGrid.Columns[t].Width.Value:=80;
 end;
 
 { TFormCircuit }

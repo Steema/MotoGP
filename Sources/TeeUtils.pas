@@ -15,12 +15,19 @@ uses
 procedure FillCombo(const ACombo:TCustomCombo; const ASource:TStringsData; const AColumn:Integer; const ASelected:String); overload;
 procedure FillCombo(const ACombo:TCustomCombo; const Values:Array of String; const ASelected:String); overload;
 
-procedure FillItems(const Items:TStrings; const ASource:TStringsData; const AColumn:Integer); overload;
-procedure FillItems(const Items:TStrings; const Values:Array of String); overload;
+procedure FillItems(const AItems:TStrings; const ASource:TStringsData; const AColumn:Integer); overload;
+procedure FillItems(const AItems:TStrings; const Values:Array of String); overload;
+
+procedure FillFolders(const APath:String; const AItems:TStrings);
+
+procedure FillSequential(const AData:TStringsData; const AColumn:Integer);
 
 procedure DrawPerpendicular(const ACanvas:TTeeCanvas; const P0, P1: TPointFloat; const ALength:Single);
 
 implementation
+
+uses
+  IOUtils;
 
 procedure DrawPerpendicular(const ACanvas:TTeeCanvas; const P0, P1: TPointFloat; const ALength:Single);
 var
@@ -80,32 +87,58 @@ begin
   ACombo.ItemIndex:=FindValue(ACombo.Items,ASelected);
 end;
 
-procedure FillItems(const Items:TStrings; const ASource:TStringsData; const AColumn:Integer);
+procedure FillItems(const AItems:TStrings; const ASource:TStringsData; const AColumn:Integer);
 var t : Integer;
 begin
-  Items.BeginUpdate;
+  AItems.BeginUpdate;
   try
-    Items.Clear;
+    AItems.Clear;
 
     for t:=0 to ASource.Count-1 do
-        Items.Add(ASource[AColumn,t]);
+        AItems.Add(ASource[AColumn,t]);
   finally
-    Items.EndUpdate;
+    AItems.EndUpdate;
   end;
 end;
 
-procedure FillItems(const Items:TStrings; const Values:Array of String);
+procedure FillItems(const AItems:TStrings; const Values:Array of String);
 var t : Integer;
 begin
-  Items.BeginUpdate;
+  AItems.BeginUpdate;
   try
-    Items.Clear;
+    AItems.Clear;
 
     for t:=Low(Values) to High(Values) do
-        Items.Add(Values[t]);
+        AItems.Add(Values[t]);
   finally
-    Items.EndUpdate;
+    AItems.EndUpdate;
   end;
+end;
+
+procedure FillFolders(const APath:String; const AItems:TStrings);
+var S, tmp : String;
+begin
+  AItems.BeginUpdate;;
+  try
+    AItems.Clear;
+
+    for S in TDirectory.GetDirectories(APath) do
+    begin
+      tmp:=ExtractFileName(S);
+
+      if Copy(tmp,1,1)<>'_' then
+         AItems.Add(tmp);
+    end;
+  finally
+    AItems.EndUpdate;
+  end;
+end;
+
+procedure FillSequential(const AData:TStringsData; const AColumn:Integer);
+var t : Integer;
+begin
+  for t:=0 to AData.Count-1 do
+      AData[AColumn,t]:=IntToStr(t+1);
 end;
 
 end.
