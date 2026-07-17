@@ -7,7 +7,10 @@ Disclaimer: This project is an independent, non-commercial fan-made software, sh
 https://github.com/user-attachments/assets/2b1d9009-105f-4075-8895-af1acda00b6b
 
 
+### Credits:
 
+- [Circuit Tracks csv](https://github.com/TUMFTM/racetrack-database)
+- [Circuit Tracks svg](https://github.com/julesr0y/f1-circuits-svg)
 
 
 ### Pilots
