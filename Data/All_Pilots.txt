@@ -1,8 +1,9 @@
-﻿Code,Name,Surname,City,Country,Birth,Weight,Height
+Code,Name,Surname,City,Country,Birth,Weight,Height
 NABE,Norick,Abe,Tòquio,Japan,07/09/1975,65,173
 PA37,Pedro,Acosta,Mazarrón,Spain,25/05/2004,62,171
 SAGI,Senna,Agius,Sydney,Australia,09/06/2005,66,175
 GAGO,Giacomo,Agostini,Brescia,Italy,16/06/1942,65,172
+MAJI,Mario,Aji,Madiun,Indonesia,16/03/2004,72,173
 KAKI,Kiyonari,Akiyoshi,Kurume,Japan,12/01/1975,67,174
 FA54,Fermín,Aldeguer,Múrcia,Spain,05/04/2005,65,180
 DALM,David,Almansa,Argamasilla de Calatrava,Spain,22/01/2006,53,165
@@ -19,6 +20,7 @@ AARE,Albert,Arenas,Girona,Spain,11/12/1996,62,168
 XART,Xavier,Artigas,Sant Andreu de la Barca,Spain,27/05/2003,58,171
 FB63,Francesco,Bagnaia,Torí,Italy,14/01/1997,67,176
 KBAL,Kork,Ballington,Durban,South Africa,10/04/1951,62,168
+BBAL,Barry,Baltus,Namur,Belgium,03/05/2004,69,178
 ABAR,Alex,Barros,São Paulo,Brazil,18/10/1970,72,174
 EB23,Enea,Bastianini,Rímini,Italy,30/12/1997,64,168
 ABAU,Alvaro,Bautista,Talavera de la Reina,Spain,21/11/1984,60,169
@@ -32,19 +34,23 @@ BB33,Brad,Binder,Potchefstroom,South Africa,11/08/1995,63,170
 DBIN,Darryn,Binder,Potchefstroom,South Africa,21/01/1998,68,175
 SBRA,Stefan,Bradl,Augsburg,Germany,29/11/1989,63,170
 DBRA,Dieter,Braun,Ulm,Germany,02/02/1943,65,173
+CBUC,Cormac,Buchanan,Invercargill,New Zealand,23/08/2006,59,173
 SBYR,Shane,Byrne,Londres,United Kingdom,10/12/1976,69,172
 ACAN,Arón,Canet,Corbera,Spain,30/09/1999,63,175
 LCAP,Loris,Capirossi,Bolonya,Italy,04/04/1973,59,165
 ACAR,Álvaro,Carpe,Múrcia,Spain,10/06/2007,55,168
 ANCA,Ana,Carrasco,Cehegín,Spain,10/03/1997,52,156
+NCAR,Nicola,Carraro,Padova,Italy,21/05/2002,62,168
 KCAR,Kel,Carruthers,Sydney,Australia,31/05/1938,64,170
 SCHA,Somkiat,Chantra,Chonburi,Thailand,15/12/1998,64,172
 CCHE,Carlos,Checa,Sant Fruitós de Bages,Spain,15/10/1972,73,172
 PCHI,Pierfrancesco,Chili,Bolonya,Italy,20/06/1964,68,173
 SCOR,Sandro,Cortese,Ochsenhausen,Germany,06/01/1990,62,169
 ACRI,Álex,Crivillé,Seva,Spain,04/03/1970,64,169
+ACRU,Adrián,Cruces,Valencia,Spain,09/08/2006,61,178
 CCRU,Cal,Crutchlow,Coventry,United Kingdom,29/10/1985,66,170
 LDAL,Lorenzo,Dalla Porta,Prato,Italy,22/06/1997,61,168
+HDAN,Hakim,Danish,Kuala Terengganu,Malaysia,30/07/2007,43,150
 RDEP,Randy,de Puniet,Andrésy,France,14/02/1981,64,169
 DDER,Didier,de Radiguès,Lovaina,Belgium,27/03/1958,61,170
 FD49,Fabio,Di Giannantonio,Roma,Italy,10/10/1998,68,175
@@ -53,11 +59,13 @@ ADOV,Andrea,Dovizioso,Forlimpopoli,Italy,23/03/1986,67,167
 MDUH,Michael,Duhamel,Mont-real,Canada,26/05/1968,68,170
 CEDW,Colin,Edwards,Conroe,United States of America,27/02/1974,75,178
 TELI,Toni,Elías,Manresa,Spain,26/03/1983,63,162
+AESC,Álex,Escrig,Valencia,Spain,21/02/2004,69,184
 AESP,Aleix,Espargaró,Granollers,Spain,30/07/1989,65,180
 PESP,Pol,Espargaró,Granollers,Spain,10/06/1991,63,171
 JEST,Joel,Esteban,Barcelona,Spain,26/07/2005,56,169
 RFEN,Romano,Fenati,Ascoli Piceno,Italy,15/01/1996,61,170
 AFER,Adrián,Fernández,Madrid,Spain,31/01/2004,59,171
+ALFE,Alberto,Ferrández,Cox,Spain,02/09/2007,,
 AGFE,Augusto,Fernández,Madrid,Spain,23/09/1997,72,181
 RF25,Raúl,Fernández,Madrid,Spain,23/10/2000,68,177
 CFOG,Carl,Fogarty,Blackburn,United Kingdom,01/07/1965,66,173
@@ -80,6 +88,7 @@ NHAY,Nicky,Hayden,Owensboro,United States of America,30/07/1981,69,173
 DHOL,Daniel,Holgado,Sant Vicent del Raspeig,Spain,27/04/2005,58,168
 RHOL,Rupert,Hollaus,Traisen,Austria,04/09/1931,58,166
 JHOP,John,Hopkins,Ramona,United States of America,22/05/1983,68,170
+AHUE,Adrián,Huertas,Madrid,Spain,21/08/2003,65,171
 BIVY,Bill,Ivy,Maidstone,United Kingdom,27/08/1942,54,160
 OJAC,Olivier,Jacque,Evreux,France,29/08/1974,63,168
 MKAL,Mika,Kallio,Valkeakoski,Finland,07/11/1982,60,168
@@ -109,20 +118,27 @@ JMCW,Jeremy,McWilliams,Belfast,United Kingdom,04/04/1964,66,171
 MMEL,Marco,Melandri,Ravenna,Italy,07/08/1982,64,166
 JM43,Jack,Miller,Townsville,Australia,18/01/1995,64,173
 JM36,Joan,Mir,Palma,Spain,01/09/1997,69,181
+ZMIT,Zen,Mitani,Ibaraki,Japan,27/03/2007,50,160
+RMOO,Ruché,Moodley,South Africa,South Africa,16/12/2006,58,170
 FM21,Franco,Morbidelli,Roma,Italy,04/12/1994,64,176
 DM11,Diogo,Moreira,São Paulo,Brazil,23/04/2004,62,169
+DAMU,Daniel,Muñoz,Dos Hermanas,Spain,28/04/2006,67,176
 DMUN,David,Muñoz,Sevilla,Spain,15/05/2006,58,167
 TNAK,Takaaki,Nakagami,Chiba,Japan,09/02/1992,70,175
 SNAK,Shinya,Nakano,Chiba,Japan,10/10/1977,61,167
 JNAV,Jorge,Navarro,La Pobla de Vallbona,Spain,03/02/1996,62,172
 ANIE,Ángel,Nieto,Zamora,Spain,25/01/1947,52,157
+COGO,Casey,O'Gorman,Portlaoise,Ireland,07/08/2007,61,175
+EOSH,Eddie,O'Shea,Leicester,United Kingdom,25/09/2006,55,170
 SOGD,Scott,Ogden,Doncaster,United Kingdom,16/10/2003,58,173
 AO79,Ai,Ogura,Kiyose,Japan,26/01/2001,62,168
 MOLI,Miguel,Oliveira,Almada,Portugal,04/01/1995,64,170
 DONC,Deniz,Öncü,Alanya,Turkey,26/07/2003,61,168
+UORR,Unai,Orradre,La Rioja,Spain,09/04/2004,,
 IORT,Iván,Ortolá,València,Spain,04/08/2004,59,172
 NPAG,Nello,Pagani,Milà,Italy,11/10/1911,63,170
 MPAS,Mattia,Pasini,Rímini,Italy,13/08/1985,65,174
+MPAW,Milan,Pawelec,Wolsztyn,Poland,04/04/2007,,
 DPED,Dani,Pedrosa,Castellar del Vallès,Spain,29/09/1985,51,158
 VPER,Valentín,Perrone,Buenos Aires,Argentina,13/01/2008,55,169
 DPET,Danilo,Petrucci,Terni,Italy,24/10/1990,80,181
@@ -131,28 +147,33 @@ PPIL,Paolo,Pileri,Terni,Italy,31/07/1944,59,166
 APIQ,Ángel,Piqueras,Ayora,Spain,30/11/2006,57,170
 MPIR,Michele,Pirro,San Giovanni Rotondo,Italy,05/07/1986,70,177
 PPON,Patrick,Pons,París,France,24/12/1952,66,175
+VPRA,Veda,Pratama,Gunungkidul,Indonesia,23/11/2008,47,161
 TPRO,Tarquinio,Provini,Roveleto,Italy,29/05/1933,58,165
 FQ20,Fabio,Quartararo,Niça,France,20/04/1999,68,177
 MQUI,Máximo,Quiles,Múrcia,Spain,19/03/2008,53,166
 TRAB,Tito,Rabat,Barcelona,Spain,25/05/1989,64,178
 WRAI,Wayne,Rainey,Downey,United States of America,23/10/1960,68,173
 MRAM,Marcos,Ramírez,Conil de la Frontera,Spain,16/12/1997,62,172
+LRAM,Leo,Rammerstorfer,Linz,Austria,13/08/2004,,
 TR7,Toprak,Razgatlıoğlu,Alanya,Turkey,16/10/1996,68,182
 PREA,Phil,Read,Luton,United Kingdom,01/01/1939,66,172
 SRED,Scott,Redding,Quedgeley,United Kingdom,04/01/1993,74,185
 JRED,Jim,Redman,Londres,United Kingdom,08/11/1931,65,173
 AR42,Alex,Rins,Barcelona,Spain,08/12/1995,72,176
+JRIO,Jesús,Ríos,Marbella,Spain,28/10/2007,,
 JROB,Joe,Roberts,Los Angeles,United States of America,16/06/1997,68,180
 KROB,Kenny,Roberts,Modesto,United States of America,31/12/1951,62,165
 KROJ,Kenny,Roberts Jr.,Mountain View,United States of America,25/07/1973,68,170
 RROC,Raymond,Roche,Ollioules,France,21/02/1957,67,172
 VROS,Valentino,Rossi,Urbino,Italy,16/02/1979,69,181
 MROU,Michel,Rougerie,París,France,21/04/1950,69,178
+JROU,Jacob,Roulstone,Figtree,Australia,04/02/2005,58,181
 JRUE,José Antonio,Rueda,Sevilla,Spain,29/10/2005,56,166
 BRUF,Bruno,Ruffo,Verona,Italy,09/12/1920,60,167
 JRUG,Jean-Philippe,Ruggia,Toló,France,01/10/1965,64,170
 JSAA,Jarno,Saarinen,Turku,Finland,11/12/1945,62,169
 FSAL,Filip,Salač,Mladá Boleslav,Czechia,12/12/2001,68,178
+RSAL,Rico,Salmela,Pirkanmaa,Finland,14/02/2008,,
 CSAN,Cecil,Sandford,Ilford,United Kingdom,21/02/1928,60,168
 CSAR,Christian,Sarron,Clarmont-Ferrand,France,27/03/1955,62,174
 ASAS,Ayumu,Sasaki,Yokosuka,Japan,04/10/2000,55,167
@@ -172,6 +193,8 @@ KTOB,Kaito,Toba,Fukuoka,Japan,07/04/2000,54,165
 JTOU,Jean-Louis,Tournadre,Clarmont-Ferrand,France,17/11/1958,62,168
 CUBB,Carlo,Ubbiali,Bèrgam,Italy,22/09/1929,52,159
 TUKA,Tohru,Ukawa,Chiba,Japan,18/05/1973,62,168
+BURI,Brian,Uriarte,Santander,Spain,11/08/2008,58,176
+ZGOO,Zonta,van den Goorbergh,Breda,Netherlands,30/11/2005,65,182
 CVEI,Collin,Veijer,Staphorst,Netherlands,19/02/2005,59,172
 CVER,Chris,Vermeulen,Brisbane,Australia,19/06/1982,68,175
 CVIE,Celestino,Vietti,Cirié,Italy,13/10/2001,63,173
@@ -180,3 +203,4 @@ MV12,Maverick,Viñales,Figueres,Spain,12/01/1995,64,171
 AWES,Anthony,West,Brisbane,Australia,17/07/1981,68,174
 RYAM,Ryusei,Yamanaka,Chiba,Japan,06/11/2001,55,167
 JZ5,Johann,Zarco,Canes,France,16/07/1990,67,171
+XZUR,Xabi,Zurutuza,Legazpi,Spain,07/04/2006,57,168
