@@ -24,6 +24,7 @@ object MainForm: TMainForm
     Height = 41
     Align = alTop
     TabOrder = 0
+    ExplicitTop = -5
     object CurrentLap: TLabel
       Left = 771
       Top = 13
@@ -246,7 +247,7 @@ object MainForm: TMainForm
       Top = 0
       Width = 321
       Height = 837
-      ActivePage = TabPilots
+      ActivePage = TabCircuits
       Align = alLeft
       TabOrder = 0
       object TabCircuits: TTabSheet
@@ -556,14 +557,14 @@ object MainForm: TMainForm
                 Frame.MiddleBrush.BackColor = clYellow
                 Frame.OuterBrush.BackColor = clGreen
                 Frame.OuterBrush.Gradient.EndColor = clGreen
-                Value = 21.700000000000000000
+                Value = 27.650000000000000000
                 InternalMarkers = {
                   02000000545046300E544E756D657269634D61726B65720008506F736974696F
                   6E0708707043656E7465720B53686170652E436F6C6F7204DBDBC80010536861
                   70652E466F6E742E436F6C6F7204282828001153686170652E466F6E742E4865
                   6967687402D00F53686170652E466F6E742E4E616D65060A44532D4469676974
                   616C1353686170652E4672616D652E56697369626C65081453686170652E5368
-                  61646F772E56697369626C65080A53686170652E546578740602323213536861
+                  61646F772E56697369626C65080A53686170652E546578740602323813536861
                   70652E54657874416C69676E6D656E74070E746152696768744A757374696679
                   1153686170652E5472616E73706172656E74090000545046300E544E756D6572
                   69634D61726B65720008506F736974696F6E070A70705269676874546F700F53
@@ -618,7 +619,7 @@ object MainForm: TMainForm
                 RotationAngle = 160
                 ShapeStyle = gsPolygon
                 TotalAngle = 140.000000000000000000
-                Value = 36.718018697574730000
+                Value = 35.305235115811230000
               end
               object FuelGauge: TLinearGauge
                 Legend.Visible = False
@@ -690,6 +691,7 @@ object MainForm: TMainForm
                 Ticks.Style = psRectangle
                 Ticks.VertSize = 10
                 Ticks.GaugeStyle = gpTick
+                Value = 19.000000000000000000
                 ValueArea.Transparent = True
               end
             end
@@ -920,296 +922,534 @@ object MainForm: TMainForm
       Top = 0
       Width = 633
       Height = 837
-      ActivePage = TabChampionShip
+      ActivePage = TabTelemetry
       Align = alClient
       TabOrder = 1
       OnChange = PageControl1Change
-      object TabLap: TTabSheet
+      ExplicitLeft = 323
+      object TabTelemetry: TTabSheet
         Caption = 'Telemetry'
-        object LapChart: TChart
-          Left = 121
-          Top = 41
-          Width = 504
-          Height = 766
-          BackWall.Brush.Gradient.Direction = gdBottomTop
-          BackWall.Brush.Gradient.EndColor = clWhite
-          BackWall.Brush.Gradient.StartColor = 15395562
-          BackWall.Brush.Gradient.Visible = True
-          BackWall.Transparent = False
-          Foot.Font.Color = clBlue
-          Foot.Font.Name = 'Verdana'
-          Gradient.Direction = gdBottomTop
-          Gradient.EndColor = clWhite
-          Gradient.MidColor = 15395562
-          Gradient.StartColor = 15395562
-          LeftWall.Color = clLightyellow
-          Legend.CheckBoxes = True
-          Legend.Font.Name = 'Verdana'
-          Legend.Shadow.Transparency = 0
-          Legend.Title.Font.Height = -16
-          Legend.Visible = False
-          RightWall.Color = clLightyellow
-          Title.Font.Height = -13
-          Title.Font.Name = 'Verdana'
-          Title.Text.Strings = (
-            'Lap')
-          BottomAxis.Axis.Color = 4210752
-          BottomAxis.Grid.Color = clDarkgray
-          BottomAxis.LabelsFormat.Font.Name = 'Verdana'
-          BottomAxis.TicksInner.Color = clDarkgray
-          BottomAxis.Title.Font.Name = 'Verdana'
-          DepthAxis.Axis.Color = 4210752
-          DepthAxis.Grid.Color = clDarkgray
-          DepthAxis.LabelsFormat.Font.Name = 'Verdana'
-          DepthAxis.TicksInner.Color = clDarkgray
-          DepthAxis.Title.Font.Name = 'Verdana'
-          DepthTopAxis.Axis.Color = 4210752
-          DepthTopAxis.Grid.Color = clDarkgray
-          DepthTopAxis.LabelsFormat.Font.Name = 'Verdana'
-          DepthTopAxis.TicksInner.Color = clDarkgray
-          DepthTopAxis.Title.Font.Name = 'Verdana'
-          CustomAxes = <
-            item
-              Horizontal = False
-              OtherSide = True
-              StartPosition = 80.000000000000000000
-            end
-            item
-              Automatic = False
-              AutomaticMaximum = False
-              Horizontal = False
-              OtherSide = False
-              Maximum = 100.000000000000000000
-              EndPosition = 15.000000000000000000
-            end
-            item
-              Horizontal = False
-              OtherSide = False
-              StartPosition = 16.000000000000000000
-              EndPosition = 29.000000000000000000
-            end>
-          LeftAxis.Axis.Color = 4210752
-          LeftAxis.Grid.Color = clDarkgray
-          LeftAxis.LabelsFormat.Font.Name = 'Verdana'
-          LeftAxis.StartPosition = 30.000000000000000000
-          LeftAxis.EndPosition = 80.000000000000000000
-          LeftAxis.TicksInner.Color = clDarkgray
-          LeftAxis.Title.Font.Name = 'Verdana'
-          RightAxis.Axis.Color = 4210752
-          RightAxis.Grid.Color = clDarkgray
-          RightAxis.LabelsFormat.Font.Name = 'Verdana'
-          RightAxis.TicksInner.Color = clDarkgray
-          RightAxis.Title.Font.Name = 'Verdana'
-          TopAxis.Axis.Color = 4210752
-          TopAxis.Grid.Color = clDarkgray
-          TopAxis.LabelsFormat.Font.Name = 'Verdana'
-          TopAxis.TicksInner.Color = clDarkgray
-          TopAxis.Title.Font.Name = 'Verdana'
-          View3D = False
-          OnAfterDraw = LapChartAfterDraw
-          Align = alClient
-          TabOrder = 0
-          DefaultCanvas = 'TGDIPlusCanvas'
-          ColorPaletteIndex = 13
-          object CurveSeries: TPointSeries
-            Title = 'Curves'
-            VertAxis = aCustomVertAxis
-            ClickableLine = False
-            Pointer.InflateMargins = True
-            Pointer.Style = psRectangle
-            XValues.Name = 'X'
-            XValues.Order = loAscending
-            YValues.Name = 'Y'
-            YValues.Order = loNone
-            CustomVertAxis = 0
-          end
-          object CurveSpeeds: TPointSeries
-            Title = 'Entry Speed'
-            ClickableLine = False
-            Pointer.InflateMargins = True
-            Pointer.Pen.Visible = False
-            Pointer.Style = psRectangle
-            XValues.Name = 'X'
-            XValues.Order = loAscending
-            YValues.Name = 'Y'
-            YValues.Order = loNone
-          end
-          object SeriesRadius: TFastLineSeries
-            Title = 'Radius'
-            VertAxis = aCustomVertAxis
-            LinePen.Color = 1330417
-            XValues.Name = 'X'
-            XValues.Order = loAscending
-            YValues.Name = 'Y'
-            YValues.Order = loNone
-            CustomVertAxis = 0
-          end
-          object CursorLap: TColorLineTool
-            Pen.Color = 1918068724
-            Pen.Width = 2
-            AxisID = 0
-            object TAnnotationTool
-              Shape.Alignment = taCenter
-              Shape.Shadow.Visible = False
-            end
-          end
-        end
-        object SeriesList: TCheckListBox
-          Left = 0
-          Top = 41
-          Width = 121
-          Height = 766
-          Align = alLeft
-          ItemHeight = 17
-          TabOrder = 1
-          OnClickCheck = SeriesListClickCheck
-        end
-        object Panel1: TPanel
+        object Panel7: TPanel
           Left = 0
           Top = 0
-          Width = 625
-          Height = 41
-          Align = alTop
-          TabOrder = 2
-          object Label2: TLabel
-            Left = 11
-            Top = 11
-            Width = 50
-            Height = 15
-            Caption = 'View Lap:'
-          end
-          object Label3: TLabel
-            Left = 256
-            Top = 13
-            Width = 34
-            Height = 15
-            Caption = 'Mode:'
-          end
-          object CBViewLastLap: TCheckBox
-            Left = 155
-            Top = 10
-            Width = 84
-            Height = 17
-            Caption = 'Last Lap'
-            Checked = True
-            State = cbChecked
-            TabOrder = 0
-            OnClick = CBViewLastLapClick
-          end
-          object CBViewMode: TComboBox
-            Left = 303
-            Top = 10
-            Width = 145
-            Height = 23
-            Style = csDropDownList
-            ItemIndex = 0
-            TabOrder = 1
-            Text = 'Single Rider'
-            Items.Strings = (
-              'Single Rider'
-              'Compare Riders'
-              'Compare Laps')
-          end
-          object EViewLap: TEdit
-            Left = 67
-            Top = 8
-            Width = 51
-            Height = 23
-            Enabled = False
-            TabOrder = 2
-            Text = '0'
-            OnChange = EViewLapChange
-          end
-          object UDViewLap: TUpDown
-            Left = 118
-            Top = 8
-            Width = 16
-            Height = 23
-            Associate = EViewLap
-            Enabled = False
-            TabOrder = 3
-          end
-        end
-      end
-      object TabLaps: TTabSheet
-        Caption = 'All Laps'
-        ImageIndex = 1
-        object AllLaps: TChart
-          Left = 0
-          Top = 0
-          Width = 625
+          Width = 105
           Height = 807
-          BackWall.Brush.Gradient.Direction = gdBottomTop
-          BackWall.Brush.Gradient.EndColor = clWhite
-          BackWall.Brush.Gradient.StartColor = 15395562
-          BackWall.Brush.Gradient.Visible = True
-          BackWall.Transparent = False
-          Foot.Font.Color = clBlue
-          Foot.Font.Name = 'Verdana'
-          Gradient.Direction = gdBottomTop
-          Gradient.EndColor = clWhite
-          Gradient.MidColor = 15395562
-          Gradient.StartColor = 15395562
-          Gradient.Visible = True
-          LeftWall.Color = clLightyellow
-          Legend.Font.Name = 'Verdana'
-          Legend.Shadow.Transparency = 0
-          Legend.Visible = False
-          RightWall.Color = clLightyellow
-          Title.Font.Name = 'Verdana'
-          Title.Text.Strings = (
-            'By Lap')
-          BottomAxis.Axis.Color = 4210752
-          BottomAxis.Grid.Color = clDarkgray
-          BottomAxis.LabelsFormat.Font.Name = 'Verdana'
-          BottomAxis.TicksInner.Color = clDarkgray
-          BottomAxis.Title.Caption = 'Lap'
-          BottomAxis.Title.Font.Name = 'Verdana'
-          Chart3DPercent = 74
-          DepthAxis.Axis.Color = 4210752
-          DepthAxis.Grid.Color = clDarkgray
-          DepthAxis.LabelsFormat.Font.Name = 'Verdana'
-          DepthAxis.TicksInner.Color = clDarkgray
-          DepthAxis.Title.Caption = 'Rider'
-          DepthAxis.Title.Font.Name = 'Verdana'
-          DepthTopAxis.Axis.Color = 4210752
-          DepthTopAxis.Grid.Color = clDarkgray
-          DepthTopAxis.LabelsFormat.Font.Name = 'Verdana'
-          DepthTopAxis.TicksInner.Color = clDarkgray
-          DepthTopAxis.Title.Font.Name = 'Verdana'
-          LeftAxis.Axis.Color = 4210752
-          LeftAxis.Grid.Color = clDarkgray
-          LeftAxis.LabelsFormat.Font.Name = 'Verdana'
-          LeftAxis.TicksInner.Color = clDarkgray
-          LeftAxis.Title.Caption = 'Lap Time'
-          LeftAxis.Title.Font.Name = 'Verdana'
-          RightAxis.Axis.Color = 4210752
-          RightAxis.Grid.Color = clDarkgray
-          RightAxis.LabelsFormat.Font.Name = 'Verdana'
-          RightAxis.TicksInner.Color = clDarkgray
-          RightAxis.Title.Font.Name = 'Verdana'
-          TopAxis.Axis.Color = 4210752
-          TopAxis.Grid.Color = clDarkgray
-          TopAxis.LabelsFormat.Font.Name = 'Verdana'
-          TopAxis.TicksInner.Color = clDarkgray
-          TopAxis.Title.Font.Name = 'Verdana'
-          OnGetAxisLabel = AllLapsGetAxisLabel
-          Align = alClient
+          Align = alLeft
           TabOrder = 0
-          DefaultCanvas = 'TGDIPlusCanvas'
-          ColorPaletteIndex = 13
-          object TowerLapRider: TTowerSeries
-            PercentDepth = 50
-            Transparency = 40
-            PercentWidth = 50
-            Pen.Visible = False
-            UseColorRange = False
-            XValues.Name = 'X'
-            XValues.Order = loNone
-            YValues.Name = 'Y'
-            YValues.Order = loNone
-            ZValues.Name = 'Z'
-            ZValues.Order = loNone
+          ExplicitTop = 41
+          ExplicitHeight = 766
+          object SeriesList: TCheckListBox
+            Left = 1
+            Top = 1
+            Width = 103
+            Height = 280
+            Align = alTop
+            ItemHeight = 17
+            TabOrder = 0
+            OnClickCheck = SeriesListClickCheck
+          end
+          object TelemetryStep: TChart
+            Left = 1
+            Top = 281
+            Width = 103
+            Height = 525
+            BackWall.Brush.Gradient.Direction = gdBottomTop
+            BackWall.Brush.Gradient.EndColor = clWhite
+            BackWall.Brush.Gradient.StartColor = 15395562
+            BackWall.Brush.Gradient.Visible = True
+            BackWall.Transparent = False
+            Foot.Font.Color = clBlue
+            Foot.Font.Name = 'Verdana'
+            Gradient.Direction = gdBottomTop
+            Gradient.EndColor = clWhite
+            Gradient.MidColor = 15395562
+            Gradient.StartColor = 15395562
+            LeftWall.Color = clLightyellow
+            Legend.Font.Name = 'Verdana'
+            Legend.Shadow.Transparency = 0
+            Legend.Visible = False
+            RightWall.Color = clLightyellow
+            Title.Font.Name = 'Verdana'
+            Title.Text.Strings = (
+              'TChart')
+            Title.Visible = False
+            AxisVisible = False
+            BottomAxis.Axis.Color = 4210752
+            BottomAxis.Grid.Color = clDarkgray
+            BottomAxis.LabelsFormat.Font.Name = 'Verdana'
+            BottomAxis.TicksInner.Color = clDarkgray
+            BottomAxis.Title.Font.Name = 'Verdana'
+            DepthAxis.Axis.Color = 4210752
+            DepthAxis.Grid.Color = clDarkgray
+            DepthAxis.LabelsFormat.Font.Name = 'Verdana'
+            DepthAxis.TicksInner.Color = clDarkgray
+            DepthAxis.Title.Font.Name = 'Verdana'
+            DepthTopAxis.Axis.Color = 4210752
+            DepthTopAxis.Grid.Color = clDarkgray
+            DepthTopAxis.LabelsFormat.Font.Name = 'Verdana'
+            DepthTopAxis.TicksInner.Color = clDarkgray
+            DepthTopAxis.Title.Font.Name = 'Verdana'
+            LeftAxis.Axis.Color = 4210752
+            LeftAxis.Grid.Color = clDarkgray
+            LeftAxis.LabelsFormat.Font.Name = 'Verdana'
+            LeftAxis.TicksInner.Color = clDarkgray
+            LeftAxis.Title.Font.Name = 'Verdana'
+            RightAxis.Axis.Color = 4210752
+            RightAxis.Grid.Color = clDarkgray
+            RightAxis.LabelsFormat.Font.Name = 'Verdana'
+            RightAxis.TicksInner.Color = clDarkgray
+            RightAxis.Title.Font.Name = 'Verdana'
+            TopAxis.Axis.Color = 4210752
+            TopAxis.Grid.Color = clDarkgray
+            TopAxis.LabelsFormat.Font.Name = 'Verdana'
+            TopAxis.TicksInner.Color = clDarkgray
+            TopAxis.Title.Font.Name = 'Verdana'
+            View3D = False
+            View3DWalls = False
+            OnAfterDraw = TelemetryStepAfterDraw
+            Align = alClient
+            BevelOuter = bvNone
+            TabOrder = 1
+            ExplicitLeft = 2
+            ExplicitTop = 287
+            ExplicitHeight = 484
+            DefaultCanvas = 'TGDIPlusCanvas'
+            ColorPaletteIndex = 13
+          end
+        end
+        object PageControlTelemetry: TPageControl
+          Left = 105
+          Top = 0
+          Width = 520
+          Height = 807
+          ActivePage = TabSingleLap
+          Align = alClient
+          TabOrder = 1
+          OnChange = PageControlTelemetryChange
+          ExplicitLeft = 106
+          ExplicitTop = 1
+          object TabSingleLap: TTabSheet
+            Caption = 'Single Lap'
+            object LapChart: TChart
+              Left = 0
+              Top = 41
+              Width = 512
+              Height = 736
+              BackWall.Brush.Gradient.Direction = gdBottomTop
+              BackWall.Brush.Gradient.EndColor = clWhite
+              BackWall.Brush.Gradient.StartColor = 15395562
+              BackWall.Brush.Gradient.Visible = True
+              BackWall.Transparent = False
+              Foot.Font.Color = clBlue
+              Foot.Font.Name = 'Verdana'
+              Gradient.Direction = gdBottomTop
+              Gradient.EndColor = clWhite
+              Gradient.MidColor = 15395562
+              Gradient.StartColor = 15395562
+              LeftWall.Color = clLightyellow
+              Legend.CheckBoxes = True
+              Legend.Font.Name = 'Verdana'
+              Legend.Shadow.Transparency = 0
+              Legend.Title.Font.Height = -16
+              Legend.Visible = False
+              RightWall.Color = clLightyellow
+              Title.Font.Height = -13
+              Title.Font.Name = 'Verdana'
+              Title.Text.Strings = (
+                'Lap')
+              BottomAxis.Axis.Color = 4210752
+              BottomAxis.Grid.Color = clDarkgray
+              BottomAxis.LabelsFormat.Font.Name = 'Verdana'
+              BottomAxis.TicksInner.Color = clDarkgray
+              BottomAxis.Title.Font.Name = 'Verdana'
+              DepthAxis.Axis.Color = 4210752
+              DepthAxis.Grid.Color = clDarkgray
+              DepthAxis.LabelsFormat.Font.Name = 'Verdana'
+              DepthAxis.TicksInner.Color = clDarkgray
+              DepthAxis.Title.Font.Name = 'Verdana'
+              DepthTopAxis.Axis.Color = 4210752
+              DepthTopAxis.Grid.Color = clDarkgray
+              DepthTopAxis.LabelsFormat.Font.Name = 'Verdana'
+              DepthTopAxis.TicksInner.Color = clDarkgray
+              DepthTopAxis.Title.Font.Name = 'Verdana'
+              CustomAxes = <
+                item
+                  Horizontal = False
+                  OtherSide = True
+                  StartPosition = 80.000000000000000000
+                end
+                item
+                  Automatic = False
+                  AutomaticMaximum = False
+                  Horizontal = False
+                  OtherSide = False
+                  Maximum = 100.000000000000000000
+                  EndPosition = 15.000000000000000000
+                end
+                item
+                  Horizontal = False
+                  OtherSide = False
+                  StartPosition = 16.000000000000000000
+                  EndPosition = 29.000000000000000000
+                end>
+              LeftAxis.Axis.Color = 4210752
+              LeftAxis.Grid.Color = clDarkgray
+              LeftAxis.LabelsFormat.Font.Name = 'Verdana'
+              LeftAxis.StartPosition = 30.000000000000000000
+              LeftAxis.EndPosition = 80.000000000000000000
+              LeftAxis.TicksInner.Color = clDarkgray
+              LeftAxis.Title.Font.Name = 'Verdana'
+              RightAxis.Axis.Color = 4210752
+              RightAxis.Grid.Color = clDarkgray
+              RightAxis.LabelsFormat.Font.Name = 'Verdana'
+              RightAxis.TicksInner.Color = clDarkgray
+              RightAxis.Title.Font.Name = 'Verdana'
+              TopAxis.Axis.Color = 4210752
+              TopAxis.Grid.Color = clDarkgray
+              TopAxis.LabelsFormat.Font.Name = 'Verdana'
+              TopAxis.TicksInner.Color = clDarkgray
+              TopAxis.Title.Font.Name = 'Verdana'
+              View3D = False
+              OnAfterDraw = LapChartAfterDraw
+              Align = alClient
+              TabOrder = 0
+              ExplicitLeft = 105
+              ExplicitWidth = 520
+              ExplicitHeight = 766
+              DefaultCanvas = 'TGDIPlusCanvas'
+              ColorPaletteIndex = 13
+              object CurveSeries: TPointSeries
+                Title = 'Curves'
+                VertAxis = aCustomVertAxis
+                ClickableLine = False
+                Pointer.InflateMargins = True
+                Pointer.Style = psRectangle
+                XValues.Name = 'X'
+                XValues.Order = loAscending
+                YValues.Name = 'Y'
+                YValues.Order = loNone
+                CustomVertAxis = 0
+              end
+              object CurveSpeeds: TPointSeries
+                Title = 'Entry Speed'
+                ClickableLine = False
+                Pointer.InflateMargins = True
+                Pointer.Pen.Visible = False
+                Pointer.Style = psRectangle
+                XValues.Name = 'X'
+                XValues.Order = loAscending
+                YValues.Name = 'Y'
+                YValues.Order = loNone
+              end
+              object SeriesRadius: TFastLineSeries
+                Title = 'Radius'
+                VertAxis = aCustomVertAxis
+                LinePen.Color = 1330417
+                XValues.Name = 'X'
+                XValues.Order = loAscending
+                YValues.Name = 'Y'
+                YValues.Order = loNone
+                CustomVertAxis = 0
+              end
+              object CursorLap: TColorLineTool
+                Pen.Color = 1918068724
+                Pen.Width = 2
+                OnDragLine = CursorLapDragLine
+                AxisID = 0
+                object TAnnotationTool
+                  Shape.Alignment = taCenter
+                  Shape.Shadow.Visible = False
+                end
+              end
+            end
+            object Panel1: TPanel
+              Left = 0
+              Top = 0
+              Width = 512
+              Height = 41
+              Align = alTop
+              TabOrder = 1
+              ExplicitLeft = 1
+              ExplicitTop = -6
+              object Label2: TLabel
+                Left = 11
+                Top = 13
+                Width = 22
+                Height = 15
+                Caption = 'Lap:'
+              end
+              object CBViewLastLap: TCheckBox
+                Left = 123
+                Top = 11
+                Width = 84
+                Height = 17
+                Caption = 'Last Lap'
+                Checked = True
+                State = cbChecked
+                TabOrder = 0
+                OnClick = CBViewLastLapClick
+              end
+              object EViewLap: TEdit
+                Left = 39
+                Top = 11
+                Width = 51
+                Height = 23
+                Enabled = False
+                TabOrder = 1
+                Text = '0'
+                OnChange = EViewLapChange
+              end
+              object UDViewLap: TUpDown
+                Left = 90
+                Top = 11
+                Width = 16
+                Height = 23
+                Associate = EViewLap
+                Enabled = False
+                TabOrder = 2
+              end
+            end
+          end
+          object TabCompare: TTabSheet
+            Caption = 'Compare'
+            ImageIndex = 1
+            object Panel8: TPanel
+              Left = 0
+              Top = 0
+              Width = 512
+              Height = 41
+              Align = alTop
+              TabOrder = 0
+              ExplicitLeft = 1
+              object Label3: TLabel
+                Left = 16
+                Top = 11
+                Width = 31
+                Height = 15
+                Caption = 'Rider:'
+              end
+              object Label6: TLabel
+                Left = 280
+                Top = 11
+                Width = 30
+                Height = 15
+                Caption = 'Rider:'
+              end
+              object Label7: TLabel
+                Left = 139
+                Top = 12
+                Width = 22
+                Height = 15
+                Caption = 'Lap:'
+              end
+              object Label8: TLabel
+                Left = 403
+                Top = 12
+                Width = 22
+                Height = 15
+                Caption = 'Lap:'
+              end
+              object CBRiderA: TComboBox
+                Left = 53
+                Top = 8
+                Width = 68
+                Height = 23
+                Style = csDropDownList
+                TabOrder = 0
+                OnChange = CBRiderAChange
+              end
+              object CBRiderB: TComboBox
+                Left = 316
+                Top = 8
+                Width = 68
+                Height = 23
+                Style = csDropDownList
+                TabOrder = 1
+                OnChange = CBRiderAChange
+              end
+              object Edit1: TEdit
+                Left = 167
+                Top = 9
+                Width = 51
+                Height = 23
+                TabOrder = 2
+                Text = '0'
+                OnChange = CBRiderAChange
+              end
+              object UDLapsA: TUpDown
+                Left = 218
+                Top = 9
+                Width = 16
+                Height = 23
+                Associate = Edit1
+                TabOrder = 3
+              end
+              object Edit2: TEdit
+                Left = 431
+                Top = 9
+                Width = 51
+                Height = 23
+                TabOrder = 4
+                Text = '0'
+                OnChange = CBRiderAChange
+              end
+              object UDLapsB: TUpDown
+                Left = 482
+                Top = 9
+                Width = 16
+                Height = 23
+                Associate = Edit2
+                TabOrder = 5
+              end
+            end
+            object CompareChart: TChart
+              Left = 0
+              Top = 41
+              Width = 512
+              Height = 736
+              BackWall.Brush.Gradient.Direction = gdBottomTop
+              BackWall.Brush.Gradient.EndColor = clWhite
+              BackWall.Brush.Gradient.StartColor = 15395562
+              BackWall.Brush.Gradient.Visible = True
+              BackWall.Transparent = False
+              Foot.Font.Color = clBlue
+              Foot.Font.Name = 'Verdana'
+              Gradient.Direction = gdBottomTop
+              Gradient.EndColor = clWhite
+              Gradient.MidColor = 15395562
+              Gradient.StartColor = 15395562
+              Gradient.Visible = True
+              LeftWall.Color = clLightyellow
+              Legend.Font.Name = 'Verdana'
+              Legend.Shadow.Transparency = 0
+              RightWall.Color = clLightyellow
+              Title.Font.Name = 'Verdana'
+              Title.Text.Strings = (
+                'TChart')
+              BottomAxis.Axis.Color = 4210752
+              BottomAxis.Grid.Color = clDarkgray
+              BottomAxis.LabelsFormat.Font.Name = 'Verdana'
+              BottomAxis.TicksInner.Color = clDarkgray
+              BottomAxis.Title.Font.Name = 'Verdana'
+              DepthAxis.Axis.Color = 4210752
+              DepthAxis.Grid.Color = clDarkgray
+              DepthAxis.LabelsFormat.Font.Name = 'Verdana'
+              DepthAxis.TicksInner.Color = clDarkgray
+              DepthAxis.Title.Font.Name = 'Verdana'
+              DepthTopAxis.Axis.Color = 4210752
+              DepthTopAxis.Grid.Color = clDarkgray
+              DepthTopAxis.LabelsFormat.Font.Name = 'Verdana'
+              DepthTopAxis.TicksInner.Color = clDarkgray
+              DepthTopAxis.Title.Font.Name = 'Verdana'
+              LeftAxis.Axis.Color = 4210752
+              LeftAxis.Grid.Color = clDarkgray
+              LeftAxis.LabelsFormat.Font.Name = 'Verdana'
+              LeftAxis.TicksInner.Color = clDarkgray
+              LeftAxis.Title.Font.Name = 'Verdana'
+              RightAxis.Axis.Color = 4210752
+              RightAxis.Grid.Color = clDarkgray
+              RightAxis.LabelsFormat.Font.Name = 'Verdana'
+              RightAxis.TicksInner.Color = clDarkgray
+              RightAxis.Title.Font.Name = 'Verdana'
+              TopAxis.Axis.Color = 4210752
+              TopAxis.Grid.Color = clDarkgray
+              TopAxis.LabelsFormat.Font.Name = 'Verdana'
+              TopAxis.TicksInner.Color = clDarkgray
+              TopAxis.Title.Font.Name = 'Verdana'
+              View3D = False
+              Align = alClient
+              TabOrder = 1
+              ExplicitLeft = 1
+              ExplicitTop = 38
+              DefaultCanvas = 'TGDIPlusCanvas'
+              ColorPaletteIndex = 13
+            end
+          end
+          object TabAllLaps: TTabSheet
+            Caption = 'All Laps'
+            ImageIndex = 2
+            object AllLaps: TChart
+              Left = 0
+              Top = 0
+              Width = 512
+              Height = 777
+              BackWall.Brush.Gradient.Direction = gdBottomTop
+              BackWall.Brush.Gradient.EndColor = clWhite
+              BackWall.Brush.Gradient.StartColor = 15395562
+              BackWall.Brush.Gradient.Visible = True
+              BackWall.Transparent = False
+              Foot.Font.Color = clBlue
+              Foot.Font.Name = 'Verdana'
+              Gradient.Direction = gdBottomTop
+              Gradient.EndColor = clWhite
+              Gradient.MidColor = 15395562
+              Gradient.StartColor = 15395562
+              Gradient.Visible = True
+              LeftWall.Color = clLightyellow
+              Legend.Font.Name = 'Verdana'
+              Legend.Shadow.Transparency = 0
+              Legend.Visible = False
+              RightWall.Color = clLightyellow
+              Title.Font.Name = 'Verdana'
+              Title.Text.Strings = (
+                'By Lap')
+              BottomAxis.Axis.Color = 4210752
+              BottomAxis.Grid.Color = clDarkgray
+              BottomAxis.LabelsFormat.Font.Name = 'Verdana'
+              BottomAxis.TicksInner.Color = clDarkgray
+              BottomAxis.Title.Caption = 'Lap'
+              BottomAxis.Title.Font.Name = 'Verdana'
+              Chart3DPercent = 74
+              DepthAxis.Axis.Color = 4210752
+              DepthAxis.Grid.Color = clDarkgray
+              DepthAxis.LabelsFormat.Font.Name = 'Verdana'
+              DepthAxis.TicksInner.Color = clDarkgray
+              DepthAxis.Title.Caption = 'Rider'
+              DepthAxis.Title.Font.Name = 'Verdana'
+              DepthTopAxis.Axis.Color = 4210752
+              DepthTopAxis.Grid.Color = clDarkgray
+              DepthTopAxis.LabelsFormat.Font.Name = 'Verdana'
+              DepthTopAxis.TicksInner.Color = clDarkgray
+              DepthTopAxis.Title.Font.Name = 'Verdana'
+              LeftAxis.Axis.Color = 4210752
+              LeftAxis.Grid.Color = clDarkgray
+              LeftAxis.LabelsFormat.Font.Name = 'Verdana'
+              LeftAxis.TicksInner.Color = clDarkgray
+              LeftAxis.Title.Caption = 'Lap Time'
+              LeftAxis.Title.Font.Name = 'Verdana'
+              RightAxis.Axis.Color = 4210752
+              RightAxis.Grid.Color = clDarkgray
+              RightAxis.LabelsFormat.Font.Name = 'Verdana'
+              RightAxis.TicksInner.Color = clDarkgray
+              RightAxis.Title.Font.Name = 'Verdana'
+              TopAxis.Axis.Color = 4210752
+              TopAxis.Grid.Color = clDarkgray
+              TopAxis.LabelsFormat.Font.Name = 'Verdana'
+              TopAxis.TicksInner.Color = clDarkgray
+              TopAxis.Title.Font.Name = 'Verdana'
+              OnGetAxisLabel = AllLapsGetAxisLabel
+              Align = alClient
+              TabOrder = 0
+              ExplicitLeft = 1
+              ExplicitTop = -3
+              ExplicitWidth = 625
+              ExplicitHeight = 807
+              DefaultCanvas = 'TGDIPlusCanvas'
+              ColorPaletteIndex = 13
+              object TowerLapRider: TTowerSeries
+                PercentDepth = 50
+                Transparency = 40
+                PercentWidth = 50
+                Pen.Visible = False
+                UseColorRange = False
+                XValues.Name = 'X'
+                XValues.Order = loNone
+                YValues.Name = 'Y'
+                YValues.Order = loNone
+                ZValues.Name = 'Z'
+                ZValues.Order = loNone
+              end
+            end
           end
         end
       end
@@ -1256,7 +1496,6 @@ object MainForm: TMainForm
                 ParentBackground = False
                 ParentColor = False
                 TabOrder = 0
-                ExplicitLeft = 2
                 _Headers = (
                   1
                   'TColumnHeaderBand'
@@ -1325,7 +1564,6 @@ object MainForm: TMainForm
                 View3D = False
                 Align = alClient
                 TabOrder = 0
-                ExplicitLeft = 2
                 DefaultCanvas = 'TGDIPlusCanvas'
                 ColorPaletteIndex = 13
               end
@@ -1661,23 +1899,33 @@ object MainForm: TMainForm
             Height = 41
             Align = alBottom
             TabOrder = 1
-            object BRandomPole: TButton
-              Left = 9
-              Top = 6
-              Width = 75
-              Height = 25
-              Caption = 'Random'
-              TabOrder = 0
-              OnClick = BRandomPoleClick
+            ExplicitLeft = 1
+            ExplicitTop = 380
+            object Label5: TLabel
+              Left = 18
+              Top = 9
+              Width = 35
+              Height = 15
+              Caption = 'Riders:'
             end
-            object CBSingleRider: TCheckBox
-              Left = 112
-              Top = 10
-              Width = 97
-              Height = 17
-              Caption = 'Single Rider'
+            object EPoleRiders: TEdit
+              Left = 59
+              Top = 6
+              Width = 41
+              Height = 23
+              TabOrder = 0
+              Text = '20'
+              OnChange = EPoleRidersChange
+            end
+            object UDPoleRiders: TUpDown
+              Left = 103
+              Top = 6
+              Width = 16
+              Height = 23
+              Associate = EPoleRiders
+              Min = 1
+              Position = 20
               TabOrder = 1
-              OnClick = CBSingleRiderClick
             end
           end
           object PageControl6: TPageControl
@@ -1898,6 +2146,54 @@ object MainForm: TMainForm
             RadioItem = True
             OnClick = OpenGL1Click
           end
+        end
+      end
+    end
+    object Options1: TMenuItem
+      Caption = '&Options'
+      object Resolution1: TMenuItem
+        Caption = '&Samples per second'
+        object N11: TMenuItem
+          Caption = '1'
+          RadioItem = True
+          OnClick = N1001Click
+        end
+        object N21: TMenuItem
+          Caption = '2'
+          RadioItem = True
+          OnClick = N1001Click
+        end
+        object N51: TMenuItem
+          Caption = '5'
+          Checked = True
+          Default = True
+          RadioItem = True
+          OnClick = N1001Click
+        end
+        object N101: TMenuItem
+          Caption = '10'
+          RadioItem = True
+          OnClick = N1001Click
+        end
+        object N201: TMenuItem
+          Caption = '20'
+          RadioItem = True
+          OnClick = N1001Click
+        end
+        object N301: TMenuItem
+          Caption = '30'
+          RadioItem = True
+          OnClick = N1001Click
+        end
+        object N401: TMenuItem
+          Caption = '40'
+          RadioItem = True
+          OnClick = N1001Click
+        end
+        object N501: TMenuItem
+          Caption = '50'
+          RadioItem = True
+          OnClick = N1001Click
         end
       end
     end

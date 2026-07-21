@@ -34,10 +34,8 @@ uses
 type
   TMainForm = class(TForm)
     PageControl1: TPageControl;
-    TabLap: TTabSheet;
-    TabLaps: TTabSheet;
+    TabTelemetry: TTabSheet;
     LapChart: TChart;
-    AllLaps: TChart;
     PanelTop: TPanel;
     BStart: TButton;
     BPause: TButton;
@@ -64,7 +62,6 @@ type
     Panel3: TPanel;
     CBMap: TComboBox;
     Panel4: TPanel;
-    BRandomPole: TButton;
     CurveSeries: TPointSeries;
     Label1: TLabel;
     LRaceEllapsed: TLabel;
@@ -89,7 +86,6 @@ type
     SpeedGauge: TNumericGauge;
     LeanGauge: TGaugeSeries;
     CursorLap: TColorLineTool;
-    TowerLapRider: TTowerSeries;
     TabData: TTabSheet;
     DataGrid: TTeeGrid;
     FuelGauge: TLinearGauge;
@@ -132,14 +128,11 @@ type
     Panel1: TPanel;
     Label2: TLabel;
     CBViewLastLap: TCheckBox;
-    Label3: TLabel;
-    CBViewMode: TComboBox;
     EViewLap: TEdit;
     UDViewLap: TUpDown;
     Panel2: TPanel;
     Label4: TLabel;
     CBSelectedBike: TComboBox;
-    CBSingleRider: TCheckBox;
     FrontTire: TPaintBox;
     BackTire: TPaintBox;
     TireStatus: TTeeGrid;
@@ -161,6 +154,39 @@ type
     TabSheet2: TTabSheet;
     TabLeaderChart: TTabSheet;
     LeaderChart: TChart;
+    Options1: TMenuItem;
+    Resolution1: TMenuItem;
+    N11: TMenuItem;
+    N21: TMenuItem;
+    N51: TMenuItem;
+    N101: TMenuItem;
+    N201: TMenuItem;
+    N301: TMenuItem;
+    N401: TMenuItem;
+    N501: TMenuItem;
+    Label5: TLabel;
+    EPoleRiders: TEdit;
+    UDPoleRiders: TUpDown;
+    Panel7: TPanel;
+    TelemetryStep: TChart;
+    PageControlTelemetry: TPageControl;
+    TabSingleLap: TTabSheet;
+    TabCompare: TTabSheet;
+    TabAllLaps: TTabSheet;
+    AllLaps: TChart;
+    TowerLapRider: TTowerSeries;
+    Panel8: TPanel;
+    Label3: TLabel;
+    CBRiderA: TComboBox;
+    Label6: TLabel;
+    CBRiderB: TComboBox;
+    Label7: TLabel;
+    Edit1: TEdit;
+    UDLapsA: TUpDown;
+    Label8: TLabel;
+    Edit2: TEdit;
+    UDLapsB: TUpDown;
+    CompareChart: TChart;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -174,7 +200,6 @@ type
     procedure SemaphorAfterDraw(Sender: TObject);
     procedure CBMapChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure BRandomPoleClick(Sender: TObject);
     procedure GDI1Click(Sender: TObject);
     procedure Skia1Click(Sender: TObject);
     procedure OpenGL1Click(Sender: TObject);
@@ -207,7 +232,6 @@ type
     procedure CBViewLastLapClick(Sender: TObject);
     procedure EViewLapChange(Sender: TObject);
     procedure BikeGridSelect(Sender: TObject);
-    procedure CBSingleRiderClick(Sender: TObject);
     procedure CBSelectedBikeChange(Sender: TObject);
     procedure FrontTirePaint(Sender: TObject);
     procedure BackTirePaint(Sender: TObject);
@@ -217,6 +241,12 @@ type
     procedure PilotsCellEditing(const Sender: TObject; const AEditor: TControl;
       const AColumn: TColumn; const ARow: Integer);
     procedure PageControl7Change(Sender: TObject);
+    procedure N1001Click(Sender: TObject);
+    procedure EPoleRidersChange(Sender: TObject);
+    procedure TelemetryStepAfterDraw(Sender: TObject);
+    procedure CursorLapDragLine(Sender: TColorLineTool);
+    procedure PageControlTelemetryChange(Sender: TObject);
+    procedure CBRiderAChange(Sender: TObject);
   private
     { Private declarations }
 
@@ -284,12 +314,14 @@ type
     procedure PaintFastest(const Sender:TColumn; var AData:TRenderData; var DefaultPaint:Boolean);
     procedure PaintFlag(const Sender:TColumn; var AData:TRenderData; var DefaultPaint:Boolean);
     procedure PaintPoleDelta(const Sender:TColumn; var AData:TRenderData; var DefaultPaint:Boolean);
+    procedure ReFillCompareChart;
     function Season:String;
     procedure SetCurrentLap(const ACurrent:Integer);
     procedure SetDashboard;
     procedure SetTeeCanvas(const AClass:TTeeCanvasClass);
     procedure SetupPilotGrid(const AGrid:TTeeGrid; const AColorColumn,ANumColumn:Integer);
     procedure StartRace;
+    procedure TotalCircuitLength(const Axis:TChartAxis);
     procedure TrySetGISBounds;
     procedure UpdateCursorLap(var AData:TAllRidersData);
     procedure UpdateLapCharts;
@@ -418,12 +450,14 @@ end;
 procedure TMainForm.BStartClick(Sender: TObject);
 begin
   BStart.Enabled:=False;
-  BRandomPole.Enabled:=False;
+  UDPoleRiders.Enabled:=False;
 
   CBCategory.Enabled:=False;
   CBSeasons.Enabled:=False;
   CBRounds.Enabled:=False;
   CBRace.Enabled:=False;
+
+  Resolution1.Enabled:=False;
 
   StartCount:=0;
 
@@ -445,12 +479,14 @@ begin
   TBLean.Enabled:=True;
   DebugLean.Visible:=Lean1.Visible;
 
-  BRandomPole.Enabled:=True;
+  UDPoleRiders.Enabled:=True;
 
   CBCategory.Enabled:=True;
   CBSeasons.Enabled:=True;
   CBRounds.Enabled:=True;
   CBRace.Enabled:=True;
+
+  Resolution1.Enabled:=True;
 end;
 
 procedure TMainForm.Button1Click(Sender: TObject);
@@ -469,15 +505,6 @@ begin
 
     PanelFull.Show;
   end;
-end;
-
-procedure TMainForm.BRandomPoleClick(Sender: TObject);
-begin
-  CreatePole;
-
-  PoleGrid.Invalidate;
-  PoleChart.Invalidate;
-  Circuit.Invalidate;
 end;
 
 const
@@ -524,9 +551,8 @@ begin
   else
     CBSeasonsChange(Self);
 
-  BRandomPole.Enabled:=Pilots.Data<>nil;
-  CBSingleRider.Enabled:=BRandomPole.Enabled;
-  BStart.Enabled:=CBSingleRider.Enabled;
+  UDPoleRiders.Enabled:=Pilots.Data<>nil;
+  BStart.Enabled:=UDPoleRiders.Enabled;
 end;
 
 procedure TMainForm.CBMapChange(Sender: TObject);
@@ -539,13 +565,99 @@ begin
 end;
 
 procedure TMainForm.CBRaceChange(Sender: TObject);
+
+  procedure SetUpDown(const AUpDown:TUpDown; const AMin,AMax:Integer);
+  begin
+    AUpDown.Max:=AMax;
+    AUpDown.Min:=AMin;
+  end;
+
 begin
   Race.TotalLaps:=StrToInt(RoundsData[3+CBRace.ItemIndex,CBRounds.ItemIndex]);
 
-  UDViewLap.Max:=Race.TotalLaps;
-  UDViewLap.Min:=1;
+  SetUpDown(UDViewLap,1,Race.TotalLaps);
+  SetUpDown(UDLapsA,1,Race.TotalLaps);
+  SetUpDown(UDLapsB,1,Race.TotalLaps);
 
   SetCurrentLap(1);
+end;
+
+procedure TMainForm.TotalCircuitLength(const Axis:TChartAxis);
+begin
+  Axis.SetMinMax(0,Race.Circuit.TotalLength);
+end;
+
+procedure TMainForm.ReFillCompareChart;
+var tmpA, tmpLapA,
+    tmpB, tmpLapB : Integer;
+    RPM : TAreaSeries;
+
+    tmpStartA, tmpStartB,
+    tmpEndA, tmpEndB,
+    tmpMax,
+    t : Integer;
+
+begin
+  tmpA:=CBRiderA.ItemIndex;
+  tmpB:=CBRiderB.ItemIndex;
+
+  tmpLapA:=UDLapsA.Position;
+  tmpLapB:=UDLapsB.Position;
+
+  CompareChart.Legend.Hide;
+
+  TotalCircuitLength(CompareChart.Axes.Bottom);
+
+  if (tmpA=-1) or (tmpB=-1) or (tmpLapA<1) or (tmpLapB<1) then
+     CompareChart.Title.Caption:=''
+  else
+  begin
+    CompareChart.Title.Caption:=CBRiderA.Text+' #'+IntToStr(tmpLapA)+' vs. '+CBRiderB.Text+' #'+IntToStr(tmpLapB);
+
+    CompareChart.FreeAllSeries;
+
+    RPM:=TAreaSeries.Create(Self);
+    RPM.ParentChart:=CompareChart;
+    RPM.AreaLinesPen.Hide;
+    RPM.Pen.Hide;
+
+    RPM.YOrigin:=0;
+    RPM.UseYOrigin:=True;
+
+    if Race.Riders[tmpA].Laps=0 then
+    begin
+      tmpStartA:=0;
+      tmpEndA:=High(Race.Data);
+    end
+    else
+      Race.Riders[tmpA].GetLapStartEnd(tmpLapA,tmpStartA,tmpEndA);
+
+    if Race.Riders[tmpB].Laps=0 then
+    begin
+      tmpStartB:=0;
+      tmpEndB:=High(Race.Data);
+    end
+    else
+      Race.Riders[tmpB].GetLapStartEnd(tmpLapB,tmpStartB,tmpEndB);
+
+    tmpMax:=Min(tmpEndA-tmpStartA,tmpEndB-tmpStartB);
+
+    RPM.BeginUpdate;
+
+    for t:=0 to tmpMax do
+    begin
+      // TODO: Sync A and B exact Position
+
+      RPM.AddXY(Race.Data[tmpStartA+t].Data[tmpA].Position,Race.Data[tmpStartA+t].Data[tmpA].RPM-Race.Data[tmpStartB+t].Data[tmpB].RPM);
+    end;
+
+    RPM.EndUpdate;
+  end;
+end;
+
+procedure TMainForm.CBRiderAChange(Sender: TObject);
+begin
+  ReFillCompareChart;
 end;
 
 procedure TMainForm.CBRoundsChange(Sender: TObject);
@@ -694,7 +806,7 @@ procedure TMainForm.CBSeasonsChange(Sender: TObject);
   end;
 
 begin
-  PilotsData.Free;
+  //PilotsData.Free;
   Pilots.Data:=nil;
 
   PilotsData:=TCSVDataImport.FromFile(CategorySeason+'\Pilots.txt',True,',','');
@@ -773,11 +885,6 @@ begin
   tmp:=FindPilotNum(Pole[Pole_Num,PoleGrid.Selected.Row]);
 
   PilotsData[Pilots_Bike,tmp]:=CBSelectedBike.Items[CBSelectedBike.ItemIndex];
-end;
-
-procedure TMainForm.CBSingleRiderClick(Sender: TObject);
-begin
-  BRandomPoleClick(Self); // Recreate Pole
 end;
 
 procedure TMainForm.CBViewLastLapClick(Sender: TObject);
@@ -992,7 +1099,8 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
     else
        Race.Circuit.Elevation:=0;
 
-    LapChart.Axes.Bottom.SetMinMax(0,Race.Circuit.TotalLength);
+    TotalCircuitLength(LapChart.Axes.Bottom);
+
     LapChart.Axes.Left.EndPosition:=80;
 
     CursorLap.Value:=Race.Circuit.PolePosition;
@@ -1197,6 +1305,11 @@ begin
   end;
 end;
 
+procedure TMainForm.N1001Click(Sender: TObject);
+begin
+  RealTimeFactor:=1/StrToInt(StripHotkey((Sender as TMenuItem).Caption));
+end;
+
 procedure TMainForm.Clear1Click(Sender: TObject);
 begin
   ApplyTheme(clWhite,clBlack);
@@ -1218,7 +1331,7 @@ begin
 
   {$IFDEF TEEPRO}
   TeeCommander1:=TTeeCommander.Create(Self);
-  TeeCommander1.Parent:=TabLaps;
+  TeeCommander1.Parent:=TabAllLaps;
   TeeCommander1.Panel:=AllLaps;
   {$ENDIF}
 end;
@@ -1255,6 +1368,8 @@ procedure TMainForm.CreatePole;
     begin
       Pole[Pole_Index,t]:=(t+1).ToString;
 
+      Pole[Pole_Delta,t]:='';
+
       tmp:=Race.PoleIndex[t];
 
       Pole[Pole_Num,t]:=PilotsData[1,tmp];
@@ -1272,7 +1387,7 @@ procedure TMainForm.CreatePole;
 
     PoleGrid.Columns[Pole_Index].Header.Text:='#';
 
-//    PoleGrid.Columns[Pole_Delta].OnPaint:=PaintPoleDelta;
+    PoleGrid.Columns[Pole_Delta].OnPaint:=PaintPoleDelta;
 
     PoleGrid.Columns[Pole_Num].Header.Text:='Num';
     PoleGrid.Columns[Pole_Name].Header.Text:='Name';
@@ -1305,31 +1420,30 @@ procedure TMainForm.CreatePole;
     end;
   end;
 
-var tmp,
+var t,
     RiderQuantity : Integer;
 begin
-  // Current rider selected
-  if CBSingleRider.Checked then
-     tmp:=FindPilotNum(Pole[Pole_Num,PoleGrid.Selected.Row])
-  else
-     tmp:=-1;
-
   Pole.Free;
 
-  if HasParameter('SINGLERIDER') or (tmp<>-1) then
-     RiderQuantity:=1
+  if PilotsData=nil then
+     Exit;
+
+  if HasParameter('SINGLERIDER') then
+  begin
+    RiderQuantity:=1;
+    UDPoleRiders.Position:=1;
+  end
   else
-     RiderQuantity:=PilotsData.Rows;
+     RiderQuantity:=Min(UDPoleRiders.Position,PilotsData.Rows);
 
   Pole:=TStringsData.Create(1+Pole_BestLap,RiderQuantity);
 
-  if tmp=-1 then // All pilots
-     Race.ShufflePole(Pole.Count)
-  else
-  begin
-    SetLength(Race.PoleIndex,1);
-    Race.PoleIndex[0]:=0;
-  end;
+  SetLength(Race.PoleIndex,RiderQuantity);
+
+  for t:=0 to RiderQuantity-1 do
+      Race.PoleIndex[t]:=t;
+
+  Race.ShufflePole(RiderQuantity);
 
   Race.StartPoleIndex:=DuplicateArray(Race.PoleIndex);
 
@@ -1341,9 +1455,17 @@ begin
 
   InitRaceRiders;
 
+  FillItems(CBRiderA.Items,PilotsData,0);
+  FillItems(CBRiderB.Items,PilotsData,0);
+
   Race.Init;
 
   PoleGridSelect(Self);
+end;
+
+procedure TMainForm.CursorLapDragLine(Sender: TColorLineTool);
+begin
+  TelemetryStep.Invalidate;
 end;
 
 function TMainForm.FindPilotNum(const ANum:String):Integer; // index inside PilotsData
@@ -1644,7 +1766,7 @@ begin
 
   PoleGrid.Columns['#'].OnPaint:=PaintFastest;
 
-  PageControl1.ActivePage:=TabLap;
+  PageControl1.ActivePage:=TabTelemetry;
 
   SpeedGauge.Value:=0;
   LeanGauge.HandDistance:=30;
@@ -1662,9 +1784,10 @@ begin
   RearBike.LoadFromFile(FindDataPath+'\Images\rear_bike_small.png');
 
   PageControl2.ActivePage:=TabCircuits;
-  PageControl1.ActivePage:=TabLap;
+  PageControl1.ActivePage:=TabTelemetry;
   PageControl4.ActivePage:=TabFrontView;
   PageControl3.ActivePage:=TabRace;
+  PageControlTelemetry.ActivePage:=TabSingleLap;
 
   LoadConfiguration;
 
@@ -1972,15 +2095,11 @@ begin
   if PageControl1.ActivePage=TabData then
   begin
     if DataGrid.Data=nil then
-       //DataGrid.Data:=TVirtualData<TRace>.Create(Race);
-       DataGrid.Data:=TVirtualArrayData<TRider>.Create(Race.Riders);
+       DataGrid.Data:=TVirtualArrayData<TRaceData>.Create(Race.Data);
   end
   else
-  if PageControl1.ActivePage=TabLap then
-  begin
-    if SeriesSpeed.Count<2 then
-       RefillCharts;
-  end
+  if PageControl1.ActivePage=TabTelemetry then
+     PageControlTelemetryChange(Self)
   else
   if PageControl1.ActivePage=TabChampionShip then
      if LeaderBoard.Data=nil then
@@ -2048,7 +2167,7 @@ begin
 
     for tt:=0 to RoundsData.Count-1 do
     begin
-      if RoundsData[5,t]<>'' then
+      if RoundsData[5,tt]<>'' then
       begin
         RoundTotal:=CalcPoints(NumRider,tt);
 
@@ -2064,6 +2183,18 @@ procedure TMainForm.PageControl7Change(Sender: TObject);
 begin
   if PageControl7.ActivePage=TabLeaderChart then
      CreateLeaderChart;
+end;
+
+procedure TMainForm.PageControlTelemetryChange(Sender: TObject);
+begin
+  if PageControlTelemetry.ActivePage=TabSingleLap then
+  begin
+    if SeriesSpeed.Count<2 then
+       RefillCharts;
+  end
+  else
+  if PageControlTelemetry.ActivePage=TabCompare then
+       RefillCompareChart;
 end;
 
 procedure TMainForm.Pole1Click(Sender: TObject);
@@ -2234,7 +2365,7 @@ begin
 
     if Length(Race.Riders)>tmpRider then
     begin
-      SeriesSpeed.GetHorizAxis.SetMinMax(0,Race.Circuit.TotalLength);
+      TotalCircuitLength(SeriesSpeed.GetHorizAxis);
 
       SeriesThrottle.GetVertAxis.SetMinMax(0,100);
       SeriesFrontBrake.GetVertAxis.SetMinMax(0,100);
@@ -2256,15 +2387,10 @@ begin
       else
          tmpLap:=UDViewLap.Position-1;
 
-      if Race.Riders[tmpRider].Laps<=tmpLap then
-         StartOfLap:=0
-      else
-         StartOfLap:=Race.Riders[tmpRider].LapsTime[tmpLap];
+      Race.Riders[tmpRider].GetLapStartEnd(tmpLap,StartOfLap,EndOfLap);
 
-      if CBViewLastLap.Checked or (Length(Race.Riders[tmpRider].LapsTime)=0) then
-         EndOfLap:=High(Race.Data)
-      else
-         EndOfLap:=Race.Riders[tmpRider].LapsTime[tmpLap];
+      if CBViewLastLap.Checked then
+         EndOfLap:=High(Race.Data);
 
       for t:=StartOfLap to EndOfLap do
           AddRiderData(t,tmpRider);
@@ -3081,6 +3207,15 @@ begin
   SetCurrentLap(0);
 end;
 
+procedure TMainForm.EPoleRidersChange(Sender: TObject);
+begin
+  CreatePole;
+
+  PoleGrid.Invalidate;
+  PoleChart.Invalidate;
+  Circuit.Invalidate;
+end;
+
 procedure TMainForm.EViewLapChange(Sender: TObject);
 begin
   if not CBViewLastLap.Checked then
@@ -3130,6 +3265,49 @@ procedure TMainForm.TBLeanChange(Sender: TObject);
 begin
   LeanGauge.Value:=TBLean.Position;
   FrontView.Invalidate;
+end;
+
+procedure TMainForm.TelemetryStepAfterDraw(Sender: TObject);
+
+  function LocateNearest(const ASeries:TChartSeries; const AValue:Single):Integer;
+  var t : Integer;
+  begin
+    for t:=0 to ASeries.Count-1 do
+    begin
+      if ASeries.XValues.Value[t]>AValue then
+      begin
+        result:=t;
+        Exit;
+      end;
+    end;
+
+    result:=-1;
+  end;
+
+var Y, t, tmp : Integer;
+    S : TChartSeries;
+begin
+  Y:=10;
+
+  for t:=0 to LapChart.SeriesCount-1 do
+  begin
+    S:=LapChart[t];
+
+    if (S<>CurveSeries) and (S<>CurveSpeeds) and S.Visible then
+    begin
+      tmp:=LocateNearest(S,CursorLap.Value);
+
+      if tmp<>-1 then
+      begin
+        TelemetryStep.Canvas.TextOut(10,Y,S.Title);
+
+        Inc(Y,20);
+        TelemetryStep.Canvas.TextOut(10,Y,FormatFloat('0.###',S.MandatoryValueList[tmp]));
+
+        Inc(Y,40);
+      end;
+    end;
+  end;
 end;
 
 procedure TMainForm.Timer1Timer(Sender: TObject);
