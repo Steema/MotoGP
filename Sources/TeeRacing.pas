@@ -9,10 +9,23 @@ unit TeeRacing;
 interface
 
 uses
-  Windows, SysUtils, Types, TeCanvas;
+  {$IFDEF MSWINDOWS}
+  Windows,
+  {$ENDIF}
+
+  {$IFDEF FMX}
+  FMXTee.Canvas,
+  {$ELSE}
+  TeCanvas,
+  {$ENDIF}
+
+  Classes, SysUtils, Types;
 
 const
-  RealTimeFactor = 0.5; // 10 times per second (no realtime)
+  Racing_DataVersion=1;
+
+var
+  RealTimeFactor : Single= 0.2; // 1/0.2 = Samples per second = 5 times per second (no realtime)
 
 type
   Float=Single; // Single or Double or Extended
@@ -239,21 +252,28 @@ type
 
     procedure StandUp;
     procedure TrailBrake(const ApexPosition:Float);
+
+    procedure Load(const AStream:TStream);
+    procedure Save(const AStream:TStream);
   end;
 
   TAllRidersData=TArray<TRiderData>;
 
   // All riders at an instant
   TRaceData=record
+  public
     Time : Int64; // msec Ellapsed from race start
     Data : TAllRidersData; // all riders at a given exact time
+
+    procedure Load(const AStream:TStream);
+    procedure Save(const AStream:TStream);
   end;
 
   TColor=UInt32;
 
   TRider=record
   public
-    Active : Boolean;  // in race, not crashed or out or at pitbox
+    Active : Boolean;  // True when in race, not crashed or out or at pitbox
 
     Number : Integer; // 93 = MM
 
@@ -273,6 +293,7 @@ type
     Ellapsed : TArray<Int64>; // Milliseconds of each finished lap
     LapsTime : TArray<Integer>;  // When the rider crosses each lap finish, indexed to TRace.Data
 
+    procedure GetLapStartEnd(const ALap:Integer; out AStart,AEnd:Integer);
     procedure GoToNextCurve(const ATotalCurves:Integer);
     procedure LapFinished(const AStep:Integer; const ATime:Int64);
     procedure Start(const TotalLaps:Integer);
@@ -479,6 +500,19 @@ begin
   result.Y:=Round(Points[tmpPos].Y);
 end;
 
+procedure TRider.GetLapStartEnd(const ALap: Integer; out AStart, AEnd: Integer);
+begin
+  if Laps<=ALap then
+     AStart:=0
+  else
+     AStart:=LapsTime[ALap];
+
+  if Length(LapsTime)=0 then
+     AEnd:=AStart // !!
+  else
+     AEnd:=LapsTime[ALap+1];
+end;
+
 { TRider }
 
 // Next Curve
@@ -629,6 +663,25 @@ begin
   Position:=AStartPosition; // Finish line + pole grid position of this pilot, in meters
 end;
 
+procedure TRiderData.Load(const AStream: TStream);
+begin
+  {
+  AStream.ReadData(RPM);
+  AStream.ReadData(Clutch);
+  AStream.ReadData(Speed);
+  AStream.ReadData(Acceleration);
+  AStream.ReadData(Position);
+  AStream.ReadData(Gear);
+  AStream.ReadData(Throttle);
+  AStream.ReadData(FrontBrake);
+  AStream.ReadData(BackBrake);
+  AStream.ReadData(LeanAngle);
+  }
+
+  // Fast:
+  AStream.Read(Self,SizeOf(Self));
+end;
+
 const
   // Average BSFC for a high-performance racing engine at high load
   // ~235 grams of fuel per kilowatt-hour
@@ -666,6 +719,11 @@ begin
   // 3. Calculate consumption in Grams per Second
   // Formula: (kW * BSFC) / 3600 seconds in an hour
   Result := (vPowerKW * vCurrentBSFC) / 3600.0;
+end;
+
+procedure TRiderData.Save(const AStream: TStream);
+begin
+  AStream.Write(Self,SizeOf(Self));
 end;
 
 procedure TRiderData.StandUp;
@@ -1342,6 +1400,35 @@ begin
 
       end;
     end;
+end;
+
+{ TRaceData }
+
+procedure TRaceData.Load(const AStream: TStream);
+var t, tmp,
+    tmpDataVersion : Integer;
+begin
+  AStream.ReadData(tmpDataVersion);
+  AStream.ReadData(Time);
+
+  AStream.ReadData(tmp);
+  SetLength(Data,tmp);
+
+  for t:=0 to tmp-1 do
+      Data[t].Load(AStream);
+end;
+
+procedure TRaceData.Save(const AStream: TStream);
+var t, tmp : Integer;
+begin
+  AStream.WriteData(Racing_DataVersion);
+  AStream.WriteData(Time);
+
+  tmp:=Length(Data);
+  AStream.WriteData(tmp);
+
+  for t:=0 to tmp-1 do
+      Data[t].Save(AStream);
 end;
 
 initialization
