@@ -848,6 +848,8 @@ begin
   end
   else
   begin
+    RoundsData:=nil;
+
     ChampionGrid.Data:=nil;
     ResultsGrid.Data:=nil;
     LeaderBoard.Data:=nil;
@@ -1338,7 +1340,10 @@ end;
 
 function HTMLColor(const S:String):TColor;
 begin
-  result:=RGB(
+  if S='' then
+     result:=clWhite
+  else
+     result:=RGB(
             StrToInt('$'+Copy(S,2,2)),
             StrToInt('$'+Copy(S,4,2)),
             StrToInt('$'+Copy(S,6,2))
@@ -2055,6 +2060,7 @@ begin
     Leaders[4,t]:=PilotsData[2,t];
   end;
 
+  if RoundsData<>nil then
   for t:=0 to RoundsData.Count-1 do
   begin
     AddPoints(7,RoundsData[5,t],SprintPoints);
@@ -2792,6 +2798,7 @@ procedure TMainForm.StartRace;
 
   procedure InitRiders;
   var t, tmp : Integer;
+      tmpBike : String;
   begin
     for t:=0 to High(Race.Riders) do
     begin
@@ -2799,7 +2806,12 @@ procedure TMainForm.StartRace;
 
       tmp:=Race.PoleIndex[t];
 
-      Race.Riders[t].Bike:=FindBike(PilotsData[5,t]);
+      tmpBike:=PilotsData[5,t];
+
+      if tmpBike='' then
+         tmpBike:='Default';
+
+      Race.Riders[t].Bike:=FindBike(tmpBike);
 
       // Customize pilot
 

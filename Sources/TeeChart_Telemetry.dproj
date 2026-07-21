@@ -170,7 +170,6 @@
         <DCCReference Include="Unit_Main.pas">
             <Form>MainForm</Form>
         </DCCReference>
-        <DCCReference Include="TeeRacing.pas"/>
         <DCCReference Include="TeeTorqueCurve.pas">
             <Form>FormTorqueCurve</Form>
         </DCCReference>
@@ -182,6 +181,7 @@
         <DCCReference Include="TeeCircuit.pas">
             <Form>FormCircuit</Form>
         </DCCReference>
+        <DCCReference Include="TeeRacing.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

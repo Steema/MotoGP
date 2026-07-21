@@ -1,5 +1,5 @@
-Code,Number,Team,Weight,Color,Bike,Front Tire,Back Tire
-JM1,1,Aprilia Racing,63
+Code,Number,Team,Weight,Color,Bike,Race Start,Brake Limit,Cornering,Traction Control,Passing,Grip Control,Consistence,Rain,Qualifying
+JM89,1,Aprilia Racing,63
 JZ5,5,LCR Honda,65
 LM10,10,Honda HRC Castrol,69
 MV12,12,Red Bull KTM Tech3,64

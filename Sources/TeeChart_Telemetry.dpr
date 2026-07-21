@@ -1,15 +1,14 @@
 program TeeChart_Telemetry;
 
 uses
-//  FastMM4,
   Forms,
   Unit_Main in 'Unit_Main.pas' {MainForm},
-  TeeRacing in 'TeeRacing.pas',
   TeeTorqueCurve in 'TeeTorqueCurve.pas' {FormTorqueCurve},
   TeeRacingAbout in 'TeeRacingAbout.pas' {AboutForm},
   TeeTire in 'TeeTire.pas',
   TeeUtils in 'TeeUtils.pas',
-  TeeCircuit in 'TeeCircuit.pas' {FormCircuit};
+  TeeCircuit in 'TeeCircuit.pas' {FormCircuit},
+  TeeRacing in 'TeeRacing.pas';
 
 {$R *.res}
 

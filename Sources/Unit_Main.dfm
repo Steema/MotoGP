@@ -24,7 +24,6 @@ object MainForm: TMainForm
     Height = 41
     Align = alTop
     TabOrder = 0
-    ExplicitTop = -5
     object CurrentLap: TLabel
       Left = 771
       Top = 13
@@ -557,14 +556,14 @@ object MainForm: TMainForm
                 Frame.MiddleBrush.BackColor = clYellow
                 Frame.OuterBrush.BackColor = clGreen
                 Frame.OuterBrush.Gradient.EndColor = clGreen
-                Value = 27.650000000000000000
+                Value = 61.250000000000000000
                 InternalMarkers = {
                   02000000545046300E544E756D657269634D61726B65720008506F736974696F
                   6E0708707043656E7465720B53686170652E436F6C6F7204DBDBC80010536861
                   70652E466F6E742E436F6C6F7204282828001153686170652E466F6E742E4865
                   6967687402D00F53686170652E466F6E742E4E616D65060A44532D4469676974
                   616C1353686170652E4672616D652E56697369626C65081453686170652E5368
-                  61646F772E56697369626C65080A53686170652E546578740602323813536861
+                  61646F772E56697369626C65080A53686170652E546578740602363113536861
                   70652E54657874416C69676E6D656E74070E746152696768744A757374696679
                   1153686170652E5472616E73706172656E74090000545046300E544E756D6572
                   69634D61726B65720008506F736974696F6E070A70705269676874546F700F53
@@ -619,7 +618,7 @@ object MainForm: TMainForm
                 RotationAngle = 160
                 ShapeStyle = gsPolygon
                 TotalAngle = 140.000000000000000000
-                Value = 35.305235115811230000
+                Value = 4.715843661688268000
               end
               object FuelGauge: TLinearGauge
                 Legend.Visible = False
@@ -691,7 +690,7 @@ object MainForm: TMainForm
                 Ticks.Style = psRectangle
                 Ticks.VertSize = 10
                 Ticks.GaugeStyle = gpTick
-                Value = 19.000000000000000000
+                Value = 56.000000000000000000
                 ValueArea.Transparent = True
               end
             end
@@ -926,7 +925,6 @@ object MainForm: TMainForm
       Align = alClient
       TabOrder = 1
       OnChange = PageControl1Change
-      ExplicitLeft = 323
       object TabTelemetry: TTabSheet
         Caption = 'Telemetry'
         object Panel7: TPanel
@@ -936,15 +934,13 @@ object MainForm: TMainForm
           Height = 807
           Align = alLeft
           TabOrder = 0
-          ExplicitTop = 41
-          ExplicitHeight = 766
           object SeriesList: TCheckListBox
             Left = 1
             Top = 1
             Width = 103
             Height = 280
             Align = alTop
-            ItemHeight = 17
+            ItemHeight = 15
             TabOrder = 0
             OnClickCheck = SeriesListClickCheck
           end
@@ -1010,9 +1006,6 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
-            ExplicitLeft = 2
-            ExplicitTop = 287
-            ExplicitHeight = 484
             DefaultCanvas = 'TGDIPlusCanvas'
             ColorPaletteIndex = 13
           end
@@ -1026,8 +1019,6 @@ object MainForm: TMainForm
           Align = alClient
           TabOrder = 1
           OnChange = PageControlTelemetryChange
-          ExplicitLeft = 106
-          ExplicitTop = 1
           object TabSingleLap: TTabSheet
             Caption = 'Single Lap'
             object LapChart: TChart
@@ -1113,9 +1104,6 @@ object MainForm: TMainForm
               OnAfterDraw = LapChartAfterDraw
               Align = alClient
               TabOrder = 0
-              ExplicitLeft = 105
-              ExplicitWidth = 520
-              ExplicitHeight = 766
               DefaultCanvas = 'TGDIPlusCanvas'
               ColorPaletteIndex = 13
               object CurveSeries: TPointSeries
@@ -1169,8 +1157,6 @@ object MainForm: TMainForm
               Height = 41
               Align = alTop
               TabOrder = 1
-              ExplicitLeft = 1
-              ExplicitTop = -6
               object Label2: TLabel
                 Left = 11
                 Top = 13
@@ -1224,7 +1210,7 @@ object MainForm: TMainForm
               object Label3: TLabel
                 Left = 16
                 Top = 11
-                Width = 31
+                Width = 30
                 Height = 15
                 Caption = 'Rider:'
               end
@@ -1899,8 +1885,6 @@ object MainForm: TMainForm
             Height = 41
             Align = alBottom
             TabOrder = 1
-            ExplicitLeft = 1
-            ExplicitTop = 380
             object Label5: TLabel
               Left = 18
               Top = 9
@@ -1918,7 +1902,7 @@ object MainForm: TMainForm
               OnChange = EPoleRidersChange
             end
             object UDPoleRiders: TUpDown
-              Left = 103
+              Left = 100
               Top = 6
               Width = 16
               Height = 23
