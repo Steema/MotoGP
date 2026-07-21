@@ -2822,11 +2822,12 @@ procedure TMainForm.StartRace;
       // Customize pilot
 
       Race.Riders[t].Pilot.Name:=PilotsData[1,t];
-      Race.Riders[t].Pilot.Weight:=StrToFloat(PilotsData[3,t]);
+
+      Race.Riders[t].Pilot.Weight:=StrToFloatDef(PilotsData[3,t],61);  // Kg
 
       tmp:=FindInAllPilots(PilotsData[0,tmp]);
 
-      Race.Riders[t].Pilot.Height:=StrToFloat(AllPilots[7,tmp]);
+      Race.Riders[t].Pilot.Height:=StrToFloatDef(AllPilots[7,tmp],167); // cm
     end;
   end;
 
