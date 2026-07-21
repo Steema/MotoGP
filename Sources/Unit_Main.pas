@@ -762,12 +762,14 @@ const
   RacePoints:Array of Integer=[25,20,16,13,11,10,9,8,7,6,5,4,3,2,1];
 
 procedure TMainForm.AddResultsPoints;
-var t : Integer;
+var t, tmp : Integer;
 begin
-  for t:=0 to High(SprintPoints) do
+  tmp:=ResultsData.Count-1;
+
+  for t:=0 to Min(tmp,High(SprintPoints)) do
       ResultsData[2,t]:=IntToStr(SprintPoints[t]);
 
-  for t:=0 to High(RacePoints) do
+  for t:=0 to Min(tmp,High(RacePoints)) do
       ResultsData[4,t]:=IntToStr(RacePoints[t]);
 end;
 
@@ -1826,13 +1828,12 @@ begin
 
   if tmp<>-1 then
   begin
-    tmpTire:=PilotsData[AColumn,FindPilotNum(Pole[Pole_Num,tmp])];
+    tmpTire:=''; // TODO !! Tire is per Race/Round, not per Rider.   //PilotsData[AColumn,FindPilotNum(Pole[Pole_Num,tmp])];
 
     ACanvas.Pen.Width:=3;
     ACanvas.Ellipse(2,2,30,30);
     ACanvas.Brush.Style:=bsClear;
     ACanvas.Font.Style:=[fsBold];
-//    ACanvas.TextFlags:=TA_CENTER;
     ACanvas.TextOut(9,4,TireLetter(tmpTire));
   end;
 end;
@@ -2156,6 +2157,8 @@ begin
 
   LeaderChart.Title.Caption:=CBCategory.Text+' '+CBSeasons.Text;
   LeaderChart.Title.Font.Size:=18;
+
+  if LeaderBoard.Data<>nil then
 
   for t:=0 to MaxRiders-1 do
   begin
