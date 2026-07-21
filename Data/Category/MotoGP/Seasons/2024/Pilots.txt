@@ -15,9 +15,9 @@ JM43,43,Red Bull KTM Factory Racing,64
 FD49,49,Pertamina Enduro VR46 Racing Team,68
 JM89,89,Prima Pramac Racing,63
 MM93,93,Gresini Racing MotoGP,64
-AE41,41,Aprilia Racing,66
+AESP,41,Aprilia Racing,66
 MB72,72,Pertamina Enduro VR46 Racing Team,61
 AM73,73,Gresini Racing MotoGP,65
-TA30,30,LCR Honda Idemitsu,62
-JM5,5,LCR Honda Castrol,65
-AF37,37,Red Bull GASGAS Tech3,64
+TNAK,30,LCR Honda Idemitsu,62
+JZ5,5,LCR Honda Castrol,65
+AGFE,37,Red Bull GASGAS Tech3,64

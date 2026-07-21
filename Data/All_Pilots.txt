@@ -64,6 +64,7 @@ DFOG,Dennis,Foggia,Roma,Italy,07/01/2001,62,170
 JFOL,Jonas,Folger,Mühldorf,Germany,13/08/1993,65,180
 TFUR,Taiyo,Furusato,Kanoya,Japan,12/07/2005,57,172
 SGAR,Sergio,García,Borriana,Spain,22/03/2003,63,171
+RG87,Remy,Gardner,Sydney,Australia,24/02/1998,72,174
 WGAR,Wayne,Gardner,Wollongong,Australia,11/10/1959,65,170
 SGIB,Sete,Gibernau,Barcelona,Spain,15/12/1972,71,177
 MGON,Manuel,González,Madrid,Spain,04/08/2002,64,172

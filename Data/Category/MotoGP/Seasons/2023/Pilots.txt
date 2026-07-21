@@ -1,5 +1,5 @@
 Code,Number,Team,Weight,Color,Bike,Front Tire,Back Tire
-FB1,1,Ducati Lenovo Team,64
+FB63,1,Ducati Lenovo Team,64
 JZ5,5,Prima Pramac Racing,65
 LM10,10,Mooney VR46 Racing Team,69
 MV12,12,Aprilia Racing,64
@@ -8,16 +8,16 @@ FM21,21,Monster Energy Yamaha MotoGP,67
 EB23,23,Ducati Lenovo Team,64
 BB33,33,Red Bull KTM Factory Racing,63
 JM36,36,Repsol Honda Team,60
-AE41,41,Aprilia Racing,66
+AESP,41,Aprilia Racing,66
 JM43,43,Red Bull KTM Factory Racing,64
 FD49,49,Gresini Racing MotoGP,68
 MB72,72,Mooney VR46 Racing Team,61
 AM73,73,Gresini Racing MotoGP,65
 JM89,89,Prima Pramac Racing,63
 MM93,93,Repsol Honda Team,64
-TA30,30,LCR Honda Idemitsu,62
+TNAK,30,LCR Honda Idemitsu,62
 AR42,42,LCR Honda Castrol,68
-AF37,37,GasGas Factory Racing Tech3,64
-PO44,44,GasGas Factory Racing Tech3,62
+AGFE,37,GasGas Factory Racing Tech3,64
+PESP,44,GasGas Factory Racing Tech3,62
 RF25,25,CryptoDATA RNF MotoGP Team,63
-MO88,88,CryptoDATA RNF MotoGP Team,64
+MOLI,88,CryptoDATA RNF MotoGP Team,64

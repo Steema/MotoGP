@@ -2451,7 +2451,10 @@ end;
 
 procedure TMainForm.UpdateCursorLap(var AData:TAllRidersData);
 begin
-  CursorLap.Value:=AData[Race.PoleIndex[PoleGrid.Selected.Row]].Position;  // Move chart cursor to position of first rider
+  if PoleGrid.Selected.Row=-1 then
+     CursorLap.Value:=0
+  else
+     CursorLap.Value:=AData[Race.PoleIndex[PoleGrid.Selected.Row]].Position;  // Move chart cursor to position of first rider
 end;
 
 procedure TMainForm.PoleGridSelect(Sender: TObject);
