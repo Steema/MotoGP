@@ -1,8 +1,8 @@
 ﻿Code,Name,Surname,City,Country,Birth,Weight,Height
 NABE,Norick,Abe,Tòquio,Japan,07/09/1975,65,173
 PA37,Pedro,Acosta,Mazarrón,Spain,25/05/2004,62,171
-GAGO,Giacomo,Agostini,Brescia,Italy,16/06/1942,65,172
 SAGI,Senna,Agius,Sydney,Australia,09/06/2005,66,175
+GAGO,Giacomo,Agostini,Brescia,Italy,16/06/1942,65,172
 KAKI,Kiyonari,Akiyoshi,Kurume,Japan,12/01/1975,67,174
 FA54,Fermín,Aldeguer,Múrcia,Spain,05/04/2005,65,180
 DALM,David,Almansa,Argamasilla de Calatrava,Spain,22/01/2006,53,165
@@ -45,6 +45,7 @@ SCOR,Sandro,Cortese,Ochsenhausen,Germany,06/01/1990,62,169
 ACRI,Álex,Crivillé,Seva,Spain,04/03/1970,64,169
 CCRU,Cal,Crutchlow,Coventry,United Kingdom,29/10/1985,66,170
 LDAL,Lorenzo,Dalla Porta,Prato,Italy,22/06/1997,61,168
+RDEP,Randy,de Puniet,Andrésy,France,14/02/1981,64,169
 DDER,Didier,de Radiguès,Lovaina,Belgium,27/03/1958,61,170
 FD49,Fabio,Di Giannantonio,Roma,Italy,10/10/1998,68,175
 MDOO,Mick,Doohan,Brisbane,Australia,04/06/1965,68,175
@@ -99,8 +100,8 @@ TLUT,Thomas,Lüthi,Linden,Switzerland,06/09/1986,65,172
 NMAC,Niall,Mackenzie,Stirling,United Kingdom,19/07/1961,61,167
 AMAN,Anton,Mang,Inzell,Germany,29/09/1949,68,174
 LM10,Luca,Marini,Urbino,Italy,10/08/1997,69,184
-MM93,Marc,Márquez,Cervera,Spain,17/02/1993,65,169
 AM73,Álex,Márquez,Cervera,Spain,23/04/1996,65,177
+MM93,Marc,Márquez,Cervera,Spain,17/02/1993,65,169
 JM89,Jorge,Martín,Madrid,Spain,29/01/1998,70,168
 JMAS,Jaume,Masià,Algemesí,Spain,31/10/2000,57,166
 GMAC,Garry,McCoy,Sydney,Australia,18/04/1972,60,164
@@ -131,7 +132,6 @@ APIQ,Ángel,Piqueras,Ayora,Spain,30/11/2006,57,170
 MPIR,Michele,Pirro,San Giovanni Rotondo,Italy,05/07/1986,70,177
 PPON,Patrick,Pons,París,France,24/12/1952,66,175
 TPRO,Tarquinio,Provini,Roveleto,Italy,29/05/1933,58,165
-RDEP,Randy,de Puniet,Andrésy,France,14/02/1981,64,169
 FQ20,Fabio,Quartararo,Niça,France,20/04/1999,68,177
 MQUI,Máximo,Quiles,Múrcia,Spain,19/03/2008,53,166
 TRAB,Tito,Rabat,Barcelona,Spain,25/05/1989,64,178

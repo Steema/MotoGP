@@ -1,2 +1,2 @@
-Round,Circuit Name,Date,Sprint Laps,Race Laps,Sprint Winner Number,Race Winner Number
+Round,Circuit Name,Date,Sprint Laps,Race Laps,Sprint,Race
 1,Circuit de Barcelona-Catalunya,17/05/2026,12,24

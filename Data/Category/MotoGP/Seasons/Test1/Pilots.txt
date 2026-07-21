@@ -1,2 +1,2 @@
-Code,Number,Team,Weight,Color,Bike,Front Tire,Back Tire
+Code,Number,Team,Weight,Color,Bike
 ACRI,1,Team Test,64,#000000,Vespa Primavera 125 1967
