@@ -330,6 +330,7 @@ object MainForm: TMainForm
             OnAfterDraw = CircuitAfterDraw
             Align = alClient
             TabOrder = 0
+            ExplicitLeft = 1
             DefaultCanvas = 'TGDIPlusCanvas'
             ColorPaletteIndex = 13
           end
@@ -342,7 +343,7 @@ object MainForm: TMainForm
             TabOrder = 1
             object SpeedButton1: TSpeedButton
               Left = 270
-              Top = 11
+              Top = 13
               Width = 23
               Height = 22
               Caption = '...'
@@ -365,15 +366,6 @@ object MainForm: TMainForm
                 'Carto Dark'
                 'Carto Positron'
                 'Carto Voyager')
-            end
-            object Button1: TButton
-              Left = 209
-              Top = 10
-              Width = 55
-              Height = 25
-              Caption = 'FULL'
-              TabOrder = 1
-              OnClick = Button1Click
             end
           end
         end
@@ -940,7 +932,7 @@ object MainForm: TMainForm
             Width = 103
             Height = 280
             Align = alTop
-            ItemHeight = 15
+            ItemHeight = 17
             TabOrder = 0
             OnClickCheck = SeriesListClickCheck
           end
@@ -1206,7 +1198,6 @@ object MainForm: TMainForm
               Height = 41
               Align = alTop
               TabOrder = 0
-              ExplicitLeft = 1
               object Label3: TLabel
                 Left = 16
                 Top = 11
@@ -1345,8 +1336,6 @@ object MainForm: TMainForm
               View3D = False
               Align = alClient
               TabOrder = 1
-              ExplicitLeft = 1
-              ExplicitTop = 38
               DefaultCanvas = 'TGDIPlusCanvas'
               ColorPaletteIndex = 13
             end
@@ -1416,10 +1405,6 @@ object MainForm: TMainForm
               OnGetAxisLabel = AllLapsGetAxisLabel
               Align = alClient
               TabOrder = 0
-              ExplicitLeft = 1
-              ExplicitTop = -3
-              ExplicitWidth = 625
-              ExplicitHeight = 807
               DefaultCanvas = 'TGDIPlusCanvas'
               ColorPaletteIndex = 13
               object TowerLapRider: TTowerSeries
@@ -1938,14 +1923,17 @@ object MainForm: TMainForm
                 Rows.Hover.Format.Font.Size = 9.000000000000000000
                 Selected.Format.Font.Name = 'Segoe UI'
                 Selected.Format.Font.Size = 9.000000000000000000
+                Selected.FullRow = True
                 Selected.UnFocused.Format.Font.Name = 'Segoe UI'
                 Selected.UnFocused.Format.Font.Size = 9.000000000000000000
+                OnSelect = LapTimesGridSelect
                 Align = alClient
                 ParentFont = True
                 UseDockManager = False
                 ParentBackground = False
                 ParentColor = False
                 TabOrder = 0
+                ExplicitLeft = -3
                 _Headers = (
                   1
                   'TColumnHeaderBand'
@@ -2047,6 +2035,21 @@ object MainForm: TMainForm
     Top = 232
     object File1: TMenuItem
       Caption = '&File'
+      object New1: TMenuItem
+        Caption = '&New'
+        OnClick = New1Click
+      end
+      object Open1: TMenuItem
+        Caption = '&Open...'
+        OnClick = Open1Click
+      end
+      object Save1: TMenuItem
+        Caption = '&Save...'
+        OnClick = Save1Click
+      end
+      object N4: TMenuItem
+        Caption = '-'
+      end
       object Exit1: TMenuItem
         Caption = '&Exit'
         ShortCut = 32883
@@ -2184,6 +2187,25 @@ object MainForm: TMainForm
     object About1: TMenuItem
       Caption = '&About...'
       OnClick = About1Click
+    end
+  end
+  object PopupCircuit: TPopupMenu
+    Left = 128
+    Top = 328
+    object CenterRider1: TMenuItem
+      Caption = 'Center &Rider'
+      OnClick = CenterRider1Click
+    end
+    object N3: TMenuItem
+      Caption = '-'
+    end
+    object FullView1: TMenuItem
+      Caption = '&Full View'
+      OnClick = FullView1Click
+    end
+    object Editor1: TMenuItem
+      Caption = '&Circuit Editor...'
+      OnClick = Editor1Click
     end
   end
 end

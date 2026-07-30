@@ -75,7 +75,6 @@ type
     OpenGL1: TMenuItem;
     TabChampionShip: TTabSheet;
     PanelFull: TPanel;
-    Button1: TButton;
     PageControl4: TPageControl;
     TabFrontView: TTabSheet;
     FrontView: TChart;
@@ -187,6 +186,15 @@ type
     Edit2: TEdit;
     UDLapsB: TUpDown;
     CompareChart: TChart;
+    PopupCircuit: TPopupMenu;
+    FullView1: TMenuItem;
+    Editor1: TMenuItem;
+    N3: TMenuItem;
+    CenterRider1: TMenuItem;
+    New1: TMenuItem;
+    Open1: TMenuItem;
+    Save1: TMenuItem;
+    N4: TMenuItem;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -203,7 +211,6 @@ type
     procedure GDI1Click(Sender: TObject);
     procedure Skia1Click(Sender: TObject);
     procedure OpenGL1Click(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
     procedure PoleGridSelect(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
     procedure LapChartAfterDraw(Sender: TObject);
@@ -236,7 +243,6 @@ type
     procedure FrontTirePaint(Sender: TObject);
     procedure BackTirePaint(Sender: TObject);
     procedure CBCategoryChange(Sender: TObject);
-    procedure SpeedButton1Click(Sender: TObject);
     procedure ChampionGridSelect(Sender: TObject);
     procedure PilotsCellEditing(const Sender: TObject; const AEditor: TControl;
       const AColumn: TColumn; const ARow: Integer);
@@ -247,6 +253,14 @@ type
     procedure CursorLapDragLine(Sender: TColorLineTool);
     procedure PageControlTelemetryChange(Sender: TObject);
     procedure CBRiderAChange(Sender: TObject);
+    procedure FullView1Click(Sender: TObject);
+    procedure CenterRider1Click(Sender: TObject);
+    procedure Editor1Click(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
+    procedure LapTimesGridSelect(Sender: TObject);
+    procedure New1Click(Sender: TObject);
+    procedure Open1Click(Sender: TObject);
+    procedure Save1Click(Sender: TObject);
   private
     { Private declarations }
 
@@ -487,24 +501,6 @@ begin
   CBRace.Enabled:=True;
 
   Resolution1.Enabled:=True;
-end;
-
-procedure TMainForm.Button1Click(Sender: TObject);
-begin
-  if PanelCircuit.Parent=TabCircuits then
-  begin
-    PanelFull.Hide;
-    PanelCircuit.Align:=alClient;
-    PanelCircuit.Parent:=Self;
-  end
-  else
-  begin
-    PanelCircuit.Align:=alTop;
-    PanelCircuit.Parent:=TabCircuits;
-    PanelCircuit.Height:=PanelCircuit.Width;
-
-    PanelFull.Show;
-  end;
 end;
 
 const
@@ -897,6 +893,13 @@ begin
   EViewLap.Enabled:=UDViewLap.Enabled;
 end;
 
+procedure TMainForm.CenterRider1Click(Sender: TObject);
+begin
+  CenterRider1.Checked:=not CenterRider1.Checked;
+
+  Circuit.Invalidate;
+end;
+
 procedure TMainForm.AllLapsGetAxisLabel(Sender: TChartAxis; Series: TChartSeries;
   ValueIndex: Integer; var LabelText: string);
 var tmp : Integer;
@@ -1018,15 +1021,46 @@ var
           P.X:=CircuitPath.CalcXPos(tmpPos);
           P.Y:=CircuitPath.CalcYPos(tmpPos);
 
-          DrawPilotNumber(C,ShowNumbers,P,14,Race.Riders[tmp].Color, IntToStr(Race.Riders[tmp].Number));
+          DrawPilotNumber(C,ShowNumbers, P
+                         ,14,Race.Riders[tmp].Color, IntToStr(Race.Riders[tmp].Number));
         end;
       end;
+    end;
+  end;
+
+  procedure CenterCurrentRider;
+  var L,
+      tmp,
+      tmpPos : Integer;
+      X,Y,
+      tmpX,tmpY : Single;
+  begin
+    tmp:=Race.PoleIndex[PoleGrid.Selected.Row];
+
+    L:=High(Race.Data);
+
+    if L>=0 then
+    begin
+      tmpPos:=Race.Circuit.IndexOfPosition(Race.Data[L].Data[tmp].Position);
+
+      X:=0.5*(CircuitPath.GetHorizAxis.Maximum-CircuitPath.GetHorizAxis.Minimum);
+      Y:=0.5*(CircuitPath.GetVertAxis.Maximum-CircuitPath.GetVertAxis.Minimum);
+
+      tmpX:=Race.Circuit.Points[tmpPos].X;
+      tmpY:=Race.Circuit.Points[tmpPos].Y;
+
+      CircuitPath.GetHorizAxis.SetMinMax(tmpX-X,tmpX+X);
+      CircuitPath.GetVertAxis.SetMinMax(tmpY-Y,tmpY+Y);
     end;
   end;
 
 begin
   if CircuitPath.Count=0 then
      Exit;
+
+  if PoleGrid.Selected.Row>-1 then
+     if CenterRider1.Checked then
+        CenterCurrentRider;
 
   C:=Circuit.Canvas;
 
@@ -1041,29 +1075,28 @@ end;
 procedure TMainForm.CircuitsSelect(Sender: TObject);
 
   procedure AddRaceCurves;
-  var t : Integer;
+  var t, L1, L2 : Integer;
       Curve : ^TCurve;
+      Old : Char;
   begin
-    SetLength(Race.Circuit.Curves,CurvesGridData.Count);
+    L1:=Length(Race.Circuit.Curves);
+    L2:=CurvesGridData.Count;
+
+    if L1<>L2 then
+       raise Exception.Create('Error different curves count: '+IntToStr(L1)+' <> '+IntToStr(L2));
+
+    Old:=FormatSettings.DecimalSeparator;
+    FormatSettings.DecimalSeparator:='.';
 
     for t:=0 to CurvesGridData.Count-1 do
     begin
       Curve:=@Race.Circuit.Curves[t];
 
-      Curve.Entry:=StrToFloat(CurvesGridData[1,t]);
-
-      Curve.EntryIndex:=Race.Circuit.IndexOfPosition(Curve.Entry);
-
-      Curve.Name:=CurvesGridData[2,t];
-
-      Curve.TotalAngle:=StrToFloatDef(CurvesGridData[3,t],0);
-
-      Curve.EntrySpeed:=StrToFloatDef(CurvesGridData[4,t],0);
-
-      Curve.BeforeApex:=StrToFloatDef(CurvesGridData[5,t],0);
-
-      Curve.ApexPosition:=Curve.Entry+Curve.BeforeApex;
+      Curve.Name:=CurvesGridData[1,t];
+      Curve.Slope:=StrToFloat(CurvesGridData[2,t]);
     end;
+
+    FormatSettings.DecimalSeparator:=Old;
   end;
 
   procedure AddCurves(const ACurves:Array of TCurve);
@@ -1131,11 +1164,13 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
   procedure LoadCSVPath(const AFile:String{; const APath:TTeeBasePath});
   var S: TStringsData;
       t : Integer;
+      Old : Char;
   begin
     S:=TCSVDataImport.FromFile(AFile);
 
     SetLength(Race.Circuit.Points,S.Count);
 
+    Old:=FormatSettings.DecimalSeparator;
     FormatSettings.DecimalSeparator:='.';
 
     for t:=0 to S.Count-1 do
@@ -1144,7 +1179,7 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
       Race.Circuit.Points[t].Y:=StrToFloat(S[1,t]);
     end;
 
-    FormatSettings.DecimalSeparator:=',';
+    FormatSettings.DecimalSeparator:=Old;
 
     S.Free;
 
@@ -1199,21 +1234,13 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
   end;
 
   procedure CreateDataFromCurves;
-  var t, L : Integer;
+  var L : Integer;
   begin
     L:=Length(Race.Circuit.Curves);
 
-    CurvesGridData:=TStringsData.Create(7,L);
+    CurvesGridData:=TStringsData.Create(3,L);
 
     FillSequential(CurvesGridData,0);
-
-    for t:=0 to L-1 do
-    begin
-      CurvesGridData[1,t]:=FloatToStr(Race.Circuit.Curves[t].Entry);
-      CurvesGridData[3,t]:=FloatToStr(Race.Circuit.Curves[t].TotalAngle); // Entry Angle?
-      CurvesGridData[4,t]:=IntToStr(100); // TODO <-- calculate Entry Speed of each curve
-      CurvesGridData[5,t]:=FloatToStr(Race.Circuit.Curves[t].BeforeApex);
-    end;
   end;
 
 var tmp : String;
@@ -1226,6 +1253,8 @@ begin
 
   if Circuits.Data.Count>0 then
   begin
+    Race.Circuit.FindCurves;
+
     tmp:=TPath.Combine(FindDataPath+'\Circuits\Curves',CircuitsData[3,Circuits.Selected.Row]+'.txt');
 
     if FileExists(tmp) then
@@ -1234,19 +1263,13 @@ begin
       AddRaceCurves;
     end
     else
-    begin
-      TFormCircuit.DetectCorners(Race.Circuit);
       CreateDataFromCurves;
-    end;
 
     CurvesGrid.Data:=CurvesGridData;
 
     CurvesGrid.Columns[0].Header.Text:='Curve';
-    CurvesGrid.Columns[1].Header.Text:='Entry Position';
-    CurvesGrid.Columns[2].Header.Text:='Name';
-    CurvesGrid.Columns[3].Header.Text:='Total Angle';
-    CurvesGrid.Columns[4].Header.Text:='Entry Speed';
-    CurvesGrid.Columns[5].Header.Text:='To Apex';
+    CurvesGrid.Columns[1].Header.Text:='Name';
+    CurvesGrid.Columns[2].Header.Text:='Slope';
   end;
 
   //AddCircuitRadius;
@@ -1312,6 +1335,12 @@ end;
 procedure TMainForm.N1001Click(Sender: TObject);
 begin
   RealTimeFactor:=1/StrToInt(StripHotkey((Sender as TMenuItem).Caption));
+end;
+
+procedure TMainForm.New1Click(Sender: TObject);
+begin
+  if TeeYesNo('Are you sure?') then
+     CreatePole;
 end;
 
 procedure TMainForm.Clear1Click(Sender: TObject);
@@ -1452,7 +1481,7 @@ begin
 
   Race.ShufflePole(RiderQuantity);
 
-  Race.StartPoleIndex:=DuplicateArray(Race.PoleIndex);
+  Race.StartPoleIndex:=TArrayHelper.Duplicate(Race.PoleIndex);
 
   InitPoleGrid;
 
@@ -1578,6 +1607,38 @@ end;
 function TMainForm.CategoryPath:String;
 begin
   result:=FindDataPath+'\Category\'+CBCategory.Text;
+end;
+
+const
+  TeeMoto='teemoto';
+
+procedure AddExtension(const ADialog:TCustomFileDialog);
+var i : TFileTypeItem;
+begin
+  ADialog.DefaultExtension:=TeeMoto;
+
+  i:=ADialog.FileTypes.Add;
+
+  i.DisplayName:='MotoGP Telemetry Files';
+  i.FileMask:='*.'+TeeMoto;
+end;
+
+procedure TMainForm.Save1Click(Sender: TObject);
+var f : TFileSaveDialog;
+begin
+  f:=TFileSaveDialog.Create(Self);
+  try
+    AddExtension(f);
+
+    f.Options:=[fdoOverWritePrompt];
+
+    f.FileName:='Race1.'+TeeMoto;
+
+    if f.Execute then
+       Race.Save(f.FileName);
+  finally
+    f.Free;
+  end;
 end;
 
 function TMainForm.Season:String;
@@ -1965,6 +2026,28 @@ begin
   end;
 end;
 
+procedure TMainForm.FullView1Click(Sender: TObject);
+begin
+  if PanelCircuit.Parent=TabCircuits then
+  begin
+    PanelFull.Hide;
+    PanelCircuit.Align:=alClient;
+    PanelCircuit.Parent:=Self;
+
+    FullView1.Checked:=True;
+  end
+  else
+  begin
+    PanelCircuit.Align:=alTop;
+    PanelCircuit.Parent:=TabCircuits;
+    PanelCircuit.Height:=PanelCircuit.Width;
+
+    PanelFull.Show;
+
+    FullView1.Checked:=False;
+  end;
+end;
+
 procedure TMainForm.SetTeeCanvas(const AClass:TTeeCanvasClass);
 begin
   CircuitPath.Free;
@@ -1988,12 +2071,32 @@ end;
 
 procedure TMainForm.SpeedButton1Click(Sender: TObject);
 begin
-  TFormCircuit.ShowCircuit(Race.Circuit);
+  PopupCircuit.Popup(SpeedButton1.ClientOrigin.X,SpeedButton1.ClientOrigin.Y+SpeedButton1.Height);
 end;
 
 procedure TMainForm.GDI1Click(Sender: TObject);
 begin
   SetTeeCanvas(TGDIPlusCanvas);
+end;
+
+procedure TMainForm.Open1Click(Sender: TObject);
+var f : TFileOpenDialog;
+begin
+  f:=TFileOpenDialog.Create(Self);
+  try
+    AddExtension(f);
+
+    f.Options:=[fdoFileMustExist];
+
+    if f.Execute then
+    begin
+      CreatePole;
+      Race.Load(f.FileName);
+    end;
+
+  finally
+    f.Free;
+  end;
 end;
 
 procedure TMainForm.OpenGL1Click(Sender: TObject);
@@ -2599,6 +2702,15 @@ end;
 procedure TMainForm.LapChartAfterDraw(Sender: TObject);
 begin
   LapChart.Canvas.TextOut(10,10,Round(CursorLap.Value).ToString+' m');
+end;
+
+procedure TMainForm.LapTimesGridSelect(Sender: TObject);
+begin
+  if LapTimesGrid.Selected.Row>-1 then
+  begin
+    CBViewLastLap.Checked:=False;
+    UDViewLap.Position:=LapTimesGrid.Selected.Row+1;
+  end;
 end;
 
 procedure TMainForm.Lean1Click(Sender: TObject);
@@ -3224,6 +3336,11 @@ end;
 procedure TMainForm.Edit1Change(Sender: TObject);
 begin
   SetCurrentLap(0);
+end;
+
+procedure TMainForm.Editor1Click(Sender: TObject);
+begin
+  TFormCircuit.ShowCircuit(Race.Circuit);
 end;
 
 procedure TMainForm.EPoleRidersChange(Sender: TObject);

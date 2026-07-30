@@ -1,8 +1,7 @@
 {
   @davidberneda
 
-  TeeChart Canvas drawing utils
-
+  https://github.com/Steema/MotoGP
 }
 unit TeeUtils;
 
