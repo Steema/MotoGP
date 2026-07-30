@@ -21,9 +21,6 @@ uses
 
   Classes, SysUtils, Types;
 
-const
-  Racing_DataVersion=1;
-
 var
   RealTimeFactor : Single= 0.2; // 1/0.2 = Samples per second = 5 times per second (no realtime)
 
@@ -46,6 +43,9 @@ type
 
     procedure Init;
     procedure CalculateAirDensity(const AElevationMeters: Float);
+
+    procedure Load(const AStream:TStream);
+    procedure Save(const AStream:TStream);
   end;
 
   // Curves (Corners) of a circuit path
@@ -81,8 +81,6 @@ type
     Abrasiveness : Float; // Micro / Macro  0.5 mm ... 2.0 mm
   end;
 
-  //TPointFloatArray=Array of TPointFloat;
-
   TCircuit=record
   public
     Curves : Array of TCurve;
@@ -104,7 +102,10 @@ type
     function PointPosition(const APosition:Float):TPoint;
 
     procedure CalculateRadius;
-    procedure FindCurves;
+    procedure FindCurves(CurvatureThreshold: Single = 0.002);
+
+    procedure Load(const AStream:TStream);
+    procedure Save(const AStream:TStream);
   end;
 
   TBikeFrontBack=record
@@ -252,9 +253,6 @@ type
 
     procedure StandUp;
     procedure TrailBrake(const ApexPosition:Float);
-
-    procedure Load(const AStream:TStream);
-    procedure Save(const AStream:TStream);
   end;
 
   TAllRidersData=TArray<TRiderData>;
@@ -297,6 +295,9 @@ type
     procedure GoToNextCurve(const ATotalCurves:Integer);
     procedure LapFinished(const AStep:Integer; const ATime:Int64);
     procedure Start(const TotalLaps:Integer);
+
+    procedure Load(const AStream:TStream);
+    procedure Save(const AStream:TStream);
   end;
 
   TAllRaceData=TArray<TRaceData>;
@@ -336,6 +337,12 @@ type
     procedure Step;
     function StepRiders(const L:Integer):Boolean;
     function TryPasses(var AllRiders:TAllRidersData):Boolean;
+
+    procedure Load(const AStream:TStream); overload;
+    procedure Load(const AFileName:String); overload;
+
+    procedure Save(const AStream:TStream); overload;
+    procedure Save(const AFileName:String); overload;
   end;
 
 var
@@ -371,11 +378,9 @@ function DetermineTrackPhase(const BikePosition:Float;
 // Percent of Throttle depending on Lean Angle in degrees
 function CalculateThrottle(const ALeanAngle,MaxAngle:Float):Float;
 
-function CalcLeanAngle(const APoints: TPointFloatArray; Current: Integer; const Speed:Float): Float;
+function CalcLeanAngle(const APoints:Array of TPointFloat; Current: Integer; const Speed:Float): Float;
 
-function DuplicateArray(const AData:Array of Integer):TArray<Integer>;
-
-function PathLength(const APoints:TPointFloatArray; const StartIndex:Integer=0; UpToIndex:Integer=-1):Float;
+function PathLength(const APoints:Array of TPointFloat; const StartIndex:Integer=0; UpToIndex:Integer=-1):Float;
 
 // Returns distance between two points
 function Distance(const P1, P2: TPointFloat): Float;
@@ -383,18 +388,30 @@ function Distance(const P1, P2: TPointFloat): Float;
 // Returns the absolute angle of a segment in radians
 function SegmentAngle(const P1, P2: TPointFloat): Float; inline;
 
+// Helper function to get the normalized angle difference between -PI and PI
+function GetAngleDifference(const Ang1, Ang2: Single): Single; inline;
+
+type
+  TArrayHelper=record
+  public
+    class function Duplicate<T>(const AData:Array of T):TArray<T>; static;
+    class procedure Read<T>(const AStream:TStream; var AData:TArray<T>); static;
+    class procedure Write<T>(const AStream:TStream; const AData:TArray<T>); static;
+  end;
+
 implementation
 
 uses
   Math;
 
-{ Other factors:
+{ Other factors pending:
 
-   Gear relations
    Wheelie effect
    Slip effect
    Weight transferences
    Traction controls
+   Suspension
+   Tire wear, pressures and temperatures
 }
 
 // Returns distance between two points
@@ -409,6 +426,16 @@ begin
   Result := ArcTan2(P2.Y - P1.Y, P2.X - P1.X);
 end;
 
+// Helper function to get the normalized angle difference between -PI and PI
+function GetAngleDifference(const Ang1, Ang2: Single): Single; inline;
+begin
+  Result := Ang1 - Ang2;
+
+  while Result > Pi do Result := Result - 2 * Pi;
+
+  while Result < -Pi do Result := Result + 2 * Pi;
+end;
+
 // Returns the angle (0 to 360) that form two points
 function AngleVector(const P1, P2: TPointFloat): Float;
 begin
@@ -418,10 +445,163 @@ begin
      Result := Result + 360;
 end;
 
+class function TArrayHelper.Duplicate<T>(const AData:Array of T):TArray<T>;
+var i, L : Integer;
+begin
+  L:=Length(AData);
+
+  SetLength(result,L);
+
+  for i:=0 to L-1 do
+      result[i]:=AData[i];
+end;
+
+class procedure TArrayHelper.Read<T>(const AStream: TStream; var AData: TArray<T>);
+var i, tmp : Integer;
+begin
+  AStream.ReadData(tmp);
+  SetLength(AData,tmp);
+
+  for i:=0 to tmp-1 do
+      AStream.ReadData(AData[i]);
+end;
+
+class procedure TArrayHelper.Write<T>(const AStream:TStream; const AData:TArray<T>);
+var L, i : Integer;
+begin
+  L:=Length(AData);
+  AStream.WriteData(L);
+
+  for i:=0 to L-1 do
+      AStream.WriteData(AData[i]);
+end;
+
 { TCircuit }
 
-procedure TCircuit.FindCurves;
+// Calculate curves and their parameters, from track Points array
+procedure TCircuit.FindCurves(CurvatureThreshold: Single = 0.002);
+const
+  G = 9.81; // m/s2
+  Friction = 0.8; // Dry asphalt, good tires
+  MetersSecToKMH = 3.6;  // Convert from meters per second, to kilometers per hour
+
+  function GetCurveNames:TArray<String>;
+  var t, L : Integer;
+  begin
+    L:=Length(Curves);
+    SetLength(result,L);
+
+    for t:=0 to L-1 do
+        result[t]:=Curves[t].Name;
+  end;
+
+var
+  i, j, L : Integer;
+  N: Integer;
+  Curvatures: Array of Single;
+  AngleDiff: Double;
+  IsTurning: Array of Boolean;
+  InsideCorner: Boolean;
+  CornerStart, CornerEnd, ApexIdx: Integer;
+  MaxCurvature: Single;
+  EntryAng, ExitAng, ApexAng : Single;
+  Track : ^TPointFloatArray;
+  CurveNames : Array of String;
 begin
+  CurveNames:=GetCurveNames;
+
+  Curves:=nil;
+
+  N := Length(Points);
+  if N < 5 then Exit;
+
+  L:=0;
+
+  Track:=@Points;
+
+  SetLength(Curvatures, N);
+  SetLength(IsTurning, N);
+
+  Curvatures[0] := 0;
+  Curvatures[N-1] := 0;
+
+  for i := 1 to N - 2 do
+  begin
+    EntryAng := SegmentAngle(Track^[i-1], Track^[i]);
+    ExitAng := SegmentAngle(Track^[i], Track^[i+1]);
+
+    AngleDiff := Abs(GetAngleDifference(ExitAng, EntryAng));
+
+    Curvatures[i] := AngleDiff / (Distance(Track^[i-1], Track^[i]) + 0.001);
+
+    IsTurning[i] := Curvatures[i] > CurvatureThreshold;
+  end;
+
+  // 2. DETECT CORNER INTERVALS AND FIND THE APEX
+  InsideCorner := False;
+  CornerStart := 0;
+
+  for i := 1 to N - 2 do
+  begin
+    if IsTurning[i] and not InsideCorner then
+    begin
+      // Corner starts
+      InsideCorner := True;
+      CornerStart := i - 1; // Capture one point before the sharp turn starts
+    end
+    else
+    if not IsTurning[i] and InsideCorner then
+    begin
+      // Corner ends
+      InsideCorner := False;
+      CornerEnd := i;
+
+      // Noise filter: ensure the corner has a minimum length (e.g., at least 5 telemetry points)
+      if (CornerEnd - CornerStart) > 5 then
+      begin
+        // Search for the APEX (the point of maximum curvature within this corner interval)
+        MaxCurvature := -1.0;
+        ApexIdx := CornerStart;
+
+        for j := CornerStart to CornerEnd do
+        begin
+          if Curvatures[j] > MaxCurvature then
+          begin
+            MaxCurvature := Curvatures[j];
+            ApexIdx := j;
+          end;
+        end;
+
+        SetLength(Curves,L+1);
+
+        if L<Length(CurveNames) then
+           Curves[L].Name:=CurveNames[L];
+
+        Curves[L].EntryIndex := CornerStart;
+
+        Curves[L].Entry:=PathLength(Points,0,CornerStart);
+
+        //ACircuit.Curves[L].ApexIndex := ApexIdx;
+        //ACircuit.Curves[L].ExitIndex := CornerEnd;
+
+        Curves[L].BeforeApex := PathLength(Points,CornerStart,ApexIdx-1);
+        Curves[L].ApexPosition:=Curves[L].Entry+Curves[L].BeforeApex;
+        Curves[L].AfterApex := PathLength(Points,ApexIdx,CornerEnd-1);
+
+        EntryAng := SegmentAngle(Track^[CornerStart], Track^[CornerStart+1]);
+        ApexAng := SegmentAngle(Track^[ApexIdx-1], Track^[ApexIdx+1]);
+        ExitAng := SegmentAngle(Track^[CornerEnd-1], Track^[CornerEnd]);
+
+        Curves[L].EntryAngle := Abs(RadToDeg(GetAngleDifference(ApexAng, EntryAng)));
+        Curves[L].ExitAngle :=  Abs(RadToDeg(GetAngleDifference(ExitAng, ApexAng)));
+        Curves[L].TotalAngle := -RadToDeg(GetAngleDifference(ExitAng, EntryAng));
+
+        Curves[L].EntrySpeed := MetersSecToKMH * Sqrt(Friction * G * Radius[Curves[L].EntryIndex+1]);
+
+        Inc(L);
+      end;
+    end;
+  end;
 end;
 
 procedure TCircuit.CalculateRadius;
@@ -464,7 +644,7 @@ begin
   end;
 end;
 
-function PathLength(const APoints:TPointFloatArray; const StartIndex:Integer=0; UpToIndex:Integer=-1):Float;
+function PathLength(const APoints:Array of TPointFloat; const StartIndex:Integer=0; UpToIndex:Integer=-1):Float;
 var t, L : Integer;
 begin
   result:=0;
@@ -492,12 +672,64 @@ begin
      result:=(FinishIndex + Round(APosition*(1+L)/TotalLength)) mod L;
 end;
 
+procedure TCircuit.Load(const AStream: TStream);
+
+  procedure ReadPoints;
+  var t, L : Integer;
+  begin
+    L:=Length(Points);
+    AStream.ReadData(L);
+
+    SetLength(Points,L);
+
+    for t:=0 to L-1 do
+        AStream.ReadData<TPointFloat>(Points[t]);
+  end;
+
+begin
+  TArrayHelper.Read<TCurve>(AStream,Curves);
+  ReadPoints;
+
+  TArrayHelper.Read<Float>(AStream,Radius);
+
+  AStream.ReadData(TotalLength);
+  AStream.ReadData(FinishIndex);
+  AStream.ReadData(PolePosition);
+  AStream.ReadData(PolePositionIndex);
+  AStream.ReadData(Elevation);
+end;
+
 function TCircuit.PointPosition(const APosition:Float):TPoint;
 var tmpPos : Integer;
 begin
   tmpPos:=IndexOfPosition(APosition);
   result.X:=Round(Points[tmpPos].X);
   result.Y:=Round(Points[tmpPos].Y);
+end;
+
+procedure TCircuit.Save(const AStream: TStream);
+
+  procedure WritePoints;
+  var t, L : Integer;
+  begin
+    L:=Length(Points);
+    AStream.WriteData(L);
+
+    for t:=0 to L-1 do
+        AStream.WriteData<TPointFloat>(Points[t]);
+  end;
+
+begin
+  TArrayHelper.Write<TCurve>(AStream,Curves);
+  WritePoints;
+
+  TArrayHelper.Write<Float>(AStream,Radius);
+
+  AStream.WriteData(TotalLength);
+  AStream.WriteData(FinishIndex);
+  AStream.WriteData(PolePosition);
+  AStream.WriteData(PolePositionIndex);
+  AStream.WriteData(Elevation);
 end;
 
 procedure TRider.GetLapStartEnd(const ALap: Integer; out AStart, AEnd: Integer);
@@ -542,6 +774,42 @@ begin
   Inc(Laps);
 
   NextCurve:=1; // Start circuit again
+end;
+
+procedure TRider.Load(const AStream: TStream);
+begin
+  AStream.ReadData(Active);
+  AStream.ReadData(Number);
+  AStream.ReadData(StartPole);
+  AStream.ReadData(Laps);
+  AStream.ReadData(BestLap);
+  AStream.ReadData(Color);
+  AStream.ReadData(NextCurve);
+
+// PENDING:
+//    Bike : TBike;
+//    Pilot : TPilot;
+
+  TArrayHelper.Read<Int64>(AStream,Ellapsed);
+  TArrayHelper.Read<Integer>(AStream,LapsTime);
+end;
+
+procedure TRider.Save(const AStream: TStream);
+begin
+  AStream.ReadData(Active);
+  AStream.ReadData(Number);
+  AStream.ReadData(StartPole);
+  AStream.ReadData(Laps);
+  AStream.ReadData(BestLap);
+  AStream.ReadData(Color);
+  AStream.ReadData(NextCurve);
+
+// PENDING:
+//    Bike : TBike;
+//    Pilot : TPilot;
+
+  TArrayHelper.Write<Int64>(AStream,Ellapsed);
+  TArrayHelper.Write<Integer>(AStream,LapsTime);
 end;
 
 procedure TRider.Start(const TotalLaps:Integer);
@@ -663,25 +931,6 @@ begin
   Position:=AStartPosition; // Finish line + pole grid position of this pilot, in meters
 end;
 
-procedure TRiderData.Load(const AStream: TStream);
-begin
-  {
-  AStream.ReadData(RPM);
-  AStream.ReadData(Clutch);
-  AStream.ReadData(Speed);
-  AStream.ReadData(Acceleration);
-  AStream.ReadData(Position);
-  AStream.ReadData(Gear);
-  AStream.ReadData(Throttle);
-  AStream.ReadData(FrontBrake);
-  AStream.ReadData(BackBrake);
-  AStream.ReadData(LeanAngle);
-  }
-
-  // Fast:
-  AStream.Read(Self,SizeOf(Self));
-end;
-
 const
   // Average BSFC for a high-performance racing engine at high load
   // ~235 grams of fuel per kilowatt-hour
@@ -719,11 +968,6 @@ begin
   // 3. Calculate consumption in Grams per Second
   // Formula: (kW * BSFC) / 3600 seconds in an hour
   Result := (vPowerKW * vCurrentBSFC) / 3600.0;
-end;
-
-procedure TRiderData.Save(const AStream: TStream);
-begin
-  AStream.Write(Self,SizeOf(Self));
 end;
 
 procedure TRiderData.StandUp;
@@ -999,6 +1243,32 @@ begin
   AirDensity:=1.225; // kg/m3
 end;
 
+procedure TWeather.Load(const AStream: TStream);
+begin
+  AStream.ReadData(AirTemperature);
+  AStream.ReadData(TrackTemperature);
+  AStream.ReadData(Humidity);
+  AStream.ReadData(Style);
+
+  AStream.ReadData(Wind);
+  AStream.ReadData(WindDirection);
+
+  AStream.ReadData(AirDensity);
+end;
+
+procedure TWeather.Save(const AStream: TStream);
+begin
+  AStream.WriteData(AirTemperature);
+  AStream.WriteData(TrackTemperature);
+  AStream.WriteData(Humidity);
+  AStream.WriteData(Style);
+
+  AStream.WriteData(Wind);
+  AStream.WriteData(WindDirection);
+
+  AStream.WriteData(AirDensity);
+end;
+
 function DetermineTrackPhase(const BikePosition:Float; const ACorner:TCurve; const ABrakeTriggerPosition:Float): TTurnPhase;
 begin
   // On or past Apex?
@@ -1056,7 +1326,7 @@ begin
      Result := 10.0;
 end;
 
-function CalcLeanAngle(const APoints: TPointFloatArray; Current: Integer; const Speed:Float): Float;
+function CalcLeanAngle(const APoints:Array of TPointFloat; Current: Integer; const Speed:Float): Float;
 const MaxLean=64;
 var
   P1, P2, P3: TPointFloat;
@@ -1196,15 +1466,108 @@ begin
       SwapInteger(Items[t],Items[Random(t+1)])
 end;
 
-function DuplicateArray(const AData:Array of Integer):TArray<Integer>;
-var t, L : Integer;
+const
+  TeeRacing_DataSignature:Integer=3489341; // Signature
+  TeeRacing_DataVersion:Integer=1; // Version
+
+procedure TRace.Load(const AStream: TStream);
+
+  procedure ReadData;
+  var t, L : Integer;
+  begin
+    AStream.ReadData(L);
+
+    SetLength(Data,L);
+
+    for t:=0 to L-1 do
+    begin
+      AStream.ReadData(Data[t].Time);
+
+      TArrayHelper.Read<TRiderData>(AStream,Data[t].Data);
+    end;
+  end;
+
+var tmpSig, tmpVersion : Integer;
 begin
-  L:=Length(AData);
+  AStream.ReadData(tmpSig);
 
-  SetLength(result,L);
+  if tmpSig<>TeeRacing_DataSignature then
+     raise Exception.Create('Error: MotoGP Telemetry file not valid');
 
-  for t:=0 to L-1 do
-      result[t]:=AData[t];
+  AStream.ReadData(tmpVersion);
+
+  Circuit.Load(AStream);
+
+  AStream.ReadData(TotalLaps);
+  AStream.ReadData(Fastest);
+  AStream.ReadData(FastestTime);
+  AStream.ReadData(Current);
+  AStream.ReadData(Ellapsed);
+
+  Weather.Load(AStream);
+
+  AStream.ReadData(PoleDistance);
+
+  TArrayHelper.Read<Integer>(AStream,PoleIndex);
+  TArrayHelper.Read<Integer>(AStream,StartPoleIndex);
+
+  TArrayHelper.Read<TRider>(AStream,Riders);
+
+  ReadData;
+end;
+
+procedure TRace.Save(const AStream: TStream);
+
+  procedure WriteData;
+  var t, L : Integer;
+  begin
+    L:=Length(Data);
+    AStream.WriteData(L);
+
+    for t:=0 to L-1 do
+    begin
+      AStream.WriteData(Data[t].Time);
+
+      TArrayHelper.Write<TRiderData>(AStream,Data[t].Data);
+    end;
+  end;
+
+begin
+  AStream.WriteData(TeeRacing_DataSignature);
+  AStream.WriteData(TeeRacing_DataVersion);
+
+  Circuit.Save(AStream);
+
+  AStream.WriteData(TotalLaps);
+  AStream.WriteData(Fastest);
+  AStream.WriteData(FastestTime);
+  AStream.WriteData(Current);
+  AStream.WriteData(Ellapsed);
+
+  Weather.Save(AStream);
+
+  AStream.WriteData(PoleDistance);
+
+  TArrayHelper.Write<Integer>(AStream,PoleIndex);
+  TArrayHelper.Write<Integer>(AStream,StartPoleIndex);
+
+  TArrayHelper.Write<TRider>(AStream,Riders);
+
+  // BUG or Limitation, array of array does not work
+  //TArrayHelper.Write<TRaceData>(AStream,Data);
+
+  WriteData;
+end;
+
+procedure TRace.Save(const AFileName: String);
+var f : TFileStream;
+begin
+  f:=TFileStream.Create(AFileName,fmCreate);
+  try
+    Save(f);
+  finally
+    f.Free;
+  end;
 end;
 
 // Randomly choose riders
@@ -1402,33 +1765,29 @@ begin
     end;
 end;
 
+procedure TRace.Load(const AFileName: String);
+var f : TFileStream;
+begin
+  f:=TFileStream.Create(AFileName,fmOpenRead+fmShareDenyWrite);
+  try
+    Load(f);
+  finally
+    f.Free;
+  end;
+end;
+
 { TRaceData }
 
 procedure TRaceData.Load(const AStream: TStream);
-var t, tmp,
-    tmpDataVersion : Integer;
 begin
-  AStream.ReadData(tmpDataVersion);
   AStream.ReadData(Time);
-
-  AStream.ReadData(tmp);
-  SetLength(Data,tmp);
-
-  for t:=0 to tmp-1 do
-      Data[t].Load(AStream);
+  TArrayHelper.Read<TRiderData>(AStream,Data);
 end;
 
 procedure TRaceData.Save(const AStream: TStream);
-var t, tmp : Integer;
 begin
-  AStream.WriteData(Racing_DataVersion);
-  AStream.WriteData(Time);
-
-  tmp:=Length(Data);
-  AStream.WriteData(tmp);
-
-  for t:=0 to tmp-1 do
-      Data[t].Save(AStream);
+  AStream.ReadData(Time);
+  TArrayHelper.Write<TRiderData>(AStream,Data);
 end;
 
 initialization

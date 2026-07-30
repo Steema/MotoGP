@@ -1,3 +1,9 @@
+{
+  @davidberneda
+
+  https://github.com/Steema/MotoGP
+
+}
 unit TeeCircuit;
 
 interface
@@ -42,7 +48,6 @@ type
   public
     { Public declarations }
 
-    class procedure DetectCorners(var ACircuit:TCircuit; CurvatureThreshold: Single = 0.002); static;
     class function ShowCircuit(var ACircuit:TCircuit):Boolean; static;
   end;
 
@@ -52,141 +57,6 @@ implementation
 
 uses
   TeeUtils, TeCanvas, Math;
-
-// Helper function to get the normalized angle difference between -PI and PI
-function GetAngleDifference(const Ang1, Ang2: Single): Single; inline;
-begin
-  Result := Ang1 - Ang2;
-
-  while Result > Pi do Result := Result - 2 * Pi;
-
-  while Result < -Pi do Result := Result + 2 * Pi;
-end;
-
-class procedure TFormCircuit.DetectCorners(var ACircuit:TCircuit; CurvatureThreshold: Single = 0.002);
-const
-  G = 9.81; // m/s2
-  Friction = 0.8; // Dry asphalt, good tires
-  MetersSecToKMH = 3.6;  // Convert from meters per second, to kilometers per hour
-
-  function GetCurveNames:TArray<String>;
-  var t, L : Integer;
-  begin
-    L:=Length(ACircuit.Curves);
-    SetLength(result,L);
-
-    for t:=0 to L-1 do
-        result[t]:=ACircuit.Curves[t].Name;
-  end;
-
-var
-  i, j, L : Integer;
-  N: Integer;
-  Curvatures: Array of Single;
-  AngleDiff: Double;
-  IsTurning: Array of Boolean;
-  InsideCorner: Boolean;
-  CornerStart, CornerEnd, ApexIdx: Integer;
-  MaxCurvature: Single;
-  EntryAng, ExitAng, ApexAng : Single;
-  Track : ^TPointFloatArray;
-  CurveNames : Array of String;
-begin
-  CurveNames:=GetCurveNames;
-
-  ACircuit.Curves:=nil;
-
-  N := Length(ACircuit.Points);
-  if N < 5 then Exit;
-
-  L:=0;
-
-  Track:=@ACircuit.Points;
-
-  SetLength(Curvatures, N);
-  SetLength(IsTurning, N);
-
-  Curvatures[0] := 0;
-  Curvatures[N-1] := 0;
-
-  for i := 1 to N - 2 do
-  begin
-    EntryAng := SegmentAngle(Track^[i-1], Track^[i]);
-    ExitAng := SegmentAngle(Track^[i], Track^[i+1]);
-
-    AngleDiff := Abs(GetAngleDifference(ExitAng, EntryAng));
-
-    Curvatures[i] := AngleDiff / (Distance(Track^[i-1], Track^[i]) + 0.001);
-
-    IsTurning[i] := Curvatures[i] > CurvatureThreshold;
-  end;
-
-  // 2. DETECT CORNER INTERVALS AND FIND THE APEX
-  InsideCorner := False;
-  CornerStart := 0;
-
-  for i := 1 to N - 2 do
-  begin
-    if IsTurning[i] and not InsideCorner then
-    begin
-      // Corner starts
-      InsideCorner := True;
-      CornerStart := i - 1; // Capture one point before the sharp turn starts
-    end
-    else
-    if not IsTurning[i] and InsideCorner then
-    begin
-      // Corner ends
-      InsideCorner := False;
-      CornerEnd := i;
-
-      // Noise filter: ensure the corner has a minimum length (e.g., at least 5 telemetry points)
-      if (CornerEnd - CornerStart) > 5 then
-      begin
-        // Search for the APEX (the point of maximum curvature within this corner interval)
-        MaxCurvature := -1.0;
-        ApexIdx := CornerStart;
-
-        for j := CornerStart to CornerEnd do
-        begin
-          if Curvatures[j] > MaxCurvature then
-          begin
-            MaxCurvature := Curvatures[j];
-            ApexIdx := j;
-          end;
-        end;
-
-        SetLength(ACircuit.Curves,L+1);
-
-        if L<Length(CurveNames) then
-           ACircuit.Curves[L].Name:=CurveNames[L];
-
-        ACircuit.Curves[L].EntryIndex := CornerStart;
-
-        ACircuit.Curves[L].Entry:=PathLength(ACircuit.Points,0,CornerStart);
-
-        //ACircuit.Curves[L].ApexIndex := ApexIdx;
-        //ACircuit.Curves[L].ExitIndex := CornerEnd;
-
-        ACircuit.Curves[L].BeforeApex := PathLength(ACircuit.Points,CornerStart,ApexIdx-1);
-        ACircuit.Curves[L].ApexPosition:=ACircuit.Curves[L].Entry+ACircuit.Curves[L].BeforeApex;
-        ACircuit.Curves[L].AfterApex := PathLength(ACircuit.Points,ApexIdx,CornerEnd-1);
-
-        EntryAng := SegmentAngle(Track^[CornerStart], Track^[CornerStart+1]);
-        ApexAng := SegmentAngle(Track^[ApexIdx-1], Track^[ApexIdx+1]);
-        ExitAng := SegmentAngle(Track^[CornerEnd-1], Track^[CornerEnd]);
-
-        ACircuit.Curves[L].EntryAngle := Abs(RadToDeg(GetAngleDifference(ApexAng, EntryAng)));
-        ACircuit.Curves[L].ExitAngle :=  Abs(RadToDeg(GetAngleDifference(ExitAng, ApexAng)));
-        ACircuit.Curves[L].TotalAngle := -RadToDeg(GetAngleDifference(ExitAng, EntryAng));
-
-        ACircuit.Curves[L].EntrySpeed := MetersSecToKMH * Sqrt(Friction * G * ACircuit.Radius[ACircuit.Curves[L].EntryIndex+1]);
-
-        Inc(L);
-      end;
-    end;
-  end;
-end;
 
 procedure TFormCircuit.FormShow(Sender: TObject);
 var t : Integer;
@@ -199,7 +69,7 @@ end;
 
 procedure TFormCircuit.Button1Click(Sender: TObject);
 begin
-  DetectCorners(Circuit^);
+  Circuit.FindCurves;
 
   Init(Circuit^);
 

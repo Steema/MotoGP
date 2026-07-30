@@ -82,7 +82,6 @@ object FormCircuit: TFormCircuit
     Align = alClient
     TabOrder = 0
     OnMouseMove = Chart1MouseMove
-    ExplicitWidth = 675
     DefaultCanvas = 'TGDIPlusCanvas'
     ColorPaletteIndex = 13
     object Series1: TLineSeries
@@ -127,7 +126,6 @@ object FormCircuit: TFormCircuit
     Height = 65
     Align = alBottom
     TabOrder = 1
-    ExplicitWidth = 1078
     object Label1: TLabel
       Left = 16
       Top = 16
@@ -209,7 +207,6 @@ object FormCircuit: TFormCircuit
     ParentBackground = False
     ParentColor = False
     TabOrder = 2
-    ExplicitLeft = 480
     _Headers = (
       1
       'TColumnHeaderBand'
