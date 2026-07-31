@@ -108,7 +108,7 @@ type
     procedure Save(const AStream:TStream);
   end;
 
-  TBikeFrontBack=record
+  TBikeFrontRear=record
   public
     Wheel : Float; // Inches diameter
     Tire : TTire;
@@ -153,8 +153,8 @@ type
 
     GearRatios : TGearRatios;
 
-    Front : TBikeFrontBack;
-    Back : TBikeFrontBack;
+    Front : TBikeFrontRear;
+    Rear : TBikeFrontRear;
 
     TotalBrakeForce : Float; // Sum of Front and Back BrakeForce in Nm
 
@@ -314,7 +314,7 @@ type
     Fastest : Integer; // Index of Rider that has the Fastest Lap in this Race
     FastestTime : Int64; // Time of the best lap of Fastest rider
 
-    Current : Integer; // Current lap (of 1st pilot)
+    CurrentLap : Integer; // Current lap (of 1st pilot)
 
     Ellapsed: Int64; // Milliseconds from Race Start
 
@@ -1051,7 +1051,7 @@ begin
   Pilot.SweatLoss:=Pilot.SweatLoss+TimeFactor*SweatRate; // grams
 
   TotalMass:=Bike.Weight+Bike.Fuel+Pilot.TotalMass-(Pilot.SweatLoss*0.001);  // In kilos kg
-  TotalGrip:= Bike.Back.Tire.Grip * TotalMass * G;
+  TotalGrip:= Bike.Rear.Tire.Grip * TotalMass * G;
 
   if Prev.Speed=0 then // Start time
   begin
@@ -1080,7 +1080,7 @@ begin
   // TODO: Apply wind and wind-direction to AirResistance, SideResistance
 
   // TODO: Pacejka's Magic Formula o Magic Formula Tire Model
-  RollingFriction:= Bike.Back.Tire.Friction * TotalMass * G;  // TODO slope positive or negative: * Sin(Slope)
+  RollingFriction:= Bike.Rear.Tire.Friction * TotalMass * G;  // TODO slope positive or negative: * Sin(Slope)
 
   // TODO: Tire degradation (weight loss, grip)
 
@@ -1091,7 +1091,7 @@ begin
 
   // Newtons
   if (FrontBrake>0) or (BackBrake>0) then
-     TotalBrakingForce:=TotalMass * ((Bike.Front.BrakeForce*FrontBrake*0.01)+(Bike.Back.BrakeForce*BackBrake*0.01))
+     TotalBrakingForce:=TotalMass * ((Bike.Front.BrakeForce*FrontBrake*0.01)+(Bike.Rear.BrakeForce*BackBrake*0.01))
   else
      TotalBrakingForce:=0;
 
@@ -1365,11 +1365,11 @@ const
 
 var Inverse_BackRadius : Float;
 begin
-  Inverse_BackRadius:=1/(Back.Wheel * InchToCm * 0.5 * 0.01);
+  Inverse_BackRadius:=1/(Rear.Wheel * InchToCm * 0.5 * 0.01);
 
   Internal_RPM_Calc:= Inverse_BackRadius * Inverse_TwoPi * 60 * FinalDrive * PrimaryRatio;
 
-  Internal_Torque_Calc:= ( PrimaryRatio * FinalDrive * 0.01 * TransmissionEfficiency)/(0.5 * Back.Tire.Diameter*0.01);
+  Internal_Torque_Calc:= ( PrimaryRatio * FinalDrive * 0.01 * TransmissionEfficiency)/(0.5 * Rear.Tire.Diameter*0.01);
 end;
 
 { TRace }
@@ -1501,7 +1501,7 @@ begin
   AStream.ReadData(TotalLaps);
   AStream.ReadData(Fastest);
   AStream.ReadData(FastestTime);
-  AStream.ReadData(Current);
+  AStream.ReadData(CurrentLap);
   AStream.ReadData(Ellapsed);
 
   Weather.Load(AStream);
@@ -1541,7 +1541,7 @@ begin
   AStream.WriteData(TotalLaps);
   AStream.WriteData(Fastest);
   AStream.WriteData(FastestTime);
-  AStream.WriteData(Current);
+  AStream.WriteData(CurrentLap);
   AStream.WriteData(Ellapsed);
 
   Weather.Save(AStream);

@@ -195,6 +195,7 @@ type
     Open1: TMenuItem;
     Save1: TMenuItem;
     N4: TMenuItem;
+    ButtonShowBike: TSpeedButton;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -261,6 +262,7 @@ type
     procedure New1Click(Sender: TObject);
     procedure Open1Click(Sender: TObject);
     procedure Save1Click(Sender: TObject);
+    procedure ButtonShowBikeClick(Sender: TObject);
   private
     { Private declarations }
 
@@ -882,6 +884,8 @@ const
 procedure TMainForm.CBSelectedBikeChange(Sender: TObject);
 var tmp : Integer;
 begin
+  ButtonShowBike.Enabled:=PoleGrid.Selected.Row<>-1;
+
   tmp:=FindPilotNum(Pole[Pole_Num,PoleGrid.Selected.Row]);
 
   PilotsData[Pilots_Bike,tmp]:=CBSelectedBike.Items[CBSelectedBike.ItemIndex];
@@ -1066,7 +1070,7 @@ begin
 
   DrawFinishLine;
 
-  if Circuit.Width>500 then
+  if Circuit.Width>250 then
      DrawCurves;
 
   DrawPilots;
@@ -1082,8 +1086,10 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
     L1:=Length(Race.Circuit.Curves);
     L2:=CurvesGridData.Count;
 
+    {
     if L1<>L2 then
        raise Exception.Create('Error different curves count: '+IntToStr(L1)+' <> '+IntToStr(L2));
+    }
 
     Old:=FormatSettings.DecimalSeparator;
     FormatSettings.DecimalSeparator:='.';
@@ -1583,8 +1589,6 @@ var tmp : TArray<String>;
     Old : Char;
     S : String;
 begin
-  Exit; // !! Conflict between track axes bounds, and real GIS bounds
-
   if GIS<>nil then
   begin
     S:=(CircuitsData[8,Circuits.Selected.Row]);
@@ -1780,6 +1784,13 @@ begin
 
   FillItems(CBSelectedBike.Items,BikeData,0);
   CBSelectedBike.ItemIndex:=0;
+  ButtonShowBike.Enabled:=True;
+
+  GIS:=TGISRaster.Create(Self);
+  GIS.HorizAxis:=aTopAxis;
+  GIS.VertAxis:=aRightAxis;
+
+  Circuit.AddSeries(GIS);
 
   CircuitPath:=TFastLineSeries.Create(Self);
   CircuitPath.ParentChart:=Circuit;
@@ -1805,9 +1816,6 @@ begin
   CBRoundsChange(Self);
 
   Circuit.Axes.Visible:=False;
-
-  GIS:=TGISRaster.Create(Self);
-  Circuit.AddSeries(GIS);
 
   TrySetGISBounds;
 
@@ -2072,6 +2080,15 @@ end;
 procedure TMainForm.SpeedButton1Click(Sender: TObject);
 begin
   PopupCircuit.Popup(SpeedButton1.ClientOrigin.X,SpeedButton1.ClientOrigin.Y+SpeedButton1.Height);
+end;
+
+procedure TMainForm.ButtonShowBikeClick(Sender: TObject);
+var tmp : Integer;
+begin
+  tmp:=CBSelectedBike.ItemIndex;
+
+  if tmp<>-1 then
+     ShowGrid(Self,DataRow(BikeData,tmp));
 end;
 
 procedure TMainForm.GDI1Click(Sender: TObject);
@@ -2415,7 +2432,7 @@ procedure TMainForm.RefillCharts;
     SeriesGear:=NewFastLine('Gear');
     SeriesThrottle:=NewFastLine('Throttle %');
     SeriesFrontBrake:=NewFastLine('Front Brake');
-    SeriesBackBrake:=NewFastLine('Back Brake');
+    SeriesBackBrake:=NewFastLine('Rear Brake');
 
     SeriesGear.Stairs:=True;
     SeriesThrottle.Stairs:=True;
@@ -2638,7 +2655,7 @@ begin
     TiresData:=TStringsData.Create(5,2);
 
     TiresData[0,0]:='Front';
-    TiresData[0,1]:='Back';
+    TiresData[0,1]:='Rear';
 
 //    TiresData[1,0]:=
 //    TiresData[1,1]:=
@@ -2707,10 +2724,7 @@ end;
 procedure TMainForm.LapTimesGridSelect(Sender: TObject);
 begin
   if LapTimesGrid.Selected.Row>-1 then
-  begin
-    CBViewLastLap.Checked:=False;
-    UDViewLap.Position:=LapTimesGrid.Selected.Row+1;
-  end;
+     UDViewLap.Position:=LapTimesGrid.Selected.Row+1;
 end;
 
 procedure TMainForm.Lean1Click(Sender: TObject);
@@ -2736,7 +2750,7 @@ begin
   CurrentLap.Caption:=IntToStr(ACurrent)+' of '+IntToStr(Race.TotalLaps);
 
   if CBViewLastLap.Checked then
-     UDViewLap.Position:=Race.Current;
+     UDViewLap.Position:=Race.CurrentLap;
 end;
 
 function TMainForm.FindBike(const ABike:String):TBike;
@@ -2836,9 +2850,9 @@ begin
           result.Front.Tire.Diameter:=60; // cm
           result.Front.Tire.Friction:=0.02; // coefficient
 
-          result.Back.Tire.Grip:=1.7;
-          result.Back.Tire.Diameter:=69; // cm
-          result.Back.Tire.Friction:=0.02; // coefficient
+          result.Rear.Tire.Grip:=1.7;
+          result.Rear.Tire.Diameter:=69; // cm
+          result.Rear.Tire.Friction:=0.02; // coefficient
 
           result.CdAeroDynamic:=0.45; // 0.3 .. 0.7 coefficient
 
@@ -2859,10 +2873,10 @@ begin
           result.IdleRPM:=AsInteger(8);
           result.Front.Wheel:=AsSingle(9);
           result.Front.BrakeForce:=AsSingle(10);
-          result.Back.Wheel:=AsSingle(11);
-          result.Back.BrakeForce:=AsSingle(12);
+          result.Rear.Wheel:=AsSingle(11);
+          result.Rear.BrakeForce:=AsSingle(12);
 
-          result.TotalBrakeForce:=result.Front.BrakeForce+result.Back.BrakeForce;
+          result.TotalBrakeForce:=result.Front.BrakeForce+result.Rear.BrakeForce;
 
           result.MaxLeanAngle:=AsSingle(13);
           result.TransmissionEfficiency:=AsSingle(14);
@@ -2960,11 +2974,11 @@ begin
        raise Exception.Create('Error Lap exceeds limits: '+IntToStr(Lap));
     {$ENDIF}
 
-    if Race.Current<=Lap then
-       if Race.Current<Race.TotalLaps then
+    if Race.CurrentLap<=Lap then
+       if Race.CurrentLap<Race.TotalLaps then
        begin
-         Race.Current:=Lap+1;
-         SetCurrentLap(Race.Current);
+         Race.CurrentLap:=Lap+1;
+         SetCurrentLap(Race.CurrentLap);
        end;
 
     tmpPole:=FindRiderInPole(Race.Riders[Rider].Number);
@@ -3050,9 +3064,9 @@ begin
 
   Race.Data[0].Time:=0;
 
-  Race.Current:=1;
+  Race.CurrentLap:=1;
 
-  SetCurrentLap(Race.Current);
+  SetCurrentLap(Race.CurrentLap);
 
   InitTowerLapRider;
 end;
@@ -3354,6 +3368,8 @@ end;
 
 procedure TMainForm.EViewLapChange(Sender: TObject);
 begin
+  CBViewLastLap.Checked:=(UDViewLap.Position>=Race.CurrentLap+1);
+
   if not CBViewLastLap.Checked then
      RefillCharts;
 end;
