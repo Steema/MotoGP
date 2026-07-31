@@ -1,7 +1,7 @@
 #,Name,Slope
 1,Expo'92,0
-2,Michelin,0
-3,,0
+2,,0
+3,Michelin,0
 4,,0
 5,Sito Pons,0
 6,Dani Pedrosa,0
