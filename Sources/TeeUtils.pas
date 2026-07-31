@@ -8,8 +8,8 @@ unit TeeUtils;
 interface
 
 uses
-  Windows, Classes, SysUtils, TeCanvas, StdCtrls, Controls,
-  Tee.GridData.Strings;
+  Windows, Classes, SysUtils, TeCanvas,
+  StdCtrls, Controls, Tee.GridData, Tee.GridData.Strings;
 
 procedure FillCombo(const ACombo:TCustomCombo; const ASource:TStringsData; const AColumn:Integer; const ASelected:String); overload;
 procedure FillCombo(const ACombo:TCustomCombo; const Values:Array of String; const ASelected:String); overload;
@@ -23,10 +23,14 @@ procedure FillSequential(const AData:TStringsData; const AColumn:Integer);
 
 procedure DrawPerpendicular(const ACanvas:TTeeCanvas; const P0, P1: TPointFloat; const ALength:Single);
 
+function DataRow(const AData:TStringsData; const ARow:Integer):TStringsData;
+
+function ShowGrid(const AOwner:TComponent; const AData:TVirtualData):TModalResult;
+
 implementation
 
 uses
-  IOUtils;
+  IOUtils, Forms, VCLTee.Grid;
 
 procedure DrawPerpendicular(const ACanvas:TTeeCanvas; const P0, P1: TPointFloat; const ALength:Single);
 var
@@ -140,4 +144,43 @@ begin
       AData[AColumn,t]:=IntToStr(t+1);
 end;
 
+function ShowGrid(const AOwner:TComponent; const AData:TVirtualData):TModalResult;
+var f : TForm;
+    g : TTeeGrid;
+begin
+  f:=TForm.Create(AOwner);
+  try
+    f.Caption:='Grid';
+
+    f.Position:=poOwnerFormCenter;
+
+    g:=TTeeGrid.Create(f);
+    g.Align:=alClient;
+    g.ParentFont:=True;
+    g.Parent:=f;
+
+    g.Data:=AData;
+
+    result:=f.ShowModal;
+  finally
+    f.Free;
+  end;
+end;
+
+function DataRow(const AData:TStringsData; const ARow:Integer):TStringsData;
+var t : Integer;
+begin
+  result:=TStringsData.Create(2,AData.Count);
+
+  result.Headers[0]:='Property';
+  result.Headers[1]:='Value';
+
+  for t:=0 to AData.Count-1 do
+  begin
+    result[0,t]:=AData.Headers[t];
+    result[1,t]:=AData[t,ARow];
+  end;
+end;
+
 end.
+
