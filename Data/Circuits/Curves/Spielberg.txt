@@ -1,0 +1,11 @@
+#,Name,Slope
+1,Niki Lauda,12.0%
+2,Münzer,12.0%
+3,Interwetten,-5.0%
+4,Rauch,-9.3%
+5,5,-7.0%
+6,6,-4.0%
+7,Graz,3.0%
+8,8,0.0%
+9,Jochen Rindt,-3.0%
+10,10,-2.0%
