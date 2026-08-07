@@ -1,0 +1,17 @@
+#,name,slope
+1,Variante del Parco,0.0%
+2,Variante del Parco,0.0%
+3,Rio,0.0%
+4,Rio,0.0%
+5,Rio,0.0%
+6,Rio,0.0%
+7,Kink (Quercia approach),0.0%
+8,Quercia,0.0%
+9,Tramonto,0.0%
+10,Tramonto,0.0%
+11,Curvone,0.0%
+12,Carro,0.0%
+13,Carro,0.0%
+14,Carro,0.0%
+15,Unnamed Left,0.0%
+16,Misano,0.0%
