@@ -1,6 +1,6 @@
 #,Name,Slope
-1,Curva Um (Turn 1),0.0%
-2,Curva Dois (Turn 2),-1.5%
+1,,0.0%
+2,,-1.5%
 3,Mergulho (The Dive),-5.5%
 4,Mergulho Exit,-2.0%
 5,Ferradura (The Horseshoe In),1.0%
