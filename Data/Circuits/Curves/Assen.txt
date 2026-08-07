@@ -1,0 +1,16 @@
+#,Name,Slope
+1,Haarbocht,0.0%
+2,Madijk,0.0%
+3,Ossebroeken,0.0%
+4,Strubben,0.0%
+5,Veenslang,0.0%
+6,Ruskenhoek,0.0%
+7,Stekkenwal,0.0%
+8,De Bult,0.0%
+9,Mandeveen,0.0%
+10,Duikersloot,0.0%
+11,Meeuwenmeer,0.0%
+12,Hoge Heide,0.0%
+13,Ramshoek,0.0%
+14,Geert Timmer Bocht (1),0.0%
+15,Geert Timmer Bocht (2),0.0%
