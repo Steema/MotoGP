@@ -1,0 +1,16 @@
+#,name,slope
+1,,0
+2,,0
+3,,0
+4,Langkawi,0
+5,Genting,0
+6,Genting,0
+7,KLIA,0
+8,KLIA,0
+9,Berjaya Tioman Corner,0
+10,,0
+11,,0
+12,,0
+13,,0
+14,,0
+15,KLIA,0
