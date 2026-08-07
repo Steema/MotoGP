@@ -1,0 +1,16 @@
+#,Name,Slope
+1,Primeira Curva,10%
+2,Kink,4%
+3,Lagos,6%
+4,Left Kink,2%
+5,Torre VIP,12%
+6,Uphill Bend,8%
+7,Medium Right,5%
+8,Samsung,6%
+9,Craig Jones,11%
+10,Portimao High,4%
+11,Portimao Drop,9%
+12,Long Left,7%
+13,Tight Left,5%
+14,Sagres,8%
+15,Galp,6%
