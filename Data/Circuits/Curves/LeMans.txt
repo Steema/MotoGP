@@ -1,0 +1,12 @@
+#,Name,Slope
+1,"Dunlop Curve",-2.5%
+2,"Dunlop Chicane",1.0%
+3,"Forest Esses",-1.5%
+4,"Tertre Rouge",-0.5%
+5,"Mulsanne Chicane 1",0.0%
+6,"Mulsanne Chicane 2",0.0%
+7,"Mulsanne Corner",0.0%
+8,"Indianapolis",-3.0%
+9,"Arnage",0.5%
+10,"Porsche Curves",0.0%
+11,"Ford Chicanes",0.5%
