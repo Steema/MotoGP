@@ -1,0 +1,21 @@
+Number,Name,Slope
+1,Big Red,11.0%
+2,Turn 2,-3.5%
+3,The Esses (Entry),0.5%
+4,The Esses (Mid),-1.0%
+5,The Esses (Exit),-2.0%
+6,Turn 6,-1.5%
+7,Turn 7,0.0%
+8,Turn 8,1.0%
+9,Turn 9,1.5%
+10,Turn 10,-4.5%
+11,The Bobby Pin,-1.0%
+12,Turn 12,2.0%
+13,Turn 13,0.5%
+14,Turn 14,0.0%
+15,Turn 15,-0.5%
+16,The Carousel (Entry),-1.0%
+17,The Carousel (Mid),-0.5%
+18,The Carousel (Exit),1.5%
+19,Turn 19,2.5%
+20,The Andretti,1.0%
