@@ -1,0 +1,14 @@
+#,name,slope
+1,Gotthard-Kühn-Platz,-6.5
+2,Anker,1.5
+3,Omega (Castrol),-4.0
+4,Omega uphill,8.0
+5,Omega crest,2.0
+6,Karthallen,-5.0
+7,The Waterfall (Senke),-12.8
+8,Sweeper inner,3.0
+9,Sweeper outer,1.0
+10,Sweeper apex,2.0
+11,Sachsen Kurve,-2.0
+12,Queckenberg,10.0
+13,Start-Finish jurisdiction,0.0
