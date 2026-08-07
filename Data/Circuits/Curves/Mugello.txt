@@ -1,0 +1,16 @@
+#,Name,Slope
+1,San Donato,-6.2%
+2,Luco,+3.8%
+3,Poggio Secco,+6.1%
+4,Materassi,-2.4%
+5,Borgo San Lorenzo,-4.1%
+6,Casanova,-8.9%
+7,Savelli,-7.5%
+8,Arrabbiata 1,+4.3%
+9,Arrabbiata 2,+9.5%
+10,Scarperia,-1.8%
+11,Palagio,-3.2%
+12,Correntaio,+2.1%
+13,Biondetti 1,+1.5%
+14,Biondetti 2,-1.2%
+15,Bine,-0.5%
