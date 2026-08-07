@@ -1,0 +1,15 @@
+#,Name,Slope
+1,Curva Um (Turn 1),0.0%
+2,Curva Dois (Turn 2),-1.5%
+3,Mergulho (The Dive),-5.5%
+4,Mergulho Exit,-2.0%
+5,Ferradura (The Horseshoe In),1.0%
+6,Miolo (The Infield Loop),0.5%
+7,Esse (S-Curve Entry),0.0%
+8,Esse (S-Curve Exit),0.5%
+9,Bico de Pato (Duck Bill),1.5%
+10,Saída do Miolo (Infield Exit 1),2.0%
+11,Saída do Miolo (Infield Exit 2),2.5%
+12,O R (The R Corner Entry),1.5%
+13,O R (The R Corner Kink),0.5%
+14,Curva Zero / Vitória,0.0%
