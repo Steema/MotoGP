@@ -1,0 +1,13 @@
+#,Name,Slope
+1,Doohan Corner,4.5
+2,Southern Loop,2.1
+3,Stoner Corner,3.0
+4,Honda Corner,1.5
+5,Siberia,2.0
+6,The Hayshed,5.2
+7,Lukey Heights,9.3
+8,Unnamed,4.0
+9,Unnamed,3.5
+10,Unnamed,2.5
+11,Unnamed,1.0
+12,Southern (Miller/Manna) - X,2.0
