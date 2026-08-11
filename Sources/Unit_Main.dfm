@@ -330,7 +330,6 @@ object MainForm: TMainForm
             OnAfterDraw = CircuitAfterDraw
             Align = alClient
             TabOrder = 0
-            ExplicitLeft = 1
             DefaultCanvas = 'TGDIPlusCanvas'
             ColorPaletteIndex = 13
           end
@@ -548,14 +547,14 @@ object MainForm: TMainForm
                 Frame.MiddleBrush.BackColor = clYellow
                 Frame.OuterBrush.BackColor = clGreen
                 Frame.OuterBrush.Gradient.EndColor = clGreen
-                Value = 17.150000000000000000
+                Value = 58.450000000000000000
                 InternalMarkers = {
                   02000000545046300E544E756D657269634D61726B65720008506F736974696F
                   6E0708707043656E7465720B53686170652E436F6C6F7204DBDBC80010536861
                   70652E466F6E742E436F6C6F7204282828001153686170652E466F6E742E4865
                   6967687402D00F53686170652E466F6E742E4E616D65060A44532D4469676974
                   616C1353686170652E4672616D652E56697369626C65081453686170652E5368
-                  61646F772E56697369626C65080A53686170652E546578740602313713536861
+                  61646F772E56697369626C65080A53686170652E546578740602353813536861
                   70652E54657874416C69676E6D656E74070E746152696768744A757374696679
                   1153686170652E5472616E73706172656E74090000545046300E544E756D6572
                   69634D61726B65720008506F736974696F6E070A70705269676874546F700F53
@@ -610,7 +609,9 @@ object MainForm: TMainForm
                 RotationAngle = 160
                 ShapeStyle = gsPolygon
                 TotalAngle = 140.000000000000000000
-                Value = -5.702029033564031000
+                Value = -31.105293720029290000
+                Left = 248
+                Top = 368
               end
               object FuelGauge: TLinearGauge
                 Legend.Visible = False
@@ -682,8 +683,10 @@ object MainForm: TMainForm
                 Ticks.Style = psRectangle
                 Ticks.VertSize = 10
                 Ticks.GaugeStyle = gpTick
-                Value = 84.000000000000000000
+                Value = 26.000000000000000000
                 ValueArea.Transparent = True
+                Left = 224
+                Top = 304
               end
             end
             object DebugLean: TPanel
@@ -714,7 +717,6 @@ object MainForm: TMainForm
               Height = 41
               Align = alBottom
               TabOrder = 3
-              ExplicitLeft = 2
               object Label4: TLabel
                 Left = 9
                 Top = 10
@@ -929,102 +931,19 @@ object MainForm: TMainForm
       OnChange = PageControl1Change
       object TabTelemetry: TTabSheet
         Caption = 'Telemetry'
-        object Panel7: TPanel
+        object PageControlTelemetry: TPageControl
           Left = 0
           Top = 0
-          Width = 105
+          Width = 625
           Height = 807
-          Align = alLeft
-          TabOrder = 0
-          object SeriesList: TCheckListBox
-            Left = 1
-            Top = 1
-            Width = 103
-            Height = 280
-            Align = alTop
-            ItemHeight = 15
-            TabOrder = 0
-            OnClickCheck = SeriesListClickCheck
-          end
-          object TelemetryStep: TChart
-            Left = 1
-            Top = 281
-            Width = 103
-            Height = 525
-            BackWall.Brush.Gradient.Direction = gdBottomTop
-            BackWall.Brush.Gradient.EndColor = clWhite
-            BackWall.Brush.Gradient.StartColor = 15395562
-            BackWall.Brush.Gradient.Visible = True
-            BackWall.Transparent = False
-            Foot.Font.Color = clBlue
-            Foot.Font.Name = 'Verdana'
-            Gradient.Direction = gdBottomTop
-            Gradient.EndColor = clWhite
-            Gradient.MidColor = 15395562
-            Gradient.StartColor = 15395562
-            LeftWall.Color = clLightyellow
-            Legend.Font.Name = 'Verdana'
-            Legend.Shadow.Transparency = 0
-            Legend.Visible = False
-            RightWall.Color = clLightyellow
-            Title.Font.Name = 'Verdana'
-            Title.Text.Strings = (
-              'TChart')
-            Title.Visible = False
-            AxisVisible = False
-            BottomAxis.Axis.Color = 4210752
-            BottomAxis.Grid.Color = clDarkgray
-            BottomAxis.LabelsFormat.Font.Name = 'Verdana'
-            BottomAxis.TicksInner.Color = clDarkgray
-            BottomAxis.Title.Font.Name = 'Verdana'
-            DepthAxis.Axis.Color = 4210752
-            DepthAxis.Grid.Color = clDarkgray
-            DepthAxis.LabelsFormat.Font.Name = 'Verdana'
-            DepthAxis.TicksInner.Color = clDarkgray
-            DepthAxis.Title.Font.Name = 'Verdana'
-            DepthTopAxis.Axis.Color = 4210752
-            DepthTopAxis.Grid.Color = clDarkgray
-            DepthTopAxis.LabelsFormat.Font.Name = 'Verdana'
-            DepthTopAxis.TicksInner.Color = clDarkgray
-            DepthTopAxis.Title.Font.Name = 'Verdana'
-            LeftAxis.Axis.Color = 4210752
-            LeftAxis.Grid.Color = clDarkgray
-            LeftAxis.LabelsFormat.Font.Name = 'Verdana'
-            LeftAxis.TicksInner.Color = clDarkgray
-            LeftAxis.Title.Font.Name = 'Verdana'
-            RightAxis.Axis.Color = 4210752
-            RightAxis.Grid.Color = clDarkgray
-            RightAxis.LabelsFormat.Font.Name = 'Verdana'
-            RightAxis.TicksInner.Color = clDarkgray
-            RightAxis.Title.Font.Name = 'Verdana'
-            TopAxis.Axis.Color = 4210752
-            TopAxis.Grid.Color = clDarkgray
-            TopAxis.LabelsFormat.Font.Name = 'Verdana'
-            TopAxis.TicksInner.Color = clDarkgray
-            TopAxis.Title.Font.Name = 'Verdana'
-            View3D = False
-            View3DWalls = False
-            OnAfterDraw = TelemetryStepAfterDraw
-            Align = alClient
-            BevelOuter = bvNone
-            TabOrder = 1
-            DefaultCanvas = 'TGDIPlusCanvas'
-            ColorPaletteIndex = 13
-          end
-        end
-        object PageControlTelemetry: TPageControl
-          Left = 105
-          Top = 0
-          Width = 520
-          Height = 807
-          ActivePage = TabSingleLap
+          ActivePage = TabRawData
           Align = alClient
-          TabOrder = 1
+          TabOrder = 0
           OnChange = PageControlTelemetryChange
           object TabSingleLap: TTabSheet
             Caption = 'Single Lap'
             object LapChart: TChart
-              Left = 0
+              Left = 105
               Top = 41
               Width = 512
               Height = 736
@@ -1106,6 +1025,7 @@ object MainForm: TMainForm
               OnAfterDraw = LapChartAfterDraw
               Align = alClient
               TabOrder = 0
+              ExplicitLeft = 0
               DefaultCanvas = 'TGDIPlusCanvas'
               ColorPaletteIndex = 13
               object CurveSeries: TPointSeries
@@ -1118,6 +1038,8 @@ object MainForm: TMainForm
                 XValues.Order = loAscending
                 YValues.Name = 'Y'
                 YValues.Order = loNone
+                Left = 224
+                Top = 232
                 CustomVertAxis = 0
               end
               object CurveSpeeds: TPointSeries
@@ -1130,6 +1052,8 @@ object MainForm: TMainForm
                 XValues.Order = loAscending
                 YValues.Name = 'Y'
                 YValues.Order = loNone
+                Left = 216
+                Top = 152
               end
               object SeriesRadius: TFastLineSeries
                 Title = 'Radius'
@@ -1139,12 +1063,16 @@ object MainForm: TMainForm
                 XValues.Order = loAscending
                 YValues.Name = 'Y'
                 YValues.Order = loNone
+                Left = 48
+                Top = 80
                 CustomVertAxis = 0
               end
               object CursorLap: TColorLineTool
                 Pen.Color = 1918068724
                 Pen.Width = 2
                 OnDragLine = CursorLapDragLine
+                Left = 248
+                Top = 88
                 AxisID = 0
                 object TAnnotationTool
                   Shape.Alignment = taCenter
@@ -1155,10 +1083,11 @@ object MainForm: TMainForm
             object Panel1: TPanel
               Left = 0
               Top = 0
-              Width = 512
+              Width = 617
               Height = 41
               Align = alTop
               TabOrder = 1
+              ExplicitWidth = 512
               object Label2: TLabel
                 Left = 11
                 Top = 13
@@ -1168,7 +1097,7 @@ object MainForm: TMainForm
               end
               object CBViewLastLap: TCheckBox
                 Left = 123
-                Top = 11
+                Top = 13
                 Width = 84
                 Height = 17
                 Caption = 'Last Lap'
@@ -1197,6 +1126,90 @@ object MainForm: TMainForm
                 TabOrder = 2
               end
             end
+            object Panel7: TPanel
+              Left = 0
+              Top = 41
+              Width = 105
+              Height = 736
+              Align = alLeft
+              TabOrder = 2
+              object SeriesList: TCheckListBox
+                Left = 1
+                Top = 1
+                Width = 103
+                Height = 280
+                Align = alTop
+                ItemHeight = 17
+                TabOrder = 0
+                OnClickCheck = SeriesListClickCheck
+              end
+              object TelemetryStep: TChart
+                Left = 1
+                Top = 281
+                Width = 103
+                Height = 454
+                BackWall.Brush.Gradient.Direction = gdBottomTop
+                BackWall.Brush.Gradient.EndColor = clWhite
+                BackWall.Brush.Gradient.StartColor = 15395562
+                BackWall.Brush.Gradient.Visible = True
+                BackWall.Transparent = False
+                Foot.Font.Color = clBlue
+                Foot.Font.Name = 'Verdana'
+                Gradient.Direction = gdBottomTop
+                Gradient.EndColor = clWhite
+                Gradient.MidColor = 15395562
+                Gradient.StartColor = 15395562
+                LeftWall.Color = clLightyellow
+                Legend.Font.Name = 'Verdana'
+                Legend.Shadow.Transparency = 0
+                Legend.Visible = False
+                RightWall.Color = clLightyellow
+                Title.Font.Name = 'Verdana'
+                Title.Text.Strings = (
+                  'TChart')
+                Title.Visible = False
+                AxisVisible = False
+                BottomAxis.Axis.Color = 4210752
+                BottomAxis.Grid.Color = clDarkgray
+                BottomAxis.LabelsFormat.Font.Name = 'Verdana'
+                BottomAxis.TicksInner.Color = clDarkgray
+                BottomAxis.Title.Font.Name = 'Verdana'
+                DepthAxis.Axis.Color = 4210752
+                DepthAxis.Grid.Color = clDarkgray
+                DepthAxis.LabelsFormat.Font.Name = 'Verdana'
+                DepthAxis.TicksInner.Color = clDarkgray
+                DepthAxis.Title.Font.Name = 'Verdana'
+                DepthTopAxis.Axis.Color = 4210752
+                DepthTopAxis.Grid.Color = clDarkgray
+                DepthTopAxis.LabelsFormat.Font.Name = 'Verdana'
+                DepthTopAxis.TicksInner.Color = clDarkgray
+                DepthTopAxis.Title.Font.Name = 'Verdana'
+                LeftAxis.Axis.Color = 4210752
+                LeftAxis.Grid.Color = clDarkgray
+                LeftAxis.LabelsFormat.Font.Name = 'Verdana'
+                LeftAxis.TicksInner.Color = clDarkgray
+                LeftAxis.Title.Font.Name = 'Verdana'
+                RightAxis.Axis.Color = 4210752
+                RightAxis.Grid.Color = clDarkgray
+                RightAxis.LabelsFormat.Font.Name = 'Verdana'
+                RightAxis.TicksInner.Color = clDarkgray
+                RightAxis.Title.Font.Name = 'Verdana'
+                TopAxis.Axis.Color = 4210752
+                TopAxis.Grid.Color = clDarkgray
+                TopAxis.LabelsFormat.Font.Name = 'Verdana'
+                TopAxis.TicksInner.Color = clDarkgray
+                TopAxis.Title.Font.Name = 'Verdana'
+                View3D = False
+                View3DWalls = False
+                OnAfterDraw = TelemetryStepAfterDraw
+                Align = alClient
+                BevelOuter = bvNone
+                TabOrder = 1
+                ExplicitHeight = 525
+                DefaultCanvas = 'TGDIPlusCanvas'
+                ColorPaletteIndex = 13
+              end
+            end
           end
           object TabCompare: TTabSheet
             Caption = 'Compare'
@@ -1204,7 +1217,7 @@ object MainForm: TMainForm
             object Panel8: TPanel
               Left = 0
               Top = 0
-              Width = 512
+              Width = 617
               Height = 41
               Align = alTop
               TabOrder = 0
@@ -1292,7 +1305,7 @@ object MainForm: TMainForm
             object CompareChart: TChart
               Left = 0
               Top = 41
-              Width = 512
+              Width = 617
               Height = 736
               BackWall.Brush.Gradient.Direction = gdBottomTop
               BackWall.Brush.Gradient.EndColor = clWhite
@@ -1346,6 +1359,7 @@ object MainForm: TMainForm
               View3D = False
               Align = alClient
               TabOrder = 1
+              ExplicitWidth = 512
               DefaultCanvas = 'TGDIPlusCanvas'
               ColorPaletteIndex = 13
             end
@@ -1356,7 +1370,7 @@ object MainForm: TMainForm
             object AllLaps: TChart
               Left = 0
               Top = 0
-              Width = 512
+              Width = 617
               Height = 777
               BackWall.Brush.Gradient.Direction = gdBottomTop
               BackWall.Brush.Gradient.EndColor = clWhite
@@ -1415,6 +1429,7 @@ object MainForm: TMainForm
               OnGetAxisLabel = AllLapsGetAxisLabel
               Align = alClient
               TabOrder = 0
+              ExplicitWidth = 512
               DefaultCanvas = 'TGDIPlusCanvas'
               ColorPaletteIndex = 13
               object TowerLapRider: TTowerSeries
@@ -1429,7 +1444,87 @@ object MainForm: TMainForm
                 YValues.Order = loNone
                 ZValues.Name = 'Z'
                 ZValues.Order = loNone
+                Left = 160
+                Top = 88
               end
+            end
+          end
+          object TabCurveStats: TTabSheet
+            Caption = 'Curves'
+            ImageIndex = 4
+            object CurveStats: TTeeGrid
+              Left = 121
+              Top = 0
+              Width = 496
+              Height = 777
+              Columns = <>
+              Align = alClient
+              UseDockManager = False
+              ParentBackground = False
+              ParentColor = False
+              TabOrder = 0
+              ExplicitWidth = 391
+              _Headers = (
+                1
+                'TColumnHeaderBand'
+                <
+                  item
+                  end>)
+            end
+            object ListCurveStats: TListBox
+              Left = 0
+              Top = 0
+              Width = 121
+              Height = 777
+              Align = alLeft
+              ItemHeight = 15
+              Items.Strings = (
+                'Brake distance'
+                'Speed at brake'
+                'Speed at entry'
+                'Speed at apex'
+                'Speed at exit'
+                'Average speed'
+                'Lean angle')
+              TabOrder = 1
+              OnClick = ListCurveStatsClick
+            end
+          end
+          object TabRawData: TTabSheet
+            Caption = 'Raw Data'
+            ImageIndex = 3
+            object DataGrid: TTeeGrid
+              Left = 0
+              Top = 0
+              Width = 617
+              Height = 777
+              Cells.Format.Font.Name = 'Segoe UI'
+              Cells.Format.Font.Size = 9.000000000000000000
+              Columns = <>
+              Header.Format.Font.Name = 'Segoe UI'
+              Header.Format.Font.Size = 9.000000000000000000
+              Rows.Format.Font.Name = 'Segoe UI'
+              Rows.Format.Font.Size = 9.000000000000000000
+              Rows.Hover.Format.Font.Name = 'Segoe UI'
+              Rows.Hover.Format.Font.Size = 9.000000000000000000
+              Selected.Format.Font.Name = 'Segoe UI'
+              Selected.Format.Font.Size = 9.000000000000000000
+              Selected.UnFocused.Format.Font.Name = 'Segoe UI'
+              Selected.UnFocused.Format.Font.Size = 9.000000000000000000
+              Align = alClient
+              ParentFont = True
+              UseDockManager = False
+              ParentBackground = False
+              ParentColor = False
+              TabOrder = 0
+              _Headers = (
+                1
+                'TColumnHeaderBand'
+                <
+                  item
+                    Format.Font.Name = 'Segoe UI'
+                    Format.Font.Size = 9.000000000000000000
+                  end>)
             end
           end
         end
@@ -1716,43 +1811,6 @@ object MainForm: TMainForm
           end
         end
       end
-      object TabData: TTabSheet
-        Caption = 'Data'
-        ImageIndex = 4
-        object DataGrid: TTeeGrid
-          Left = 0
-          Top = 0
-          Width = 625
-          Height = 807
-          Cells.Format.Font.Name = 'Segoe UI'
-          Cells.Format.Font.Size = 9.000000000000000000
-          Columns = <>
-          Header.Format.Font.Name = 'Segoe UI'
-          Header.Format.Font.Size = 9.000000000000000000
-          Rows.Format.Font.Name = 'Segoe UI'
-          Rows.Format.Font.Size = 9.000000000000000000
-          Rows.Hover.Format.Font.Name = 'Segoe UI'
-          Rows.Hover.Format.Font.Size = 9.000000000000000000
-          Selected.Format.Font.Name = 'Segoe UI'
-          Selected.Format.Font.Size = 9.000000000000000000
-          Selected.UnFocused.Format.Font.Name = 'Segoe UI'
-          Selected.UnFocused.Format.Font.Size = 9.000000000000000000
-          Align = alClient
-          ParentFont = True
-          UseDockManager = False
-          ParentBackground = False
-          ParentColor = False
-          TabOrder = 0
-          _Headers = (
-            1
-            'TColumnHeaderBand'
-            <
-              item
-                Format.Font.Name = 'Segoe UI'
-                Format.Font.Size = 9.000000000000000000
-              end>)
-        end
-      end
       object TabSheet1: TTabSheet
         Caption = 'Circuits'
         ImageIndex = 5
@@ -2029,8 +2087,8 @@ object MainForm: TMainForm
     Enabled = False
     Interval = 1
     OnTimer = Timer1Timer
-    Left = 544
-    Top = 352
+    Left = 480
+    Top = 304
   end
   object TimerStart: TTimer
     Enabled = False
@@ -2215,6 +2273,19 @@ object MainForm: TMainForm
     object Editor1: TMenuItem
       Caption = '&Circuit Editor...'
       OnClick = Editor1Click
+    end
+  end
+  object PopupColumn: TPopupMenu
+    OnPopup = PopupColumnPopup
+    Left = 656
+    Top = 456
+    object Autosize1: TMenuItem
+      Caption = '&Autosize'
+      OnClick = Autosize1Click
+    end
+    object Colorize1: TMenuItem
+      Caption = '&Colorize'
+      OnClick = Colorize1Click
     end
   end
 end

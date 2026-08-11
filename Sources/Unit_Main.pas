@@ -25,6 +25,7 @@ uses
   TeeComma,
   {$ENDIF}
 
+  Tee.GridData,
   Tee.GridData.Strings, Tee.Grid.CSV, TeeGIS, TeeRacing, Tee.Painter,
   Tee.Grid.Columns, Tee.GridData.Rtti, Tee.Grid, Tee.Grid.RowGroup,
   Tee.Format, Tee.Renders, TeeTorqueCurve,
@@ -85,8 +86,6 @@ type
     SpeedGauge: TNumericGauge;
     LeanGauge: TGaugeSeries;
     CursorLap: TColorLineTool;
-    TabData: TTabSheet;
-    DataGrid: TTeeGrid;
     FuelGauge: TLinearGauge;
     FrontView1: TMenuItem;
     Pole1: TMenuItem;
@@ -196,6 +195,14 @@ type
     Save1: TMenuItem;
     N4: TMenuItem;
     ButtonShowBike: TSpeedButton;
+    TabRawData: TTabSheet;
+    DataGrid: TTeeGrid;
+    TabCurveStats: TTabSheet;
+    CurveStats: TTeeGrid;
+    ListCurveStats: TListBox;
+    PopupColumn: TPopupMenu;
+    Autosize1: TMenuItem;
+    Colorize1: TMenuItem;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -263,6 +270,10 @@ type
     procedure Open1Click(Sender: TObject);
     procedure Save1Click(Sender: TObject);
     procedure ButtonShowBikeClick(Sender: TObject);
+    procedure ListCurveStatsClick(Sender: TObject);
+    procedure Autosize1Click(Sender: TObject);
+    procedure Colorize1Click(Sender: TObject);
+    procedure PopupColumnPopup(Sender: TObject);
   private
     { Private declarations }
 
@@ -282,7 +293,8 @@ type
     Pole,
     ResultsData,
     LapsTimeData,
-    CurvesGridData : TStringsData;
+    CurvesGridData,
+    CurveStatsData : TStringsData;
 
     StartCount : Integer;
 
@@ -309,8 +321,10 @@ type
     procedure AddRiderData(const APos:Integer; const Rider:Integer);
     procedure ApplyTheme(const ABack,AFont:Graphics.TColor);
     function CategoryPath:String;
+    function CategorySeason:String;
     function CheckPilotExists(const S:String):Boolean;
     procedure ClearLapCharts;
+    procedure ColumnRightClick(Sender: TObject);
     procedure CreateLeaderBoard;
     procedure CreateLeaderChart;
     procedure CreatePole;
@@ -323,13 +337,14 @@ type
     function FindBike(const ABike:String):TBike;
     function FindPilotNum(const ANum:String):Integer; // index inside PilotsData
     function FindRiderInPole(const ANumber:Integer):Integer;
+    function GetRiderName(const ANumber:Integer):String;
     procedure InitPoleData;
     procedure LoadConfiguration;
     procedure RefillCharts;
-    function CategorySeason:String;
     procedure PaintFastest(const Sender:TColumn; var AData:TRenderData; var DefaultPaint:Boolean);
     procedure PaintFlag(const Sender:TColumn; var AData:TRenderData; var DefaultPaint:Boolean);
     procedure PaintPoleDelta(const Sender:TColumn; var AData:TRenderData; var DefaultPaint:Boolean);
+    procedure RecalcCurveStats;
     procedure ReFillCompareChart;
     function Season:String;
     procedure SetCurrentLap(const ACurrent:Integer);
@@ -362,7 +377,11 @@ uses
   TeeSkia,
   {$ENDIF}
 
-  TeeGLCanvas, TeeRacingAbout, Picture, TeeCountryFlags, TeeUtils, TeeCircuit;
+  TeeGLCanvas, TeeRacingAbout, Picture, TeeCountryFlags, TeeUtils,
+
+  Tee.Grid.Bands.Columns, Tee.Grid.Rows,
+
+  TeeCircuit;
 
 function HasParameter(const AParameter:String):Boolean;
 var t : Integer;
@@ -442,10 +461,10 @@ begin
 
   tmpGears:=TStringsData.Create(2,BikeData.Count);
 
-  GearRatios.Data:=tmpGears;
+  tmpGears.Headers[0]:='Gear';
+  tmpGears.Headers[1]:='Ratio';
 
-  GearRatios.Columns[0].Header.Text:='Gear';
-  GearRatios.Columns[1].Header.Text:='Ratio';
+  GearRatios.Data:=tmpGears;
 
   FillSequential(tmpGears,0);
 
@@ -904,9 +923,16 @@ begin
   Circuit.Invalidate;
 end;
 
+function TMainForm.GetRiderName(const ANumber:Integer):String;
+var tmp : Integer;
+begin
+  tmp:=FindRiderInPole(ANumber);
+
+  result:=IntToStr(ANumber)+' '+Pole[Pole_Name,tmp];
+end;
+
 procedure TMainForm.AllLapsGetAxisLabel(Sender: TChartAxis; Series: TChartSeries;
   ValueIndex: Integer; var LabelText: string);
-var tmp : Integer;
 begin
   if Sender=AllLaps.DepthAxis then
      if ValueIndex=-1 then
@@ -914,11 +940,7 @@ begin
        ValueIndex:=StrToInt(LabelText);
 
        if (ValueIndex>=0) and (ValueIndex<=High(Race.Riders)) then
-       begin
-         tmp:=FindRiderInPole(Race.Riders[ValueIndex].Number);
-
-         LabelText:=IntToStr(Race.Riders[ValueIndex].Number)+' '+Pole[Pole_Name,tmp];
-       end;
+          LabelText:=GetRiderName(Race.Riders[ValueIndex].Number);
      end;
 end;
 
@@ -983,7 +1005,7 @@ var
   begin
     for t:=0 to High(Race.Circuit.Curves) do
     begin
-      tmp:=Race.Circuit.Curves[t].EntryIndex; //Race.Circuit.IndexOfPosition(Race.Circuit.Curves[t].Entry);
+      tmp:=Race.Circuit.Curves[t].EntryIndex;
 
       X:=CircuitPath.CalcXPos(tmp);
       Y:=CircuitPath.CalcYPos(tmp);
@@ -1083,10 +1105,10 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
       Curve : ^TCurve;
       Old : Char;
   begin
+    {
     L1:=Length(Race.Circuit.Curves);
     L2:=CurvesGridData.Count;
 
-    {
     if L1<>L2 then
        raise Exception.Create('Error different curves count: '+IntToStr(L1)+' <> '+IntToStr(L2));
     }
@@ -1099,6 +1121,7 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
       Curve:=@Race.Circuit.Curves[t];
 
       Curve.Name:=CurvesGridData[1,t];
+
       Curve.Slope:=StrToFloat(CurvesGridData[2,t]);
     end;
 
@@ -1117,7 +1140,7 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
       tmp:=IntToStr(t+1)+#13#10+ACurves[t].Name;
 
       CurveSeries.AddXY(X,ACurves[t].TotalAngle,tmp);
-      CurveSpeeds.AddXY(X,ACurves[t].EntrySpeed/3.6);
+      CurveSpeeds.AddXY(X,ACurves[t].EntrySpeed/MetersSecToKMH);
     end;
   end;
 
@@ -1742,21 +1765,52 @@ begin
   C.OnPaint:=PaintFlag;
 end;
 
-procedure TMainForm.FormShow(Sender: TObject);
+type
+  TBandAccess=class(TCustomColumnBand);
+
+procedure TMainForm.Colorize1Click(Sender: TObject);
+var tmp : TColumn;
 begin
+  tmp:=TColumn(AutoSize1.GetParentMenu.Tag);
+
+  Colorize1.Checked:=not Colorize1.Checked;
+
+  if Colorize1.Checked then
+     TColorizeRender.Enable(tmp,(tmp.Collection.Owner as TRowGroup).Rows.Format)
+  else
+     tmp.Render:=nil;
+end;
+
+procedure TMainForm.ColumnRightClick(Sender: TObject);
+var P : TPoint;
+begin
+  PopupColumn.Tag:=NativeInt(TBandAccess(Sender).MouseColumn);
+
+  P:=VCL.Controls.Mouse.Cursorpos;
+
+  PopupColumn.Popup(P.X,P.Y);
+end;
+
+procedure TMainForm.FormShow(Sender: TObject);
+
+  procedure SetupAllGrids;
+  var t : Integer;
+  begin
+    for t:=0 to ComponentCount-1 do
+        if Components[t] is TTeeGrid then
+        begin
+          //TTeeGrid(Components[t]).ParentFont:=True;
+          TTeeGrid(Components[t]).Header.OnRightClick:=ColumnRightClick;
+        end;
+  end;
+
+begin
+  FormatSettings.DecimalSeparator:='.';
+
   LapChart.Axes.FastCalc:=True;
   AllLaps.Axes.FastCalc:=True;
 
-  PoleGrid.ParentFont:=True;
-  Pilots.ParentFont:=True;
-  Circuits.ParentFont:=True;
-  ChampionGrid.ParentFont:=True;
-  BikeGrid.ParentFont:=True;
-  TiresGrid.ParentFont:=True;
-  AllPilotsGrid.ParentFont:=True;
-  CurvesGrid.ParentFont:=True;
-  LeaderBoard.ParentFont:=True;
-  ResultsGrid.ParentFont:=True;
+  SetupAllGrids;
 
   {$IFNDEF USE_SKIA}
   Skia1.Enabled:=False;
@@ -1875,6 +1929,10 @@ begin
 
     FrontView.Hide;
   end;
+
+  if ParamCount=1 then
+     if FileExists(ParamStr(1)) then
+        Race.Load(ParamStr(1));
 end;
 
 procedure TMainForm.DrawTireIcon(const ACanvas:TCanvas; const AColumn:Integer);
@@ -2219,12 +2277,6 @@ end;
 
 procedure TMainForm.PageControl1Change(Sender: TObject);
 begin
-  if PageControl1.ActivePage=TabData then
-  begin
-    if DataGrid.Data=nil then
-       DataGrid.Data:=TVirtualArrayData<TRaceData>.Create(Race.Data);
-  end
-  else
   if PageControl1.ActivePage=TabTelemetry then
      PageControlTelemetryChange(Self)
   else
@@ -2316,6 +2368,12 @@ end;
 
 procedure TMainForm.PageControlTelemetryChange(Sender: TObject);
 begin
+  if PageControlTelemetry.ActivePage=TabRawData then
+  begin
+    if DataGrid.Data=nil then
+       DataGrid.Data:=TVirtualArrayData<TRaceData>.Create(Race.Data);
+  end
+  else
   if PageControlTelemetry.ActivePage=TabSingleLap then
   begin
     if SeriesSpeed.Count<2 then
@@ -2323,7 +2381,94 @@ begin
   end
   else
   if PageControlTelemetry.ActivePage=TabCompare then
-       RefillCompareChart;
+       RefillCompareChart
+  else
+  if PageControlTelemetry.ActivePage=TabCurveStats then
+  begin
+    if ListCurveStats.ItemIndex=-1 then
+    begin
+      ListCurveStats.ItemIndex:=0;
+      ListCurveStatsClick(Self);
+    end
+    else
+    if CurveStats.Data=nil then
+       RecalcCurveStats;
+  end;
+end;
+
+procedure TMainForm.RecalcCurveStats;
+
+  function GetCurveStat(const ACurve,ARider,AStat:Integer):Single;
+
+    // When was ARider just before the APos position in the circuit
+    function FindTele(const APos:Single):Integer;
+    var t : Integer;
+    begin
+      for t:=High(Race.Data) downto 0 do
+           if Race.Data[t].Data[ARider].Position<APos then
+           begin
+             result:=t;
+             Exit;
+           end;
+
+      result:=-1;
+    end;
+
+    function SpeedAt(const APos:Single):Single;
+    var tmp : Integer;
+    begin
+      tmp:=FindTele(APos);
+
+      if tmp>-1 then
+         result:=Race.Data[tmp].Data[ARider].Speed*MetersSecToKMH
+      else
+         result:=0;
+    end;
+
+  begin
+    result:=0;
+
+    case AStat of
+      2: result:=SpeedAt(Race.Circuit.Curves[ACurve].ApexPosition);
+      3: result:=SpeedAt(Race.Circuit.Curves[ACurve].Entry);
+      4: result:=SpeedAt(Race.Circuit.Curves[ACurve].ExitPosition);
+    end;
+  end;
+
+var c,r,
+    tmp,
+    tmpStat : Integer;
+begin
+  CurveStats.Data:=nil;
+
+  CurveStatsData:=TStringsData.Create(2+Length(Race.Circuit.Curves), Length(Race.PoleIndex));
+
+  CurveStatsData.Headers[0]:='#';
+  CurveStatsData.Headers[1]:='Rider';
+
+  for c:=2 to CurveStatsData.Columns-1 do
+      CurveStatsData.Headers[c]:=Race.Circuit.Curves[c-2].Name;
+
+  for r:=0 to CurveStatsData.Rows-1 do
+  begin
+    tmp:=StrToInt(Pole.Cells[Pole_Num,r]);
+
+    CurveStatsData[0,r]:=IntToStr(tmp);
+    CurveStatsData[1,r]:=Pole[Pole_Name,r];
+  end;
+
+  tmpStat:=ListCurveStats.ItemIndex;
+
+  for c:=2 to CurveStatsData.Columns-1 do
+      for r:=0 to CurveStatsData.Rows-1 do
+          CurveStatsData[c,r]:=FormatFloat('0.##',GetCurveStat(c-2,r,tmpStat));
+
+  CurveStats.Data:=CurveStatsData;
+
+  SetupPilotGrid(CurveStats,0,0);
+
+  for c:=2 to CurveStats.Columns.Count-1 do
+      CurveStats.Columns[c].InitAlign(THorizontalAlign.Right);
 end;
 
 procedure TMainForm.Pole1Click(Sender: TObject);
@@ -2675,6 +2820,15 @@ begin
   FrontView.Invalidate;
 end;
 
+procedure TMainForm.PopupColumnPopup(Sender: TObject);
+var tmp : TColumn;
+begin
+  tmp:=TColumn(AutoSize1.GetParentMenu.Tag);
+
+  Colorize1.Enabled:=TColorizeRender.CanColorize(tmp,TCustomTeeGrid.DataOf(tmp));
+  Colorize1.Checked:=Colorize1.Enabled and (tmp.Render is TColorizeRender);
+end;
+
 procedure TMainForm.rack1Click(Sender: TObject);
 begin
   rack1.Checked:=not rack1.Checked;
@@ -2731,6 +2885,11 @@ procedure TMainForm.Lean1Click(Sender: TObject);
 begin
   DebugLean.Visible:=not DebugLean.Visible;
   Lean1.Checked:=DebugLean.Visible;
+end;
+
+procedure TMainForm.ListCurveStatsClick(Sender: TObject);
+begin
+  RecalcCurveStats;
 end;
 
 procedure TMainForm.InitPoleData;
@@ -3176,6 +3335,13 @@ begin
   }
 end;
 
+procedure TMainForm.Autosize1Click(Sender: TObject);
+var tmp : TColumn;
+begin
+  tmp:=TColumn(AutoSize1.GetParentMenu.Tag);
+  tmp.Width.Automatic:=True;
+end;
+
 procedure TMainForm.Dark1Click(Sender: TObject);
 begin
   ApplyTheme(clBlack,clWhite);
@@ -3343,7 +3509,7 @@ begin
     UpdateCursorLap(Race.Data[L].Data);
   end;
 
-  if PageControl1.ActivePage=TabData then
+  if PageControlTelemetry.ActivePage=TabRawData then
      DataGrid.Invalidate;
 end;
 
@@ -3401,7 +3567,7 @@ begin
       Speed:=Race.Data[L].Data[Rider].Speed;
 
       LeanGauge.Value:=Round(Race.Data[L].Data[Rider].LeanAngle);
-      SpeedGauge.Value:=Round(Speed*3.6); // to km/h
+      SpeedGauge.Value:=Round(Speed*MetersSecToKMH); // to km/h
 
       FuelGauge.Value:=Race.Riders[Rider].Bike.Fuel;
     end;
