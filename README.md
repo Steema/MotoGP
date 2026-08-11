@@ -64,6 +64,11 @@ https://github.com/user-attachments/assets/2b1d9009-105f-4075-8895-af1acda00b6b
 
 <img width="676" height="202" alt="image" src="https://github.com/user-attachments/assets/9c0fbf8b-4373-49e2-b861-068430df2450" />
 
+## Curve statistics (per Rider)
+
+<img width="931" height="383" alt="image" src="https://github.com/user-attachments/assets/99c39a23-6430-460a-92c8-3272b791b02e" />
+
+
 
 
 
