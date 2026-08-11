@@ -24,6 +24,9 @@ uses
 var
   RealTimeFactor : Single= 0.2; // 1/0.2 = Samples per second = 5 times per second (no realtime)
 
+const
+  MetersSecToKMH = 3.6;  // Convert from meters per second, to kilometers per hour
+
 type
   Float=Single; // Single or Double or Extended
 
@@ -50,6 +53,7 @@ type
 
   // Curves (Corners) of a circuit path
   TCurve=record
+  public
     Name : String;
 
     Entry : Float; // Entry position of this curve, (in meters from start, might not be from Finish line)
@@ -63,9 +67,11 @@ type
 
     BeforeApex : Float; // Distance from Entry to Apex in meters
     AfterApex  : Float; // Distance from Apex to curve exit in meters
-    ApexPosition : Float; // Sum of Entry+BeforeApex
 
     Slope : Float; // In degrees, from last curve
+
+    function ApexPosition:Float; inline; // Sum of Entry+BeforeApex
+    function ExitPosition:Float; inline; // Sum of ApexPosition+AfterApex
   end;
 
   TTire=record
@@ -483,7 +489,6 @@ procedure TCircuit.FindCurves(CurvatureThreshold: Single = 0.002);
 const
   G = 9.81; // m/s2
   Friction = 0.8; // Dry asphalt, good tires
-  MetersSecToKMH = 3.6;  // Convert from meters per second, to kilometers per hour
 
   function GetCurveNames:TArray<String>;
   var t, L : Integer;
@@ -585,7 +590,6 @@ begin
         //ACircuit.Curves[L].ExitIndex := CornerEnd;
 
         Curves[L].BeforeApex := PathLength(Points,CornerStart,ApexIdx-1);
-        Curves[L].ApexPosition:=Curves[L].Entry+Curves[L].BeforeApex;
         Curves[L].AfterApex := PathLength(Points,ApexIdx,CornerEnd-1);
 
         EntryAng := SegmentAngle(Track^[CornerStart], Track^[CornerStart+1]);
@@ -796,13 +800,13 @@ end;
 
 procedure TRider.Save(const AStream: TStream);
 begin
-  AStream.ReadData(Active);
-  AStream.ReadData(Number);
-  AStream.ReadData(StartPole);
-  AStream.ReadData(Laps);
-  AStream.ReadData(BestLap);
-  AStream.ReadData(Color);
-  AStream.ReadData(NextCurve);
+  AStream.WriteData(Active);
+  AStream.WriteData(Number);
+  AStream.WriteData(StartPole);
+  AStream.WriteData(Laps);
+  AStream.WriteData(BestLap);
+  AStream.WriteData(Color);
+  AStream.WriteData(NextCurve);
 
 // PENDING:
 //    Bike : TBike;
@@ -1288,7 +1292,7 @@ function EvaluateBrakingPoint(const ABikePosition, ABikeSpeedMPS: Float;
                               const ACorner: TCurve;
                               const AMaxDecelerationMPS2: Float): TBrakeDecision;
 const
-  Inverse_36=1/3.6;
+  Inverse_36=1/MetersSecToKMH;
 
 var
   BrakingTriggerPosition: Float;
@@ -1472,6 +1476,17 @@ const
 
 procedure TRace.Load(const AStream: TStream);
 
+  procedure ReadRiders;
+  var t, L : Integer;
+  begin
+    AStream.ReadData(L);
+
+    SetLength(Riders,L);
+
+    for t:=0 to L-1 do
+        Riders[t].Load(AStream);
+  end;
+
   procedure ReadData;
   var t, L : Integer;
   begin
@@ -1511,12 +1526,20 @@ begin
   TArrayHelper.Read<Integer>(AStream,PoleIndex);
   TArrayHelper.Read<Integer>(AStream,StartPoleIndex);
 
-  TArrayHelper.Read<TRider>(AStream,Riders);
-
+  ReadRiders;
   ReadData;
 end;
 
 procedure TRace.Save(const AStream: TStream);
+
+  procedure WriteRiders;
+  var t : Integer;
+  begin
+    AStream.WriteData(Length(Riders));
+
+    for t:=0 to High(Riders) do
+        Riders[t].Save(AStream);
+  end;
 
   procedure WriteData;
   var t, L : Integer;
@@ -1551,11 +1574,7 @@ begin
   TArrayHelper.Write<Integer>(AStream,PoleIndex);
   TArrayHelper.Write<Integer>(AStream,StartPoleIndex);
 
-  TArrayHelper.Write<TRider>(AStream,Riders);
-
-  // BUG or Limitation, array of array does not work
-  //TArrayHelper.Write<TRaceData>(AStream,Data);
-
+  WriteRiders;
   WriteData;
 end;
 
@@ -1691,7 +1710,7 @@ begin
         Curve:=@Circuit.Curves[Riders[t].NextCurve-1];
 
         // If the bike is already going slower than the corner target speed, no need to brake yet
-        if Data[L].Data[t].Speed*3.6 <= Curve.EntrySpeed then
+        if Data[L].Data[t].Speed*MetersSecToKMH <= Curve.EntrySpeed then
         begin
           Brake.DistanceToBrakePoint := Curve.Entry - Data[L].Data[t].Position;
           Brake.BrakingDistanceNeeded := 0.0;
@@ -1788,6 +1807,18 @@ procedure TRaceData.Save(const AStream: TStream);
 begin
   AStream.ReadData(Time);
   TArrayHelper.Write<TRiderData>(AStream,Data);
+end;
+
+{ TCurve }
+
+function TCurve.ApexPosition: Float;
+begin
+  result:=Entry+BeforeApex;
+end;
+
+function TCurve.ExitPosition: Float;
+begin
+  result:=ApexPosition+AfterApex;
 end;
 
 initialization
