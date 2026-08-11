@@ -1,0 +1,211 @@
+﻿Circuit,Session,Track,Rider,Front,Rear
+GP Qatar (Lusail),Sprint,Dry,93,Hard,Medium
+GP Qatar (Lusail),Sprint,Dry,63,Hard,Soft
+GP Qatar (Lusail),Sprint,Dry,89,Medium,Medium
+GP Qatar (Lusail),Sprint,Dry,31,Medium,Soft
+GP Qatar (Lusail),Sprint,Dry,33,Hard,Soft
+GP Qatar (Lusail),Sprint,Dry,12,Hard,Medium
+GP Qatar (Lusail),Sprint,Dry,23,Hard,Medium
+GP Qatar (Lusail),Sprint,Dry,72,Hard,Medium
+GP Qatar (Lusail),Sprint,Dry,20,Medium,Soft
+GP Qatar (Lusail),Sprint,Dry,42,Medium,Medium
+GP Qatar (Lusail),Sprint,Dry,73,Medium,Medium
+GP Qatar (Lusail),Sprint,Dry,49,Medium,Soft
+GP Qatar (Lusail),Sprint,Dry,21,Medium,Soft
+GP Qatar (Lusail),Sprint,Dry,5,Medium,Medium
+GP Qatar (Lusail),Sprint,Dry,36,Medium,Soft
+GP Qatar (Lusail),Race,Dry,93,Medium,Medium
+GP Qatar (Lusail),Race,Dry,63,Medium,Hard
+GP Qatar (Lusail),Race,Dry,89,Medium,Hard
+GP Qatar (Lusail),Race,Dry,31,Hard,Hard
+GP Qatar (Lusail),Race,Dry,33,Medium,Medium
+GP Qatar (Lusail),Race,Dry,12,Medium,Hard
+GP Qatar (Lusail),Race,Dry,23,Medium,Hard
+GP Qatar (Lusail),Race,Dry,72,Medium,Hard
+GP Qatar (Lusail),Race,Dry,20,Hard,Medium
+GP Qatar (Lusail),Race,Dry,42,Hard,Medium
+GP Qatar (Lusail),Race,Dry,73,Hard,Hard
+GP Qatar (Lusail),Race,Dry,49,Medium,Medium
+GP Qatar (Lusail),Race,Dry,21,Medium,Medium
+GP Qatar (Lusail),Race,Dry,5,Hard,Hard
+GP Qatar (Lusail),Race,Dry,36,Medium,Hard
+GP España (Jerez),Sprint,Dry,93,Medium,Medium
+GP España (Jerez),Sprint,Dry,63,Medium,Medium
+GP España (Jerez),Sprint,Dry,89,Medium,Soft
+GP España (Jerez),Sprint,Dry,31,Medium,Medium
+GP España (Jerez),Sprint,Dry,33,Hard,Soft
+GP España (Jerez),Sprint,Dry,12,Hard,Medium
+GP España (Jerez),Sprint,Dry,23,Medium,Medium
+GP España (Jerez),Sprint,Dry,72,Hard,Medium
+GP España (Jerez),Sprint,Dry,20,Medium,Medium
+GP España (Jerez),Sprint,Dry,42,Medium,Medium
+GP España (Jerez),Sprint,Dry,73,Hard,Medium
+GP España (Jerez),Sprint,Dry,49,Medium,Medium
+GP España (Jerez),Sprint,Dry,21,Hard,Medium
+GP España (Jerez),Sprint,Dry,5,Medium,Medium
+GP España (Jerez),Sprint,Dry,36,Hard,Medium
+GP España (Jerez),Race,Dry,93,Medium,Medium
+GP España (Jerez),Race,Dry,63,Medium,Hard
+GP España (Jerez),Race,Dry,89,Medium,Medium
+GP España (Jerez),Race,Dry,31,Hard,Hard
+GP España (Jerez),Race,Dry,33,Hard,Hard
+GP España (Jerez),Race,Dry,12,Hard,Medium
+GP España (Jerez),Race,Dry,23,Hard,Hard
+GP España (Jerez),Race,Dry,72,Hard,Medium
+GP España (Jerez),Race,Dry,20,Hard,Medium
+GP España (Jerez),Race,Dry,42,Hard,Hard
+GP España (Jerez),Race,Dry,73,Medium,Medium
+GP España (Jerez),Race,Dry,49,Hard,Hard
+GP España (Jerez),Race,Dry,21,Medium,Medium
+GP España (Jerez),Race,Dry,5,Hard,Hard
+GP España (Jerez),Race,Dry,36,Hard,Hard
+GP França (Le Mans),Sprint,Wet,93,Rain Soft,Rain Medium
+GP França (Le Mans),Sprint,Wet,63,Rain Soft,Rain Soft
+GP França (Le Mans),Sprint,Wet,89,Rain Medium,Rain Medium
+GP França (Le Mans),Sprint,Wet,31,Rain Medium,Rain Soft
+GP França (Le Mans),Sprint,Wet,33,Rain Soft,Rain Medium
+GP França (Le Mans),Sprint,Wet,12,Rain Soft,Rain Soft
+GP França (Le Mans),Sprint,Wet,23,Rain Medium,Rain Soft
+GP França (Le Mans),Sprint,Wet,72,Rain Soft,Rain Medium
+GP França (Le Mans),Sprint,Wet,20,Rain Medium,Rain Soft
+GP França (Le Mans),Sprint,Wet,42,Rain Soft,Rain Medium
+GP França (Le Mans),Sprint,Wet,73,Rain Medium,Rain Medium
+GP França (Le Mans),Sprint,Wet,49,Rain Medium,Rain Medium
+GP França (Le Mans),Sprint,Wet,21,Rain Soft,Rain Medium
+GP França (Le Mans),Sprint,Wet,5,Rain Medium,Rain Soft
+GP França (Le Mans),Sprint,Wet,36,Rain Soft,Rain Soft
+GP França (Le Mans),Race,Wet,93,Rain Medium,Rain Medium
+GP França (Le Mans),Race,Wet,63,Rain Medium,Rain Soft
+GP França (Le Mans),Race,Wet,89,Rain Soft,Rain Medium
+GP França (Le Mans),Race,Wet,31,Rain Soft,Rain Soft
+GP França (Le Mans),Race,Wet,33,Rain Soft,Rain Soft
+GP França (Le Mans),Race,Wet,12,Rain Soft,Rain Medium
+GP França (Le Mans),Race,Wet,23,Rain Soft,Rain Medium
+GP França (Le Mans),Race,Wet,72,Rain Soft,Rain Soft
+GP França (Le Mans),Race,Wet,20,Rain Soft,Rain Soft
+GP França (Le Mans),Race,Wet,42,Rain Soft,Rain Soft
+GP França (Le Mans),Race,Wet,73,Rain Medium,Rain Medium
+GP França (Le Mans),Race,Wet,49,Rain Medium,Rain Medium
+GP França (Le Mans),Race,Wet,21,Rain Soft,Rain Medium
+GP França (Le Mans),Race,Wet,5,Rain Medium,Rain Soft
+GP França (Le Mans),Race,Wet,36,Rain Medium,Rain Soft
+GP Catalunya (Montmeló),Sprint,Dry,93,Medium,Medium
+GP Catalunya (Montmeló),Sprint,Dry,63,Medium,Medium
+GP Catalunya (Montmeló),Sprint,Dry,89,Medium,Medium
+GP Catalunya (Montmeló),Sprint,Dry,31,Hard,Medium
+GP Catalunya (Montmeló),Sprint,Dry,33,Medium,Medium
+GP Catalunya (Montmeló),Sprint,Dry,12,Hard,Medium
+GP Catalunya (Montmeló),Sprint,Dry,23,Hard,Soft
+GP Catalunya (Montmeló),Sprint,Dry,72,Hard,Soft
+GP Catalunya (Montmeló),Sprint,Dry,20,Hard,Medium
+GP Catalunya (Montmeló),Sprint,Dry,42,Medium,Medium
+GP Catalunya (Montmeló),Sprint,Dry,73,Hard,Soft
+GP Catalunya (Montmeló),Sprint,Dry,49,Medium,Soft
+GP Catalunya (Montmeló),Sprint,Dry,21,Medium,Soft
+GP Catalunya (Montmeló),Sprint,Dry,5,Hard,Medium
+GP Catalunya (Montmeló),Sprint,Dry,36,Hard,Medium
+GP Catalunya (Montmeló),Race,Dry,93,Medium,Medium
+GP Catalunya (Montmeló),Race,Dry,63,Hard,Hard
+GP Catalunya (Montmeló),Race,Dry,89,Hard,Hard
+GP Catalunya (Montmeló),Race,Dry,31,Hard,Medium
+GP Catalunya (Montmeló),Race,Dry,33,Hard,Hard
+GP Catalunya (Montmeló),Race,Dry,12,Hard,Medium
+GP Catalunya (Montmeló),Race,Dry,23,Medium,Hard
+GP Catalunya (Montmeló),Race,Dry,72,Hard,Hard
+GP Catalunya (Montmeló),Race,Dry,20,Medium,Medium
+GP Catalunya (Montmeló),Race,Dry,42,Medium,Hard
+GP Catalunya (Montmeló),Race,Dry,73,Hard,Medium
+GP Catalunya (Montmeló),Race,Dry,49,Medium,Hard
+GP Catalunya (Montmeló),Race,Dry,21,Medium,Medium
+GP Catalunya (Montmeló),Race,Dry,5,Hard,Medium
+GP Catalunya (Montmeló),Race,Dry,36,Hard,Medium
+GP Itàlia (Mugello),Sprint,Dry,93,Medium,Soft
+GP Itàlia (Mugello),Sprint,Dry,63,Hard,Medium
+GP Itàlia (Mugello),Sprint,Dry,89,Medium,Medium
+GP Itàlia (Mugello),Sprint,Dry,31,Hard,Medium
+GP Itàlia (Mugello),Sprint,Dry,33,Medium,Soft
+GP Itàlia (Mugello),Sprint,Dry,12,Medium,Medium
+GP Itàlia (Mugello),Sprint,Dry,23,Hard,Medium
+GP Itàlia (Mugello),Sprint,Dry,72,Medium,Medium
+GP Itàlia (Mugello),Sprint,Dry,20,Medium,Medium
+GP Itàlia (Mugello),Sprint,Dry,42,Hard,Medium
+GP Itàlia (Mugello),Sprint,Dry,73,Hard,Medium
+GP Itàlia (Mugello),Sprint,Dry,49,Medium,Medium
+GP Itàlia (Mugello),Sprint,Dry,21,Hard,Medium
+GP Itàlia (Mugello),Sprint,Dry,5,Medium,Medium
+GP Itàlia (Mugello),Sprint,Dry,36,Hard,Medium
+GP Itàlia (Mugello),Race,Dry,93,Hard,Medium
+GP Itàlia (Mugello),Race,Dry,63,Hard,Medium
+GP Itàlia (Mugello),Race,Dry,89,Hard,Medium
+GP Itàlia (Mugello),Race,Dry,31,Hard,Medium
+GP Itàlia (Mugello),Race,Dry,33,Medium,Hard
+GP Itàlia (Mugello),Race,Dry,12,Hard,Hard
+GP Itàlia (Mugello),Race,Dry,23,Hard,Hard
+GP Itàlia (Mugello),Race,Dry,72,Medium,Hard
+GP Itàlia (Mugello),Race,Dry,20,Medium,Medium
+GP Itàlia (Mugello),Race,Dry,42,Medium,Medium
+GP Itàlia (Mugello),Race,Dry,73,Hard,Medium
+GP Itàlia (Mugello),Race,Dry,49,Hard,Hard
+GP Itàlia (Mugello),Race,Dry,21,Medium,Medium
+GP Itàlia (Mugello),Race,Dry,5,Hard,Medium
+GP Itàlia (Mugello),Race,Dry,36,Hard,Hard
+GP Països Baixos (Assen),Sprint,Dry,93,Medium,Medium
+GP Països Baixos (Assen),Sprint,Dry,63,Medium,Medium
+GP Països Baixos (Assen),Sprint,Dry,89,Hard,Soft
+GP Països Baixos (Assen),Sprint,Dry,31,Hard,Soft
+GP Països Baixos (Assen),Sprint,Dry,33,Medium,Medium
+GP Països Baixos (Assen),Sprint,Dry,12,Medium,Soft
+GP Països Baixos (Assen),Sprint,Dry,23,Hard,Soft
+GP Països Baixos (Assen),Sprint,Dry,72,Medium,Soft
+GP Països Baixos (Assen),Sprint,Dry,20,Hard,Soft
+GP Països Baixos (Assen),Sprint,Dry,42,Medium,Medium
+GP Països Baixos (Assen),Sprint,Dry,73,Hard,Medium
+GP Països Baixos (Assen),Sprint,Dry,49,Medium,Soft
+GP Països Baixos (Assen),Sprint,Dry,21,Medium,Medium
+GP Països Baixos (Assen),Sprint,Dry,5,Medium,Medium
+GP Països Baixos (Assen),Sprint,Dry,36,Medium,Medium
+GP Països Baixos (Assen),Race,Dry,93,Hard,Medium
+GP Països Baixos (Assen),Race,Dry,63,Medium,Medium
+GP Països Baixos (Assen),Race,Dry,89,Medium,Medium
+GP Països Baixos (Assen),Race,Dry,31,Medium,Hard
+GP Països Baixos (Assen),Race,Dry,33,Hard,Medium
+GP Països Baixos (Assen),Race,Dry,12,Hard,Hard
+GP Països Baixos (Assen),Race,Dry,23,Medium,Hard
+GP Països Baixos (Assen),Race,Dry,72,Hard,Medium
+GP Països Baixos (Assen),Race,Dry,20,Hard,Medium
+GP Països Baixos (Assen),Race,Dry,42,Medium,Medium
+GP Països Baixos (Assen),Race,Dry,73,Medium,Hard
+GP Països Baixos (Assen),Race,Dry,49,Hard,Medium
+GP Països Baixos (Assen),Race,Dry,21,Hard,Medium
+GP Països Baixos (Assen),Race,Dry,5,Medium,Hard
+GP Països Baixos (Assen),Race,Dry,36,Medium,Hard
+GP Alemanya (Sachsenring),Sprint,Dry,93,Hard,Soft
+GP Alemanya (Sachsenring),Sprint,Dry,63,Hard,Medium
+GP Alemanya (Sachsenring),Sprint,Dry,89,Medium,Medium
+GP Alemanya (Sachsenring),Sprint,Dry,31,Medium,Soft
+GP Alemanya (Sachsenring),Sprint,Dry,33,Medium,Soft
+GP Alemanya (Sachsenring),Sprint,Dry,12,Hard,Medium
+GP Alemanya (Sachsenring),Sprint,Dry,23,Medium,Medium
+GP Alemanya (Sachsenring),Sprint,Dry,72,Hard,Soft
+GP Alemanya (Sachsenring),Sprint,Dry,20,Hard,Medium
+GP Alemanya (Sachsenring),Sprint,Dry,42,Hard,Soft
+GP Alemanya (Sachsenring),Sprint,Dry,73,Hard,Soft
+GP Alemanya (Sachsenring),Sprint,Dry,49,Hard,Medium
+GP Alemanya (Sachsenring),Sprint,Dry,21,Hard,Medium
+GP Alemanya (Sachsenring),Sprint,Dry,5,Medium,Soft
+GP Alemanya (Sachsenring),Sprint,Dry,36,Hard,Soft
+GP Alemanya (Sachsenring),Race,Dry,93,Hard,Medium
+GP Alemanya (Sachsenring),Race,Dry,63,Medium,Hard
+GP Alemanya (Sachsenring),Race,Dry,89,Hard,Medium
+GP Alemanya (Sachsenring),Race,Dry,31,Medium,Hard
+GP Alemanya (Sachsenring),Race,Dry,33,Medium,Medium
+GP Alemanya (Sachsenring),Race,Dry,12,Medium,Hard
+GP Alemanya (Sachsenring),Race,Dry,23,Medium,Medium
+GP Alemanya (Sachsenring),Race,Dry,72,Hard,Hard
+GP Alemanya (Sachsenring),Race,Dry,20,Medium,Hard
+GP Alemanya (Sachsenring),Race,Dry,42,Hard,Medium
+GP Alemanya (Sachsenring),Race,Dry,73,Hard,Hard
+GP Alemanya (Sachsenring),Race,Dry,49,Medium,Hard
+GP Alemanya (Sachsenring),Race,Dry,21,Hard,Medium
+GP Alemanya (Sachsenring),Race,Dry,5,Medium,Hard
+GP Alemanya (Sachsenring),Race,Dry,36,Medium,Hard
