@@ -694,6 +694,45 @@ begin
   result:=AllPilots.IndexOf(S,0);
 end;
 
+procedure DetectNumbers(const AGrid:TTeeGrid);
+
+  function IsNumeric(const AColumn:TColumn):Boolean;
+
+    function AllRowsAreNumeric:Boolean;
+    var t : Integer;
+    var S : String;
+        tmpFloat : Single;
+    begin
+      result:=False;
+
+      for t:=0 to AGrid.Data.Count-1 do
+      begin
+        S:=Trim(AGrid.Data.AsString(AColumn,t));
+
+        if S<>'' then
+        begin
+          result:=TryStrToFloat(S,tmpFloat);  // At least one cell needed !
+
+          if not result then
+             Exit;
+        end;
+      end;
+    end;
+
+  begin
+    result:=AGrid.Data.IsNumeric(AColumn);
+
+    if not result then
+       result:=AllRowsAreNumeric;
+  end;
+
+var t : Integer;
+begin
+  for t:=0 to AGrid.Columns.Count-1 do
+      if IsNumeric(AGrid.Columns[t]) then
+         AGrid.Columns[t].InitAlign(THorizontalAlign.Right);
+end;
+
 procedure TMainForm.ChampionGridSelect(Sender: TObject);
 
   procedure SplitInto(const S:String; const AColumn:Integer);
@@ -758,6 +797,8 @@ begin
     ResultsGrid.Columns[2].Width.Value:=70;
     ResultsGrid.Columns[3].Width.Value:=60;
     ResultsGrid.Columns[4].Width.Value:=70;
+
+    DetectNumbers(ResultsGrid);
 
     SetupPilotGrid(ResultsGrid,1,1);
     SetupPilotGrid(ResultsGrid,3,3);
@@ -833,6 +874,7 @@ begin
   VerifyPilots;
 
   Pilots.Data:=PilotsData;
+  DetectNumbers(Pilots);
 
   SetupPilotGrid(Pilots,1,-1);
 
@@ -852,6 +894,8 @@ begin
     AddCountryColumn;
 
     ChampionGrid.Data:=RoundsData;
+
+    DetectNumbers(ChampionGrid);
 
     ChampionGrid.Columns[5].Hide;
     ChampionGrid.Columns[6].Hide;
@@ -1100,6 +1144,24 @@ end;
 
 procedure TMainForm.CircuitsSelect(Sender: TObject);
 
+  function PercentStrToFloat(S:String):TeeRacing.Float;
+  var L : Integer;
+  begin
+    S:=Trim(S);
+
+    if S='' then
+       result:=0
+    else
+    begin
+      L:=Length(S);
+
+      if Copy(S,L,1)='%' then
+         Delete(S,L,1);
+
+      result:=StrToFloat(S);
+    end;
+  end;
+
   procedure AddRaceCurves;
   var t, L1, L2 : Integer;
       Curve : ^TCurve;
@@ -1122,7 +1184,7 @@ procedure TMainForm.CircuitsSelect(Sender: TObject);
 
       Curve.Name:=CurvesGridData[1,t];
 
-      Curve.Slope:=StrToFloat(CurvesGridData[2,t]);
+      Curve.Slope:=PercentStrToFloat(CurvesGridData[2,t]);
     end;
 
     FormatSettings.DecimalSeparator:=Old;
@@ -1295,6 +1357,7 @@ begin
       CreateDataFromCurves;
 
     CurvesGrid.Data:=CurvesGridData;
+    DetectNumbers(CurvesGrid);
 
     CurvesGrid.Columns[0].Header.Text:='Curve';
     CurvesGrid.Columns[1].Header.Text:='Name';
@@ -1446,6 +1509,8 @@ procedure TMainForm.CreatePole;
     end;
 
     PoleGrid.Data:=Pole;
+
+    DetectNumbers(PoleGrid);
 
     if PoleGrid.Selected.Row>Pole.Count then
        PoleGrid.Selected.Row:=Pole.Count-1;
@@ -1820,19 +1885,27 @@ begin
   VerifyAllPilots;
 
   AllPilotsGrid.Data:=AllPilots;
+  DetectNumbers(AllPilotsGrid);
+
   AddFlags(AllPilotsGrid,4,AllPilots);
 
   SensorsData:=TCSVDataImport.FromFile(FindDataPath+'\Sensors.txt');
   Sensors.Data:=SensorsData;
+  DetectNumbers(Sensors);
 
   Torque:=TFormTorqueCurve.Create(Self);
   Torque.Align:=alClient;
   TTeeVCL.AddFormTo(Torque,PanelBikeParams);
 
   TiresGrid.Data:=TCSVDataImport.FromFile(FindDataPath+'\'+All_Tires_File);
+  DetectNumbers(TiresGrid);
 
   BikeData:=TCSVDataImport.FromFile(FindDataPath+'\'+All_Bikes_File);
+
   BikeGrid.Data:=BikeData;
+
+  DetectNumbers(BikeGrid);
+
   BikeGrid.Columns['GearsRatio'].Hide;
   BikeGrid.Columns['TorqueCurve'].Hide;
 
@@ -1855,6 +1928,7 @@ begin
 
   CircuitsData:=TCSVDataImport.FromFile(FindDataPath+'\Circuits\Circuits.txt');
   Circuits.Data:=CircuitsData;
+  DetectNumbers(Circuits);
 
   AddFlags(Circuits,2,CircuitsData);
 
@@ -2268,6 +2342,8 @@ begin
   LeaderBoard.Columns[9].Header.Text:='Total Wins';
   LeaderBoard.Columns[10].Header.Text:='Podiums';
 
+  DetectNumbers(LeaderBoard);
+
   Leaders.SortBy(LeaderBoard.Columns[5],False,True);
 
   FillSequential(Leaders,0);
@@ -2467,8 +2543,7 @@ begin
 
   SetupPilotGrid(CurveStats,0,0);
 
-  for c:=2 to CurveStats.Columns.Count-1 do
-      CurveStats.Columns[c].InitAlign(THorizontalAlign.Right);
+  DetectNumbers(CurveStats);
 end;
 
 procedure TMainForm.Pole1Click(Sender: TObject);
@@ -2779,6 +2854,7 @@ begin
 
     LapsTimeData:=TStringsData.Create(2,Race.TotalLaps);
     LapTimesGrid.Data:=LapsTimeData;
+    DetectNumbers(LapTimesGrid);
 
     LapTimesGrid.Columns[0].Header.Text:='Lap';
     LapTimesGrid.Columns[1].Header.Text:='Time';
@@ -2806,6 +2882,7 @@ begin
 //    TiresData[1,1]:=
 
     TireStatus.Data:=TiresData;
+    DetectNumbers(TireStatus);
 
     TireStatus.Columns[0].Header.Text:='Tire';
     TireStatus.Columns[1].Header.Text:='Model';

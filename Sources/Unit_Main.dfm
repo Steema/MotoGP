@@ -547,14 +547,14 @@ object MainForm: TMainForm
                 Frame.MiddleBrush.BackColor = clYellow
                 Frame.OuterBrush.BackColor = clGreen
                 Frame.OuterBrush.Gradient.EndColor = clGreen
-                Value = 58.450000000000000000
+                Value = 76.300000000000000000
                 InternalMarkers = {
                   02000000545046300E544E756D657269634D61726B65720008506F736974696F
                   6E0708707043656E7465720B53686170652E436F6C6F7204DBDBC80010536861
                   70652E466F6E742E436F6C6F7204282828001153686170652E466F6E742E4865
                   6967687402D00F53686170652E466F6E742E4E616D65060A44532D4469676974
                   616C1353686170652E4672616D652E56697369626C65081453686170652E5368
-                  61646F772E56697369626C65080A53686170652E546578740602353813536861
+                  61646F772E56697369626C65080A53686170652E546578740602373613536861
                   70652E54657874416C69676E6D656E74070E746152696768744A757374696679
                   1153686170652E5472616E73706172656E74090000545046300E544E756D6572
                   69634D61726B65720008506F736974696F6E070A70705269676874546F700F53
@@ -609,7 +609,7 @@ object MainForm: TMainForm
                 RotationAngle = 160
                 ShapeStyle = gsPolygon
                 TotalAngle = 140.000000000000000000
-                Value = -31.105293720029290000
+                Value = -39.818508382886650000
                 Left = 248
                 Top = 368
               end
@@ -683,7 +683,7 @@ object MainForm: TMainForm
                 Ticks.Style = psRectangle
                 Ticks.VertSize = 10
                 Ticks.GaugeStyle = gpTick
-                Value = 26.000000000000000000
+                Value = 90.000000000000000000
                 ValueArea.Transparent = True
                 Left = 224
                 Top = 304
@@ -925,10 +925,11 @@ object MainForm: TMainForm
       Top = 0
       Width = 633
       Height = 837
-      ActivePage = TabTelemetry
+      ActivePage = TabSheet3
       Align = alClient
       TabOrder = 1
       OnChange = PageControl1Change
+      ExplicitLeft = 323
       object TabTelemetry: TTabSheet
         Caption = 'Telemetry'
         object PageControlTelemetry: TPageControl
@@ -1025,7 +1026,6 @@ object MainForm: TMainForm
               OnAfterDraw = LapChartAfterDraw
               Align = alClient
               TabOrder = 0
-              ExplicitLeft = 0
               DefaultCanvas = 'TGDIPlusCanvas'
               ColorPaletteIndex = 13
               object CurveSeries: TPointSeries
@@ -1087,7 +1087,6 @@ object MainForm: TMainForm
               Height = 41
               Align = alTop
               TabOrder = 1
-              ExplicitWidth = 512
               object Label2: TLabel
                 Left = 11
                 Top = 13
@@ -1205,7 +1204,6 @@ object MainForm: TMainForm
                 Align = alClient
                 BevelOuter = bvNone
                 TabOrder = 1
-                ExplicitHeight = 525
                 DefaultCanvas = 'TGDIPlusCanvas'
                 ColorPaletteIndex = 13
               end
@@ -1359,7 +1357,6 @@ object MainForm: TMainForm
               View3D = False
               Align = alClient
               TabOrder = 1
-              ExplicitWidth = 512
               DefaultCanvas = 'TGDIPlusCanvas'
               ColorPaletteIndex = 13
             end
@@ -1429,7 +1426,6 @@ object MainForm: TMainForm
               OnGetAxisLabel = AllLapsGetAxisLabel
               Align = alClient
               TabOrder = 0
-              ExplicitWidth = 512
               DefaultCanvas = 'TGDIPlusCanvas'
               ColorPaletteIndex = 13
               object TowerLapRider: TTowerSeries
@@ -1463,7 +1459,6 @@ object MainForm: TMainForm
               ParentBackground = False
               ParentColor = False
               TabOrder = 0
-              ExplicitWidth = 391
               _Headers = (
                 1
                 'TColumnHeaderBand'
@@ -1710,9 +1705,10 @@ object MainForm: TMainForm
           Top = 0
           Width = 625
           Height = 807
-          ActivePage = TabSheet4
+          ActivePage = TabTires
           Align = alClient
           TabOrder = 0
+          ExplicitLeft = 1
           object TabSheet4: TTabSheet
             Caption = 'Parameters'
             object Splitter2: TSplitter
@@ -1801,6 +1797,7 @@ object MainForm: TMainForm
               ParentBackground = False
               ParentColor = False
               TabOrder = 0
+              ExplicitLeft = -2
               _Headers = (
                 1
                 'TColumnHeaderBand'
