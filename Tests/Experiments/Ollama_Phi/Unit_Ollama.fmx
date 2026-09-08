@@ -1,7 +1,7 @@
 object Form20: TForm20
   Left = 0
   Top = 0
-  Caption = 'Form20'
+  Caption = 'Tee Ollama'
   ClientHeight = 480
   ClientWidth = 640
   FormFactor.Width = 320
@@ -43,6 +43,22 @@ object Form20: TForm20
       TabOrder = 1
       Text = 'Ask'
       OnClick = Button1Click
+    end
+    object Label1: TLabel
+      Position.X = 136.000000000000000000
+      Position.Y = 40.000000000000000000
+      TextSettings.HorzAlign = Trailing
+      Text = '&Model:'
+      TabOrder = 2
+    end
+    object ComboModel: TComboBox
+      Items.Strings = (
+        'phi3.5'
+        'qwen3.5')
+      ItemIndex = 0
+      Position.X = 264.000000000000000000
+      Position.Y = 38.000000000000000000
+      TabOrder = 3
     end
   end
 end

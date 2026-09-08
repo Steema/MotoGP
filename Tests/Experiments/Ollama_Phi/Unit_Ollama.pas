@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
   FMX.Controls.Presentation, FMX.StdCtrls, FMX.Memo.Types, FMX.ScrollBox,
-  FMX.Memo, FMX.Edit, FMX.Layouts;
+  FMX.Memo, FMX.Edit, FMX.Layouts, FMX.ListBox;
 
 type
   TForm20 = class(TForm)
@@ -14,6 +14,8 @@ type
     MemoResponse: TMemo;
     EditAsk: TEdit;
     Layout1: TLayout;
+    Label1: TLabel;
+    ComboModel: TComboBox;
     procedure Button1Click(Sender: TObject);
   private
     { Private declarations }
@@ -33,7 +35,7 @@ uses
   System.Net.URLClient, System.NetConsts,
   System.Diagnostics;
 
-procedure AskOllama(const APrompt: string; OnResponse: TProc<string>);
+procedure AskOllama(const APrompt, AModel: string; OnResponse: TProc<string>);
 begin
   TTask.Run(
     procedure
@@ -49,7 +51,7 @@ begin
       ResponseStream := TStringStream.Create('', TEncoding.UTF8);
       try
         // 1. Prepare Ollama
-        JSONBody.AddPair('model', 'phi3.5');
+        JSONBody.AddPair('model', AModel {'qwen3.5' 'phi3.5'});
         JSONBody.AddPair('prompt', APrompt);
         JSONBody.AddPair('stream', False); // False, full answer in one message
 
@@ -57,6 +59,8 @@ begin
         RequestStream.Position := 0;
 
         // 2. Send POST to local Ollama API
+        HTTP.ResponseTimeout:=120000;
+
         HTTP.ContentType := 'application/json';
         HTTP.Post('http://localhost:11434/api/generate', RequestStream, ResponseStream);
 
@@ -93,7 +97,7 @@ begin
 
   S:=TStopwatch.StartNew;
 
-  AskOllama(EditAsk.Text,
+  AskOllama(EditAsk.Text, ComboModel.Text,
     procedure(Response: string)
     begin
       MemoResponse.Lines.Text := 'Time: '+S.ElapsedMilliseconds.ToString+#13#10+
