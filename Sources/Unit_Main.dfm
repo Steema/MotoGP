@@ -553,6 +553,8 @@ object MainForm: TMainForm
                 Frame.OuterBrush.BackColor = clGreen
                 Frame.OuterBrush.Gradient.EndColor = clGreen
                 Value = 56.410000000000000000
+                Left = 48
+                Top = 288
                 InternalMarkers = {
                   02000000545046300E544E756D657269634D61726B65720008506F736974696F
                   6E0708707043656E7465720B53686170652E436F6C6F7204DBDBC80010536861
@@ -866,73 +868,13 @@ object MainForm: TMainForm
           ColorPaletteIndex = 13
         end
       end
-      object TabPilots: TTabSheet
-        Caption = 'Pilots'
-        ImageIndex = 1
-        object Pilots: TTeeGrid
-          Left = 0
-          Top = 0
-          Width = 313
-          Height = 807
-          Columns = <>
-          OnCellEditing = PilotsCellEditing
-          Align = alClient
-          UseDockManager = False
-          ParentBackground = False
-          ParentColor = False
-          TabOrder = 0
-          _Headers = (
-            1
-            'TColumnHeaderBand'
-            <
-              item
-              end>)
-        end
-      end
-      object TabSensors: TTabSheet
-        Caption = 'Sensors'
-        ImageIndex = 2
-        object Sensors: TTeeGrid
-          Left = 0
-          Top = 0
-          Width = 313
-          Height = 807
-          Cells.Format.Font.Name = 'Segoe UI'
-          Cells.Format.Font.Size = 9.000000000000000000
-          Columns = <>
-          Header.Format.Font.Name = 'Segoe UI'
-          Header.Format.Font.Size = 9.000000000000000000
-          Rows.Format.Font.Name = 'Segoe UI'
-          Rows.Format.Font.Size = 9.000000000000000000
-          Rows.Hover.Format.Font.Name = 'Segoe UI'
-          Rows.Hover.Format.Font.Size = 9.000000000000000000
-          Selected.Format.Font.Name = 'Segoe UI'
-          Selected.Format.Font.Size = 9.000000000000000000
-          Selected.UnFocused.Format.Font.Name = 'Segoe UI'
-          Selected.UnFocused.Format.Font.Size = 9.000000000000000000
-          Align = alClient
-          ParentFont = True
-          UseDockManager = False
-          ParentBackground = False
-          ParentColor = False
-          TabOrder = 0
-          _Headers = (
-            1
-            'TColumnHeaderBand'
-            <
-              item
-                Format.Font.Name = 'Segoe UI'
-                Format.Font.Size = 9.000000000000000000
-              end>)
-        end
-      end
     end
     object PageControl1: TPageControl
       Left = 324
       Top = 0
       Width = 633
       Height = 837
-      ActivePage = TabTelemetry
+      ActivePage = TabSensors
       Align = alClient
       TabOrder = 1
       OnChange = PageControl1Change
@@ -1882,6 +1824,82 @@ object MainForm: TMainForm
             'TColumnHeaderBand'
             <
               item
+              end>)
+        end
+      end
+      object TabSeason: TTabSheet
+        Caption = 'Season'
+        ImageIndex = 5
+        object PageControl8: TPageControl
+          Left = 0
+          Top = 0
+          Width = 625
+          Height = 807
+          ActivePage = TabPilots
+          Align = alClient
+          TabOrder = 0
+          object TabPilots: TTabSheet
+            Caption = 'Pilots'
+            object Pilots: TTeeGrid
+              Left = 0
+              Top = 0
+              Width = 617
+              Height = 777
+              Columns = <>
+              OnCellEditing = PilotsCellEditing
+              Align = alClient
+              UseDockManager = False
+              ParentBackground = False
+              ParentColor = False
+              TabOrder = 0
+              ExplicitLeft = -2
+              ExplicitWidth = 313
+              ExplicitHeight = 807
+              _Headers = (
+                1
+                'TColumnHeaderBand'
+                <
+                  item
+                  end>)
+            end
+          end
+        end
+      end
+      object TabSensors: TTabSheet
+        Caption = 'Sensors'
+        ImageIndex = 6
+        object Sensors: TTeeGrid
+          Left = 0
+          Top = 0
+          Width = 625
+          Height = 807
+          Cells.Format.Font.Name = 'Segoe UI'
+          Cells.Format.Font.Size = 9.000000000000000000
+          Columns = <>
+          Header.Format.Font.Name = 'Segoe UI'
+          Header.Format.Font.Size = 9.000000000000000000
+          Rows.Format.Font.Name = 'Segoe UI'
+          Rows.Format.Font.Size = 9.000000000000000000
+          Rows.Hover.Format.Font.Name = 'Segoe UI'
+          Rows.Hover.Format.Font.Size = 9.000000000000000000
+          Selected.Format.Font.Name = 'Segoe UI'
+          Selected.Format.Font.Size = 9.000000000000000000
+          Selected.UnFocused.Format.Font.Name = 'Segoe UI'
+          Selected.UnFocused.Format.Font.Size = 9.000000000000000000
+          Align = alClient
+          ParentFont = True
+          UseDockManager = False
+          ParentBackground = False
+          ParentColor = False
+          TabOrder = 0
+          ExplicitLeft = 1
+          _Headers = (
+            1
+            'TColumnHeaderBand'
+            <
+              item
+                Format.Font.Name = 'Segoe UI'
+                Format.Font.Size = 9.000000000000000000
               end>)
         end
       end

@@ -42,21 +42,17 @@ type
     BPause: TButton;
     PageControl2: TPageControl;
     TabCircuits: TTabSheet;
-    TabPilots: TTabSheet;
     PanelCircuit: TPanel;
     Circuit: TChart;
-    TabSensors: TTabSheet;
     Splitter1: TSplitter;
     Timer1: TTimer;
     PanelPole: TPanel;
     CurrentLap: TLabel;
     SplitterPole: TSplitter;
-    Pilots: TTeeGrid;
     PageControl3: TPageControl;
     TabRace: TTabSheet;
     TabPole: TTabSheet;
     PoleGrid: TTeeGrid;
-    Sensors: TTeeGrid;
     PoleChart: TChart;
     Semaphor: TChart;
     TimerStart: TTimer;
@@ -203,6 +199,12 @@ type
     PopupColumn: TPopupMenu;
     Autosize1: TMenuItem;
     Colorize1: TMenuItem;
+    TabSeason: TTabSheet;
+    PageControl8: TPageControl;
+    TabPilots: TTabSheet;
+    Pilots: TTeeGrid;
+    TabSensors: TTabSheet;
+    Sensors: TTeeGrid;
     procedure BStartClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure BPauseClick(Sender: TObject);
@@ -1622,7 +1624,11 @@ var C : TCanvas3D;
 begin
   C:=SiteWeather.Canvas;
 
-  C.Font.Color:=clNavy;
+  if Clear1.Checked then
+     C.Font.Color:=clNavy
+  else
+     C.Font.Color:=clWhite;
+
   C.TextAlign:=TA_LEFT;
 
   C.TextOut(15,10,'Temp: '+Race.Weather.AirTemperature.ToString+'°C');
@@ -2848,8 +2854,8 @@ begin
     TiresData[0,0]:='Front';
     TiresData[0,1]:='Rear';
 
-//    TiresData[1,0]:=
-//    TiresData[1,1]:=
+    TiresData[1,0]:='MIC-DRY-M';
+    TiresData[1,1]:='MIC-DRY-M';
 
     TireStatus.Data:=TiresData;
     DetectNumbers(TireStatus);
