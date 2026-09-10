@@ -695,41 +695,10 @@ begin
 end;
 
 procedure DetectNumbers(const AGrid:TTeeGrid);
-
-  function IsNumeric(const AColumn:TColumn):Boolean;
-
-    function AllRowsAreNumeric:Boolean;
-    var t : Integer;
-    var S : String;
-        tmpFloat : Single;
-    begin
-      result:=False;
-
-      for t:=0 to AGrid.Data.Count-1 do
-      begin
-        S:=Trim(AGrid.Data.AsString(AColumn,t));
-
-        if S<>'' then
-        begin
-          result:=TryStrToFloat(S,tmpFloat);  // At least one cell needed !
-
-          if not result then
-             Exit;
-        end;
-      end;
-    end;
-
-  begin
-    result:=AGrid.Data.IsNumeric(AColumn);
-
-    if not result then
-       result:=AllRowsAreNumeric;
-  end;
-
 var t : Integer;
 begin
   for t:=0 to AGrid.Columns.Count-1 do
-      if IsNumeric(AGrid.Columns[t]) then
+      if AGrid.Data.IsNumeric(AGrid.Columns[t]) then
          AGrid.Columns[t].InitAlign(THorizontalAlign.Right);
 end;
 
@@ -2854,7 +2823,6 @@ begin
 
     LapsTimeData:=TStringsData.Create(2,Race.TotalLaps);
     LapTimesGrid.Data:=LapsTimeData;
-    DetectNumbers(LapTimesGrid);
 
     LapTimesGrid.Columns[0].Header.Text:='Lap';
     LapTimesGrid.Columns[1].Header.Text:='Time';
@@ -2864,6 +2832,8 @@ begin
     CBSelectedBike.ItemIndex:=CBSelectedBike.Items.IndexOf(tmpBike);
 
     FillLapTimes(Race.PoleIndex[tmp]);
+
+    DetectNumbers(LapTimesGrid);
   end;
 
   if Length(Race.Data)=0 then
@@ -2917,13 +2887,16 @@ begin
 end;
 
 procedure TMainForm.SemaphorAfterDraw(Sender: TObject);
-var t : Integer;
+var w,h, t : Integer;
 begin
   with Semaphor.Canvas do
   begin
     Brush.Color:=clRed;
     Pen.Color:=clBlack;
     Pen.Width:=1;
+
+    w:=Semaphor.Width div 6;
+    h:=Semaphor.Height div 3;
 
     for t:=0 to 4 do
     begin
@@ -2932,7 +2905,7 @@ begin
       else
          Brush.Style:=bsSolid;
 
-      Ellipse(12+t*14,8,22+t*14,20);
+      Ellipse(w+t*w,h,w+(t*w)+h,Semaphor.Height-h);
     end;
   end;
 end;
@@ -3381,6 +3354,8 @@ begin
   ThemeGrid(GearRatios,ABack,AFont);
   ThemeGrid(AllPilotsGrid,ABack,AFont);
   ThemeGrid(LeaderBoard,ABack,AFont);
+  ThemeGrid(ResultsGrid,ABack,AFont);
+  ThemeGrid(CurveStats,ABack,AFont);
 
   ThemeChart(SiteWeather,ABack,AFont);
   ThemeChart(LapChart,ABack,AFont);
@@ -3396,13 +3371,16 @@ begin
   SeriesList.Color:=ABack;
   SeriesList.Font.Color:=AFont;
 
+  ListCurveStats.Color:=ABack;
+  ListCurveStats.Font.Color:=AFont;
+
   ChangePanel(Panel1);
   ChangePanel(Panel2);
   ChangePanel(Panel3);
   ChangePanel(Panel4);
   ChangePanel(PanelTop);
 
-  ChangeFonts([CurrentLap,Label1,Label2,Label3,Label4,LRaceEllapsed]);
+  ChangeFonts([CurrentLap,Label1,Label2,Label3,Label4,Label5,Label6,Label7,Label8,LRaceEllapsed]);
 
   {
   CBSingleRider.StyleElements := [];
