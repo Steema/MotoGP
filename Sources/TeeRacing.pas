@@ -8,6 +8,10 @@ unit TeeRacing;
 
 interface
 
+{
+  Main simulation algorithm for multiple riders doing a bike race.
+}
+
 uses
   {$IFDEF MSWINDOWS}
   Windows,
@@ -75,6 +79,7 @@ type
   end;
 
   TTire=record
+    ModelName : String;
     Grip : Float;  // Dry: 1.5 .. 1.8  // Wet/Rain: 0.9 .. 1.1
     SlipRatio : Float; // % slip
     Diameter : Float; // cm
@@ -384,8 +389,10 @@ function DetermineTrackPhase(const BikePosition:Float;
 // Percent of Throttle depending on Lean Angle in degrees
 function CalculateThrottle(const ALeanAngle,MaxAngle:Float):Float;
 
+// Returns the needed lean angle to pass a given curve at a Current point, and Speed
 function CalcLeanAngle(const APoints:Array of TPointFloat; Current: Integer; const Speed:Float): Float;
 
+// Returns the sum of distances
 function PathLength(const APoints:Array of TPointFloat; const StartIndex:Integer=0; UpToIndex:Integer=-1):Float;
 
 // Returns distance between two points
@@ -511,7 +518,7 @@ var
   MaxCurvature: Single;
   EntryAng, ExitAng, ApexAng : Single;
   Track : ^TPointFloatArray;
-  CurveNames : Array of String;
+  CurveNames : TArray<String>;
 begin
   CurveNames:=GetCurveNames;
 
@@ -1330,6 +1337,7 @@ begin
      Result := 10.0;
 end;
 
+// Returns the needed lean angle to pass a given curve at a Current point, and Speed
 function CalcLeanAngle(const APoints:Array of TPointFloat; Current: Integer; const Speed:Float): Float;
 const MaxLean=64;
 var
@@ -1805,7 +1813,7 @@ end;
 
 procedure TRaceData.Save(const AStream: TStream);
 begin
-  AStream.ReadData(Time);
+  AStream.WriteData(Time);
   TArrayHelper.Write<TRiderData>(AStream,Data);
 end;
 
